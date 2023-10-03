@@ -1,0 +1,16 @@
+{
+  "configurations": [
+      {
+          "name": "Linux",
+          "includePath": [
+              "${workspaceFolder}/**"
+          ],
+          "defines": ["__USE_XOPEN2K", "__USE_XOPEN2K8", "_POSIX_C_SOURCE=200112L"],
+          "compilerPath": "/usr/bin/gcc",
+          "cStandard": "c17",
+          "cppStandard": "gnu++17",
+          "intelliSenseMode": "linux-gcc-x64"
+      }
+  ],
+  "version": 4
+}
