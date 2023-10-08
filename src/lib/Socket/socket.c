@@ -170,6 +170,49 @@ void listenForConnections(int socketFileDescriptor) {
   printf("Stop listening\n");
 }
 
+bool readOnce(int socketFileDescriptor, int bufferSize) {
+  struct sockaddr_storage originConnectionAddress; // Informações do endereço da conexão de origem
+  socklen_t sin_size = sizeof originConnectionAddress;
+
+  int numbytes = 0;         // numero de bytes escritos no buffer
+  int addr_len = sin_size;  // tamanho do endereço (de origem) escritos (de no max sin_size)
+  char buffer[bufferSize];  // buffer dos dados
+
+  /** Recebe a mensagem */
+  numbytes = recvfrom(
+    socketFileDescriptor,
+    buffer,
+    bufferSize - 1,
+    0, // flags
+    (struct sockaddr *) &originConnectionAddress,
+    &addr_len
+  );
+
+  /** Se erro na leitura */
+  if (numbytes == -1) {
+      perror("recvfrom");
+      return false;
+  }
+
+  /** Ip de origem da conexão */
+  char ipAddress[50];
+  inet_ntop(
+    originConnectionAddress.ss_family,
+    get_in_addr((struct sockaddr *) &originConnectionAddress),
+    ipAddress,
+    sizeof(ipAddress)
+  );
+
+  /** Garante que a string lida é null terminated */
+  buffer[numbytes] = '\0';
+
+  printf("(readOnce): Received message from: \"%s\"\n", ipAddress);
+  printf("(readOnce): message: \n\"%s\"\n", buffer);
+
+
+  return true;
+}
+
 void closeServerSocket(int socketFileDescriptor) {
   close(socketFileDescriptor);
 }

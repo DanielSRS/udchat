@@ -174,3 +174,6 @@ dist
 # Finder (MacOS) folder config
 .DS_Store
 
+# Native lib
+src/lib/Socket/socket.o
+src/lib/Socket/socket.so

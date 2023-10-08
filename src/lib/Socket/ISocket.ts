@@ -24,14 +24,24 @@ interface TCPSocketServer {
   close: () => void;
 }
 
-interface UPDSocket {
+type UPDsendResponse = { sucess: true } | { sucess: false; errorCode: number }
+
+export interface UPDSocket {
   /**
    * Recebe os dados enviados através do socket
    */
-  receive: () => void;
+  receive: (params?: {
+    port?: number;
+    timeout?: number,
+  }) => Promise<string>;
   /**
    * Envia dados atraves do socket
    */
-  send: () => void;
+  send: (params: {
+    host: string;
+    port: number;
+    message: string;
+  }) => UPDsendResponse;
+  /** Fecha */
   close: () => void;
 }
