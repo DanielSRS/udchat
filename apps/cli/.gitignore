@@ -162,7 +162,6 @@ dist
 
 # yarn v2
 
-.yarn/releases
 .yarn/cache
 .yarn/unplugged
 .yarn/build-state.yml
@@ -175,6 +174,3 @@ dist
 # Finder (MacOS) folder config
 .DS_Store
 
-# Native lib
-src/lib/Socket/socket.o
-src/lib/Socket/socket.so
