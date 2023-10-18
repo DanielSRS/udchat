@@ -1,7 +1,7 @@
 import { Either, tryCatch as EitherTryCatch } from "fp-ts/lib/Either";
 import { fromZodError } from "zod-validation-error";
 import { ZodError, ZodIssue, z } from "zod";
-import { CoreError } from "../coreError";
+import { CoreError, ErrorCodes } from "../coreError";
 
 /**
  * Membro de uma organização.
@@ -13,7 +13,7 @@ interface Member {
   readonly username: string;
 };
 
-const MemberSchema = z.object({
+export const MemberSchema = z.object({
   name: z.string(),
   username: z.string(),
 });
@@ -23,10 +23,10 @@ type MemberError = ReturnType<typeof CoreError<ZodIssue[]>>;
 const createMemberError = (e: unknown) => {
   const error = fromZodError(e as ZodError, { prefix: null });
   return CoreError({
-    code: 'UEIUKLOC',
+    code: 'MCWIDOMC',
     details: error.details,
     erros: error.message.split(';'),
-    message: 'Member creation with invalid data',
+    message: ErrorCodes['MCWIDOMC'],
   });
 }
 
@@ -36,3 +36,5 @@ export const Member = (member: Member): Either<MemberError, Member> => {
     createMemberError,
   );
 };
+
+export type IMember = Member;
