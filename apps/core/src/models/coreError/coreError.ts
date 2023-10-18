@@ -12,11 +12,13 @@ interface CoreError<T> {
   readonly details: T;
 }
 
+/** https://stackoverflow.com/questions/32807163/call-constructor-on-typescript-class-without-new */
 interface CoreErrorConstructor {
   new<T>(params: CoreError<T>): CoreError<T>;  // newable
   <T>(params: CoreError<T>): CoreError<T>; // callable
 }
 
+/** https://stackoverflow.com/questions/42999983/typescript-removing-readonly-modifier */
 type Writeable<T> = { -readonly [K in keyof T]: T[K] }; 
 
 export const CoreError = function<Y>(this: CoreError<Y> | void, params: CoreError<Y>) {

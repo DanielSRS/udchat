@@ -2,7 +2,7 @@ import { expect, it } from "bun:test";
 import { Member } from ".";
 import { match as EitherMatch } from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
-import { CoreError } from "../coreError";
+import { CoreError, ErrorCodes } from "../coreError";
 
 const VALID_MEMBER = { name: 'dan', username: 'dani' };
 
@@ -34,9 +34,9 @@ it('Falha se args de Member forem undefined', () => {
     res,
     EitherMatch(
       (error) => { 
-        expect(error.code).toBe('UEIUKLOC');
+        expect(error.code).toBe('MCWIDOMC');
         expect(error.erros).toEqual(['Required']);
-        expect(error.message).toBe('Member creation with invalid data');
+        expect(error.message).toBe(ErrorCodes['MCWIDOMC']);
        },
       () => { expect().fail('Invalid data. this should never pass') }
     ),
