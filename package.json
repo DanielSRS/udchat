@@ -1,15 +1,16 @@
 {
   "name": "udchat",
-  "module": "src/index.ts",
-  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ]
+  },
   "scripts": {
-    "start": "bun run src/index.ts",
-    "testing": "bun test --watch"
+    "cli": "bun apps/cli/src/index.ts"
   },
-  "devDependencies": {
-    "bun-types": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  }
+  "author": "Daniel Santa Rosa",
+  "packageManager": "yarn@3.6.4"
 }
