@@ -9,6 +9,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@udchat/cli@workspace:apps/cli"
   dependencies:
+    "@udchat/core": "workspace:*"
     "@udchat/socket": "workspace:*"
     bun-types: latest
   peerDependencies:
@@ -16,12 +17,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@udchat/core@workspace:apps/core":
+"@udchat/core@workspace:*, @udchat/core@workspace:apps/core":
   version: 0.0.0-use.local
   resolution: "@udchat/core@workspace:apps/core"
   dependencies:
     bun-types: latest
     fp-ts: 2.16.1
+    xstate: 4.38.2
     zod: 3.22.4
     zod-validation-error: 1.5.0
   peerDependencies:
@@ -58,6 +60,13 @@ __metadata:
   resolution: "udchat@workspace:."
   languageName: unknown
   linkType: soft
+
+"xstate@npm:4.38.2":
+  version: 4.38.2
+  resolution: "xstate@npm:4.38.2"
+  checksum: 04cc8a5ab40f85e2dc46c72c0737dec028ef5733e4d4074962d701632895b3208e1031be79e6e26b32667fcb161ed85da5a73c6f759430c9642144e696291e5f
+  languageName: node
+  linkType: hard
 
 "zod-validation-error@npm:1.5.0":
   version: 1.5.0
