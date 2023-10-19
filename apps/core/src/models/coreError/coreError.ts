@@ -1,7 +1,7 @@
 import { ErrorCode } from "./errorCode";
 
 /** Objeto que identifica um erro */
-interface CoreError<T> {
+export interface CoreError<T> {
   /** Codigo de erro. Idendifica um erro */
   readonly code: ErrorCode;
   /** Mensagem brevemente descritiva sobre o erro */
