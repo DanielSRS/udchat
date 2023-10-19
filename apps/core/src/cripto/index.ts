@@ -1,0 +1,1 @@
+export { generateAssimetricKeys } from './cripto';
