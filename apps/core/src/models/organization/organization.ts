@@ -1,5 +1,5 @@
 import { ZodError, ZodIssue, z } from "zod";
-import { IMember, MemberSchema } from "../member";
+import { Member, MemberSchema } from "../member";
 import { Either, tryCatch as EitherTryCatch } from "fp-ts/lib/Either";
 import { CoreError, ErrorCodes } from "../coreError";
 import { fromZodError } from "zod-validation-error";
@@ -8,7 +8,7 @@ interface Organization {
   /** Data de criação da organização */
   creationDate: string;
   /** Membros da organização */
-  members: Array<IMember>
+  members: Array<Member>
 };
 
 const OrganizationSchema = z.object({
