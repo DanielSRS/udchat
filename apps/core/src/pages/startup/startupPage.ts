@@ -112,7 +112,7 @@ const createNewUser = async () => {
 
 
 interface GetUserFromFs {
-  (): Promise<Member>;
+  (): Promise<User>;
 }
 /** Recupera o usuário do app do sistema de arquivos */
 const getUserFromFs: GetUserFromFs = () => new Promise(async (resolve, reject) => {
@@ -137,7 +137,13 @@ const getUserFromFs: GetUserFromFs = () => new Promise(async (resolve, reject) =
             message: 'Não foi possivel criar membero'
           }));
         },
-        (m) => resolve(m),
+        (m) => resolve({
+          encriptionKeys: {
+            privateKey,
+            publicKey,
+          },
+          member: m,
+        }),
       ),
     )
   } catch(e) {
@@ -162,9 +168,9 @@ interface SaveUserToFs {
 /** Salva o usuário do app no sistema de arquivos */
 const saveUserToFs: SaveUserToFs = (user) => new Promise(async (resolve, reject) => {
   try {
-    const privateKey = await Bun.write(PRIVATE_KEY_PATH, user.encriptionKeys.privateKey);
-    const publicKey = await Bun.write(PUBLIC_KEY_PATH, user.encriptionKeys.publicKey);
-    const member = await Bun.write(MEMBER_PATH, JSON.stringify(user.member));
+    await Bun.write(PRIVATE_KEY_PATH, user.encriptionKeys.privateKey);
+    await Bun.write(PUBLIC_KEY_PATH, user.encriptionKeys.publicKey);
+    await Bun.write(MEMBER_PATH, JSON.stringify(user.member));
 
     resolve(true);
   } catch(e) {
