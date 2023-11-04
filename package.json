@@ -9,7 +9,7 @@
     ]
   },
   "scripts": {
-    "cli": "bun apps/cli/src/index.ts"
+    "cli": "cd apps/cli && bun start"
   },
   "author": "Daniel Santa Rosa",
   "packageManager": "yarn@3.6.4"
