@@ -7,18 +7,22 @@ import { Member } from "../../models/member";
 import { CoreError } from "../../models/coreError";
 import { pipe } from "fp-ts/lib/function";
 import { match as EitherMatch, isLeft, left as EitherLeft, right as EitherRight } from "fp-ts/lib/Either";
+import { Organization } from "../../models/organization";
 
 /** Caminho do arquivo de chave privada do usuario */
 const PRIVATE_KEY_PATH = "./database/keys/_myuserprivatekey.pem";
 /** Caminho do arquivo de chave publica do usuario */
 const PUBLIC_KEY_PATH = "./database/keys/_myuserpublickey.pem";
-/** Caminho do arquivo de membro privada do usuario */
+/** Caminho do arquivo de membro do usuario */
 const MEMBER_PATH = "./database/members/_myuserMemberData.mem";
+/** Caminho do arquivo da organização */
+const ORGANIZATION_PATH = "./database/organizations/_myOrganizationData.mem";
 
 export const startup = () => {
   const startupActor = interpret(startupMachine.withConfig({
     services: {
       getUser: getUserFromFs,
+      getOrg: getOrgFromFs,
     }
   }));
 
@@ -26,6 +30,7 @@ export const startup = () => {
     const initialState = snapshot.matches('findingUser');
     const noUSer = snapshot.matches('noUserFound');
     const onOrg = snapshot.matches('findingOrg');
+    const noOrgFound = snapshot.matches('noOrgFound');
 
     if (initialState) {
       console.log('🔎 Buscando credenciais');
@@ -40,6 +45,10 @@ export const startup = () => {
 
     if (onOrg) {
       console.log('🔎 Buscando organização');
+    }
+
+    if (noOrgFound) {
+      console.log('❌ Nenhuma organização, como pode?');
     }
   });
 
@@ -156,6 +165,37 @@ const getUserFromFs: GetUserFromFs = () => new Promise(async (resolve, reject) =
     }));
   }
 });
+
+interface GetOrgFromFs {
+  (): Promise<Organization>;
+}
+const getOrgFromFs: GetOrgFromFs = () => new Promise(async (resolve, reject) => {
+  const organizationFile = Bun.file(ORGANIZATION_PATH);
+  try {
+    const organization = Organization(await organizationFile.json());
+    pipe(
+      organization,
+      EitherMatch(
+        (e) => {
+          reject(CoreError({
+            code: 'FTPOFD00',
+            details: e,
+            erros: [e.code],
+            message: 'Organization data on the file is invalid',
+          }));
+        },
+        org => resolve(org),
+      ),
+    )
+  } catch(e) {
+    reject(CoreError({
+      code: 'NFPLADO0',
+      details: e,
+      erros: [],
+      message: 'Falha ao abrir arquivo de organização',
+    }))
+  }
+})
 
 interface User {
   encriptionKeys: KeyPair;
