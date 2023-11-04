@@ -2,11 +2,11 @@ import { interpret } from "xstate";
 import { startupMachine } from "../../machines";
 import { createInterface } from "readline";
 import { stdin, stdout } from "process";
-import { generateAssimetricKeys } from "../../cripto/cripto";
+import { KeyPair, generateAssimetricKeys } from "../../cripto/cripto";
 import { Member } from "../../models/member";
 import { CoreError } from "../../models/coreError";
 import { pipe } from "fp-ts/lib/function";
-import { match as EitherMatch } from "fp-ts/lib/Either";
+import { match as EitherMatch, isLeft, left as EitherLeft, right as EitherRight } from "fp-ts/lib/Either";
 
 /** Caminho do arquivo de chave privada do usuario */
 const PRIVATE_KEY_PATH = "./database/keys/_myuserprivatekey.pem";
@@ -46,6 +46,29 @@ export const startup = () => {
   startupActor.start();
 };
 
+const genereateNewUser = async () => {
+  const pair = await generateAssimetricKeys();
+  const newMember = Member({ name: 'name', username: 'username' });
+  if (isLeft(pair) || isLeft(newMember)) {
+    const a = [];
+    isLeft(pair) ? a.push(pair.left): undefined;
+    isLeft(newMember) ? a.push(newMember.left): undefined;
+
+    return EitherLeft(CoreError({
+      code: 'UCF00000',
+      details: a,
+      erros: a.map((e) => e.code),
+      message: 'Não foi possivel criar membero'
+    }));
+  }
+
+  return EitherRight({
+    encriptionKeys: pair.right,
+    member: newMember.right,
+  })
+
+}
+
 /** Cria um novo usuário do app */
 const createNewUser = async () => {
   const read = createInterface({ input: stdin, output: stdout });
@@ -55,20 +78,21 @@ const createNewUser = async () => {
       if(ansewer === 's') {
         console.log('🎉 Criando usuário');
         read.close();
-        const pair = await generateAssimetricKeys();
+        const user = await genereateNewUser();
         return pipe(
-          pair,
+          user,
           EitherMatch(
-            () => {
+            async () => {
               console.log('🪲 Erro! Usuário não criado.');
-              resolve(false);
+              return false;
             },
             async p => {
               console.log('✅ Usuário criado!');
-              await saveUserToFs(p.privateKey, p.publicKey);
-              resolve(true);
+              const a = await saveUserToFs(p)
+              return a;
             }
           ),
+          async res => { resolve(await res) },
         );
       }
   
@@ -94,27 +118,28 @@ interface GetUserFromFs {
 const getUserFromFs: GetUserFromFs = () => new Promise(async (resolve, reject) => {
   const privateKeyFile = Bun.file(PRIVATE_KEY_PATH);
   const publicKeyFile = Bun.file(PUBLIC_KEY_PATH);
-
+  const memberFile = Bun.file(MEMBER_PATH);
 
   try {
     const privateKey = await privateKeyFile.text();
     const publicKey = await publicKeyFile.text();
-    const newMember = Member({
-      name: 'name',
-      username: 'username',
-    });
+    const member = await memberFile.json();
+    const validateMember = Member(member);
 
-    if (newMember._tag === 'Left') {
-      reject(CoreError({
-        code: 'OCWIDOMC',
-        details: undefined,
-        erros: [],
-        message: 'Não foi possivel criar membero'
-        }));
-      return;
-    }
-
-    resolve(newMember.right);
+    pipe(
+      validateMember,
+      EitherMatch(
+        () => {
+          reject(CoreError({
+            code: 'OCWIDOMC',
+            details: undefined,
+            erros: [],
+            message: 'Não foi possivel criar membero'
+          }));
+        },
+        (m) => resolve(m),
+      ),
+    )
   } catch(e) {
     // console.log('Error: ', JSON.stringify({ e: e }, null, 2));
     reject(CoreError({
@@ -126,26 +151,28 @@ const getUserFromFs: GetUserFromFs = () => new Promise(async (resolve, reject) =
   }
 });
 
+interface User {
+  encriptionKeys: KeyPair;
+  member: Member;
+}
+
 interface SaveUserToFs {
-  (pri: string, pub: string): Promise<boolean>;
+  (user: User): Promise<boolean>;
 }
 /** Salva o usuário do app no sistema de arquivos */
-const saveUserToFs: SaveUserToFs = (pr, pu) => new Promise(async (resolve, reject) => {
-  const privateKeyFile = Bun.file(PRIVATE_KEY_PATH);
-  const publicKeyFile = Bun.file(PUBLIC_KEY_PATH);
-
+const saveUserToFs: SaveUserToFs = (user) => new Promise(async (resolve, reject) => {
   try {
-    const privateKey = await Bun.write(PRIVATE_KEY_PATH, pr);
-    const publicKey = await Bun.write(PUBLIC_KEY_PATH, pu);
+    const privateKey = await Bun.write(PRIVATE_KEY_PATH, user.encriptionKeys.privateKey);
+    const publicKey = await Bun.write(PUBLIC_KEY_PATH, user.encriptionKeys.publicKey);
+    const member = await Bun.write(MEMBER_PATH, JSON.stringify(user.member));
 
     resolve(true);
   } catch(e) {
-    console.log('Error: ', JSON.stringify({ e: e }, null, 2));
     reject(CoreError({
-      code: 'OCWIDOMC',
+      code: 'NFPSUSA0',
       details: e,
       erros: [],
-      message: 'Não foi possivel salvar as chaves do usuário'
+      message: 'Não foi possivel salvar usuário'
     }));
   }
 });

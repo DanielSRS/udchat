@@ -1,6 +1,8 @@
 export const ErrorCodes = {
   MCWIDOMC: 'Member creation with invalid data on model constructor',
+  UCF00000: 'User creation failed',
   EKCF0000: 'Encription keys creation failed',
+  NFPSUSA0: 'Não foi possível salvar o usuário no sistema de arquivos',
   OCWIDOMC: 'Organization creation with invalid data on model constructor'
 } as const;
 
