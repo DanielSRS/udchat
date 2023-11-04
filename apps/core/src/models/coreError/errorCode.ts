@@ -1,5 +1,6 @@
 export const ErrorCodes = {
   MCWIDOMC: 'Member creation with invalid data on model constructor',
+  EKCF0000: 'Encription keys creation failed',
   OCWIDOMC: 'Organization creation with invalid data on model constructor'
 } as const;
 
