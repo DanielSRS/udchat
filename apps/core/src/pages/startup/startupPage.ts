@@ -8,6 +8,13 @@ import { CoreError } from "../../models/coreError";
 import { pipe } from "fp-ts/lib/function";
 import { match as EitherMatch } from "fp-ts/lib/Either";
 
+/** Caminho do arquivo de chave privada do usuario */
+const PRIVATE_KEY_PATH = "./database/keys/_myuserprivatekey.pem";
+/** Caminho do arquivo de chave publica do usuario */
+const PUBLIC_KEY_PATH = "./database/keys/_myuserpublickey.pem";
+/** Caminho do arquivo de membro privada do usuario */
+const MEMBER_PATH = "./database/members/_myuserMemberData.mem";
+
 export const startup = () => {
   const startupActor = interpret(startupMachine.withConfig({
     services: {
@@ -85,10 +92,9 @@ interface GetUserFromFs {
 }
 /** Recupera o usuário do app do sistema de arquivos */
 const getUserFromFs: GetUserFromFs = () => new Promise(async (resolve, reject) => {
-  const privateKeyPath = "./database/keys/_myuserprivatekey.pem";
-  const publicKeyPath = "./database/keys/_myuserpublickey.pem";
-  const privateKeyFile = Bun.file(privateKeyPath);
-  const publicKeyFile = Bun.file(publicKeyPath);
+  const privateKeyFile = Bun.file(PRIVATE_KEY_PATH);
+  const publicKeyFile = Bun.file(PUBLIC_KEY_PATH);
+
 
   try {
     const privateKey = await privateKeyFile.text();
@@ -125,14 +131,12 @@ interface SaveUserToFs {
 }
 /** Salva o usuário do app no sistema de arquivos */
 const saveUserToFs: SaveUserToFs = (pr, pu) => new Promise(async (resolve, reject) => {
-  const privateKeyPath = "./database/keys/_myuserprivatekey.pem";
-  const publicKeyPath = "./database/keys/_myuserpublickey.pem";
-  const privateKeyFile = Bun.file(privateKeyPath);
-  const publicKeyFile = Bun.file(publicKeyPath);
+  const privateKeyFile = Bun.file(PRIVATE_KEY_PATH);
+  const publicKeyFile = Bun.file(PUBLIC_KEY_PATH);
 
   try {
-    const privateKey = await Bun.write(privateKeyPath, pr);
-    const publicKey = await Bun.write(publicKeyPath, pu);
+    const privateKey = await Bun.write(PRIVATE_KEY_PATH, pr);
+    const publicKey = await Bun.write(PUBLIC_KEY_PATH, pu);
 
     resolve(true);
   } catch(e) {
