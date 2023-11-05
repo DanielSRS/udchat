@@ -8,6 +8,8 @@ import { CoreError } from "../../models/coreError";
 import { pipe } from "fp-ts/lib/function";
 import { match as EitherMatch, isLeft, left as EitherLeft, right as EitherRight } from "fp-ts/lib/Either";
 import { Organization } from "../../models/organization";
+import { SystemError } from "bun";
+import fs from 'node:fs/promises';
 
 /** Caminho do arquivo de chave privada do usuario */
 const PRIVATE_KEY_PATH = "./database/keys/_myuserprivatekey.pem";
@@ -17,6 +19,7 @@ const PUBLIC_KEY_PATH = "./database/keys/_myuserpublickey.pem";
 const MEMBER_PATH = "./database/members/_myuserMemberData.mem";
 /** Caminho do arquivo da organização */
 const ORGANIZATION_PATH = "./database/organizations/_myOrganizationData.mem";
+const ORGANIZATION_DIR_PATH = "./database/organizations/";
 
 export const startup = () => {
   const startupActor = interpret(startupMachine.withConfig({
@@ -29,8 +32,9 @@ export const startup = () => {
   startupActor.subscribe(async (snapshot) => {
     const initialState = snapshot.matches('findingUser');
     const noUSer = snapshot.matches('noUserFound');
-    const onOrg = snapshot.matches('findingOrg');
+    const findingOrg = snapshot.matches('findingOrg');
     const noOrgFound = snapshot.matches('noOrgFound');
+    const started = snapshot.matches('started');
 
     if (initialState) {
       console.log('🔎 Buscando credenciais');
@@ -43,12 +47,19 @@ export const startup = () => {
       }
     }
 
-    if (onOrg) {
+    if (findingOrg) {
       console.log('🔎 Buscando organização');
     }
 
     if (noOrgFound) {
       console.log('❌ Nenhuma organização, como pode?');
+      if(await createNewOrg()) {
+        startupActor.send({ type: 'CREATE_ORG' });
+      }
+    }
+
+    if (started) {
+      console.log('✨ Todos os dados validados');
     }
   });
 
@@ -119,6 +130,51 @@ const createNewUser = async () => {
   });
 }
 
+const generateNewOrg = async () => {
+  return Organization({
+    creationDate: (new Date()).toISOString(),
+    members: [],
+  });
+}
+
+/** Cria uma nova organização */
+const createNewOrg = async () => {
+  const read = createInterface({ input: stdin, output: stdout });
+  return new Promise<boolean>((resolve) => {
+    read.question('Deseja criar nova organização?\n\ns - Sim\nn - Não\n\n', async (ansewer) => {
+      console.log()
+      if(ansewer === 's') {
+        console.log('🎉 Criando organização');
+        read.close();
+        const org = await generateNewOrg();
+        return pipe(
+          org,
+          EitherMatch(
+            async () => {
+              console.log('🪲 Erro! Organização não criada.');
+              return false;
+            },
+            async p => {
+              console.log('✅ Organização criada!');
+              return await saveOrgToFs(p);
+            }
+          ),
+          async res => { resolve(await res) },
+        );
+      }
+  
+      if(ansewer === 'n') {
+        console.log('❌ Não é possivel continuar sem uma organização. Encerrando...');
+        read.close();
+        return resolve(false);
+      }
+  
+      console.log('💥 Resposta inválida! Encerrando...');
+      read.close();
+      resolve(false);
+    });
+  });
+}
 
 interface GetUserFromFs {
   (): Promise<User>;
@@ -222,3 +278,55 @@ const saveUserToFs: SaveUserToFs = (user) => new Promise(async (resolve, reject)
     }));
   }
 });
+
+interface SaveOrgToFs {
+  (org: Organization): Promise<boolean>;
+}
+/** Salva o organização no sistema de arquivos */
+const saveOrgToFs: SaveOrgToFs = (org) => new Promise(async (resolve, reject) => {
+  try {
+    await createDirectories([ORGANIZATION_DIR_PATH]);
+    await Bun.write(ORGANIZATION_PATH, JSON.stringify(org));
+
+    resolve(true);
+  } catch(e) {
+    console.log(e);
+    reject(CoreError({
+      code: 'NFPSORSA',
+      details: e,
+      erros: [],
+      message: 'Não foi possivel salvar organização'
+    }));
+  }
+});
+
+interface CreateDirectories {
+  (directories: Array<string>): Promise<
+  | { success: true; error: undefined }
+  | { success: false; error: CoreError<SystemError>[] }
+  >;
+}
+
+const createDirectories: CreateDirectories = async (directories) => {
+  const errors: CoreError<SystemError>[] = [];
+  directories.map(async dir => {
+    try {
+      await fs.mkdir(dir, { recursive: true });
+      // console.log('diretorio criado: ', dir);
+    } catch (error) {
+      const err = error as SystemError;
+      errors.push(CoreError({
+        code: 'NFPCDIR0',
+        details: err,
+        erros: [err?.message],
+        message: 'Erro ao criar diretório',
+      }));
+    }
+  });
+  
+  if (errors.length === 0) {
+    return { success: true };
+  }
+
+  return { success: false, error: errors };
+}
