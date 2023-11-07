@@ -10,6 +10,14 @@ export const ErrorCodes = {
   NFPLADO0: 'Não foi possivel ler arquivo de organização',
   NFPSORSA: 'Não foi possível salvar organização no sistema de arquivos',
   NFPCDIR0: 'Não foi possível diretorio',
+  NFPSMKVS: 'Não foi possivel salvar map no mmkv storage',
+  NFPSSKVS: 'Não foi possivel salvar string no mmkv storage',
+  NFPSBKVS: 'Não foi possivel salvar boolean no mmkv storage',
+  NFPSAKVS: 'Não foi possivel salvar array no mmkv storage',
+  NFPLSKVS: 'Não foi possivel ler string no mmkv storage',
+  NFPLMKVS: 'Não foi possivel ler map no mmkv storage',
+  NFPLBKVS: 'Não foi possivel ler boolean no mmkv storage',
+  NFPLAKVS: 'Não foi possivel ler array no mmkv storage',
 } as const;
 
 /** https://stackoverflow.com/questions/59251860/use-keys-of-an-object-as-union-type */
