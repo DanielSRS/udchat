@@ -1,13 +1,14 @@
 import { Button, StyleSheet, Text, View } from 'react-native';
-import { generateAssimetricKeys } from '../../cripto';
-import { isRight } from 'fp-ts/lib/Either';
+import { match as EitherMatch } from 'fp-ts/lib/Either';
 import { useMachine } from '@xstate/react';
 import { startupMachine } from '../../machines';
+import { createUser, getPersistedUserTRH } from '../../managers/user/userManager';
+import { pipe } from 'fp-ts/lib/function';
 
 export const Startup = () => {
   const [state, send] = useMachine(startupMachine, {
     services: {
-      getUser: () => new Promise((_, r) => r()),
+      getUser: getPersistedUserTRH,
       getOrg: () => new Promise((_, r) => r()),
     }
   });
@@ -26,7 +27,19 @@ export const Startup = () => {
       {!noUSer ? null : (
         <>
           <Text>no user</Text>
-          <Button title={'Create user'} onPress={() => send({ type: 'CREATE_USER' })} />
+          <Button title={'Create user'} onPress={async () => {
+            const newUser = await createUser();
+            pipe(
+              newUser,
+              EitherMatch(
+                error => {console.log('Failed user creation', JSON.stringify(error, null, 2))},
+                user => { 
+                  console.log('created user: ', user.encriptionKeys.privateKey);
+                  send({ type: 'CREATE_USER' });
+                },
+              ),
+            );
+          }} />
         </>
       )}
       {!findingOrg ? null : (
