@@ -2,7 +2,7 @@ import { interpret } from "xstate";
 import { startupMachine } from "../../machines";
 import { createInterface } from "readline";
 import { stdin, stdout } from "process";
-import { KeyPair, generateAssimetricKeys } from "../../cripto/cripto";
+import { generateAssimetricKeys } from "../../cripto/cripto";
 import { Member } from "../../models/member";
 import { CoreError } from "../../models/coreError";
 import { pipe } from "fp-ts/lib/function";
@@ -10,6 +10,7 @@ import { match as EitherMatch, isLeft, left as EitherLeft, right as EitherRight 
 import { Organization } from "../../models/organization";
 import { SystemError } from "bun";
 import fs from 'node:fs/promises';
+import { User } from "../../models/user/user";
 
 /** Caminho do arquivo de chave privada do usuario */
 const PRIVATE_KEY_PATH = "./database/keys/_myuserprivatekey.pem";
@@ -252,11 +253,6 @@ const getOrgFromFs: GetOrgFromFs = () => new Promise(async (resolve, reject) => 
     }))
   }
 })
-
-interface User {
-  encriptionKeys: KeyPair;
-  member: Member;
-}
 
 interface SaveUserToFs {
   (user: User): Promise<boolean>;

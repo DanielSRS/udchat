@@ -5,6 +5,7 @@ export const ErrorCodes = {
   NFPSUSA0: 'Não foi possível salvar o usuário no sistema de arquivos',
   OCWIDOMC: 'Organization creation with invalid data on model constructor',
   KPCIDOMC: 'KeyPair creation with invalid data on model constructor',
+  UCWIDOMC: 'Organization creation with invalid data on model constructor',
   FTPOFD00: 'Fail to parse organization file data',
   NFPLADO0: 'Não foi possivel ler arquivo de organização',
   NFPSORSA: 'Não foi possível salvar organização no sistema de arquivos',
