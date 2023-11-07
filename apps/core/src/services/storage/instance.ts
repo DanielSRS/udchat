@@ -46,17 +46,17 @@ export interface StorageInstance {
   /**
    * Get the string value for the given key.
    */
-  getString(key: string): Promise<Either<StorageWritingError, string>>;
+  getString(key: string): Promise<Either<StorageReadingError, string>>;
   /**
    * Get then Object from storage for the given key.
    */
-  getMap<T>(key: string): Promise<Either<StorageWritingError, NonNullable<T>>>;
+  getMap<T>(key: string): Promise<Either<StorageReadingError, NonNullable<T>>>;
   /**
    * Get the boolean value for the given key.
    */
-  getBoolean(key: string): Promise<Either<StorageWritingError, boolean>>;
+  getBoolean(key: string): Promise<Either<StorageReadingError, boolean>>;
   /**
    * Get the array from the storage for the given key.
    */
-  getArray<T>(key: string): Promise<Either<StorageWritingError, Array<T>>>;
+  getArray<T>(key: string): Promise<Either<StorageReadingError, Array<T>>>;
 }

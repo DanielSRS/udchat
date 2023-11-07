@@ -1,4 +1,3 @@
-import { MMKVInstance, MMKVLoader } from 'react-native-mmkv-storage';
 import { StorageInstance, StorageReadingError, StorageWritingError } from './instance';
 import { StorageLoader } from './loader';
 import { Either, left, right } from 'fp-ts/lib/Either';
@@ -17,14 +16,6 @@ function readingErr<T>(code: CoreError<any>['code'], expected: string) {
   }))
 }
 
-/** Erro de escrita do map no storage */
-const mapWritingError = readingErr('NFPSMKVS', 'boolean');
-/** Erro de escrita de string no storage */
-const stringWritingError = readingErr('NFPSSKVS', 'string');
-/** Erro de escrita de boolean no storage */
-const booleanWritingError = readingErr('NFPSBKVS', 'boolean');
-/** Erro de escrita de array no storage */
-const arrayWritingError = readingErr('NFPSAKVS', 'array');
 /** Erro de leitura de string no storage */
 const stringReadingError = readingErr('NFPLSKVS', 'string');
 /** Erro de leitura de map no storage */
@@ -34,12 +25,14 @@ const booleanReadingError = readingErr('NFPLBKVS', 'boolean');
 /** Erro de leitura de array no storage */
 const arrayReadingError = readingErr('NFPLAKVS', 'array');
 
+const database: { [key: string]: { [key: string]: any } } = {};
+
 
 interface MMKVStorageProps {
-  mmkvInstance: MMKVInstance;
+  mmkvInstance: { [key: string]: any };
 }
 class MMKVStorage implements StorageInstance {
-  private mmkvInstance: MMKVInstance;
+  private mmkvInstance: { [key: string]: any };
 
   constructor(props: MMKVStorageProps) {
     this.mmkvInstance = props.mmkvInstance;
@@ -47,11 +40,8 @@ class MMKVStorage implements StorageInstance {
 
   setMap(key: string, value: object) {
     return new Promise<Either<StorageWritingError, true>>((resolve) => {
-      this.mmkvInstance.setMapAsync(key, value)
-        .then(val => val
-            ? resolve(right(true))
-            : resolve(mapWritingError(val)))
-        .catch(e => resolve(mapWritingError(e)));
+      this.mmkvInstance[key] = value;
+      resolve(right(true));
     });
   }
   setString(
@@ -59,11 +49,8 @@ class MMKVStorage implements StorageInstance {
     value: string,
   ) {
     return new Promise<Either<StorageWritingError, true>>((resolve) => {
-      this.mmkvInstance.setStringAsync(key, value)
-        .then(val => val
-            ? resolve(right(true))
-            : resolve(stringWritingError(val)))
-        .catch(e => resolve(stringWritingError(e)));
+      this.mmkvInstance[key] = value;
+      resolve(right(true));
     });
   }
   setBoolean(
@@ -71,11 +58,8 @@ class MMKVStorage implements StorageInstance {
     value: boolean,
   ) {
     return new Promise<Either<StorageWritingError, true>>((resolve) => {
-      this.mmkvInstance.setBoolAsync(key, value)
-        .then(val => val
-            ? resolve(right(true))
-            : resolve(booleanWritingError(val)))
-        .catch(e => resolve(booleanWritingError(e)));
+      this.mmkvInstance[key] = value;
+      resolve(right(true));
     });
   }
   setArray(
@@ -83,56 +67,50 @@ class MMKVStorage implements StorageInstance {
     value: any[],
   ) {
     return new Promise<Either<StorageWritingError, true>>((resolve) => {
-      this.mmkvInstance.setArrayAsync(key, value)
-        .then(val => val
-            ? resolve(right(true))
-            : resolve(arrayWritingError(val)))
-        .catch(e => resolve(arrayWritingError(e)));
+      this.mmkvInstance[key] = value;
+      resolve(right(true));
     });
   }
   removeItem(key: string) {
     return new Promise<Either<false, true>>((resolve) => {
-      const res = this.mmkvInstance.removeItem(key);
-      res ? resolve(right(res)) : resolve(left(res));
+      this.mmkvInstance[key] = undefined;
+      resolve(right(true));
     });
   }
   getString(key: string) {
     return new Promise<Either<StorageReadingError, string>>((resolve) => {
-      this.mmkvInstance.getStringAsync(key)
-        .then(val => typeof val === 'string'
-            ? resolve(right(val))
-            : resolve(stringReadingError(val)))
-        .catch(e => resolve(stringReadingError(e)));
+      const val = this.mmkvInstance[key];
+      typeof val === 'string'
+        ? resolve(right(val))
+        : resolve(stringReadingError(val));
     });
   }
   getMap<T>(key: string) {
     return new Promise<Either<StorageReadingError, NonNullable<T>>>((resolve) => {
-      this.mmkvInstance.getMapAsync<NonNullable<T>>(key)
-        .then(val => val
-            ? resolve(right(val))
-            : resolve(mapReadingError(val)))
-        .catch(e => resolve(mapReadingError(e)));
+      const val = this.mmkvInstance[key];
+      val
+        ? resolve(right(val))
+        : resolve(mapReadingError(val));
     });
   }
   getBoolean(key: string) {
     return new Promise<Either<StorageReadingError, boolean>>((resolve) => {
-      this.mmkvInstance.getBoolAsync(key)
-        .then(val => typeof val === 'boolean'
-            ? resolve(right(val))
-            : resolve(booleanReadingError(val)))
-        .catch(e => resolve(booleanReadingError(e)));
+      const val = this.mmkvInstance[key];
+      val
+        ? resolve(right(val))
+        : resolve(booleanReadingError(val));
     });
   }
   getArray<T>(key: string) {
     return new Promise<Either<StorageReadingError, Array<T>>>((resolve) => {
-      this.mmkvInstance.getArrayAsync<T>(key)
-        .then(val => val
-            ? resolve(right(val))
-            : resolve(arrayReadingError(val)))
-        .catch(e => resolve(arrayReadingError(e)));
+      const val = this.mmkvInstance[key];
+      val
+        ? resolve(right(val))
+        : resolve(arrayReadingError(val));
     });
   }
 }
+
 
 class MMKVStorageLoader implements StorageLoader {
   private instanceId: string;
@@ -154,14 +132,21 @@ class MMKVStorageLoader implements StorageLoader {
   }
 
   private initWithEncryption() {
-    return new MMKVLoader()
-      .withInstanceID(this.instanceId)
-      .withEncryption()
-      .initialize();
+    let db = database[this.instanceId];
+    if (!db) {
+      database[this.instanceId] = {};
+      db = database[this.instanceId];
+    }
+    return db;
   }
 
   private initWithNoEncryption() {
-    return new MMKVLoader().withInstanceID(this.instanceId).initialize();
+    let db = database[this.instanceId];
+    if (!db) {
+      database[this.instanceId] = {};
+      db = database[this.instanceId];
+    }
+    return db;
   }
 
   initialize(): StorageInstance {
