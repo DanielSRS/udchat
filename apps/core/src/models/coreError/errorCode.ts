@@ -18,6 +18,8 @@ export const ErrorCodes = {
   NFPLMKVS: 'Não foi possivel ler map no mmkv storage',
   NFPLBKVS: 'Não foi possivel ler boolean no mmkv storage',
   NFPLAKVS: 'Não foi possivel ler array no mmkv storage',
+  CUFWNIER: 'Create user failed with new instance error',
+  CUFWSTER: 'Create user failed with storage error',
 } as const;
 
 /** https://stackoverflow.com/questions/59251860/use-keys-of-an-object-as-union-type */

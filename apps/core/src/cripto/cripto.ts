@@ -1,6 +1,6 @@
 import { RSAKeyPairOptions, generateKeyPair } from "crypto";
 import { Either, left, right } from "fp-ts/lib/Either";
-import { CoreError } from "../models/coreError";
+import { CoreError, ErrorCodes } from "../models/coreError";
 import { KeyPair } from "../models/keyPair/keyPair";
 
 const options: RSAKeyPairOptions<"pem", "pem"> = {
@@ -29,7 +29,7 @@ export const generateAssimetricKeys = async () => {
         code: 'EKCF0000',
         details: error,
         erros: [error.message],
-        message: '',
+        message: ErrorCodes['EKCF0000'],
       })));
     });
   });
