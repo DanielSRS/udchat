@@ -14,7 +14,7 @@ const userStorage = storageService.withInstanceID('user').withEncryption().initi
  * - Na criação das craves criptograficas
  * - Na criação do membro
  */
-const genereateNewUser = async () => {
+export const genereateNewUser = async () => {
   const pair = await generateAssimetricKeys();
   const newMember = Member({ name: 'name', username: 'username' });
 
@@ -125,17 +125,4 @@ export const saveUser = (user: User, storage: StorageInstance = userStorage) => 
 export const getPersistedUser = (params: { storage?: StorageInstance } = {}) => {
   const { storage = userStorage } = params;
   return storage.getMap<User>('user');
-}
-
-export const getPersistedUserTRH = () => {
-  return new Promise<User>((resolve, reject) => {
-    getPersistedUser()
-      .then(value => {
-        if (isLeft(value)) {
-          reject(value.left);
-          return;
-        }
-        resolve(value.right);
-      })
-  })
 }
