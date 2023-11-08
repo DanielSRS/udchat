@@ -6,7 +6,7 @@ import { CoreError, ErrorCodes } from "../coreError";
 /**
  * Membro de uma organização.
  */
-interface Member {
+export interface Member {
   /** Nome do membro da organização */
   readonly name: string;
   /** Nome de usuário do membro da organização. É unico */
@@ -36,5 +36,3 @@ export const Member = (member: Member): Either<MemberError, Member> => {
     createMemberError,
   );
 };
-
-export type IMember = Member;

@@ -1,7 +1,3 @@
-import { createUDPServer } from '@udchat/socket';
+import { startup } from '@udchat/core/src/pages/startup';
 
-const server = createUDPServer();
-
-setTimeout(() => {
-  server.close();
-}, 1000);
+startup()
