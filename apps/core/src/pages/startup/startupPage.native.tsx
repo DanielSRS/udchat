@@ -33,7 +33,7 @@ export const Startup = () => {
         <View>
           <Text>estado: {state.value}</Text>
           <Text>Contexto:</Text>
-          <Text>{JSON.stringify(state.context, null, 2)}</Text>
+          <Text>{Object.keys(state.context)}</Text>
         </View>
         {!initialState ? null : (
           <Text>Initial state</Text>
