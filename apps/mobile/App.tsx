@@ -6,22 +6,15 @@
  */
 
 import React from 'react';
-import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
   useColorScheme,
-  View,
 } from 'react-native';
 
-import {
-  Colors,
-} from 'react-native/Libraries/NewAppScreen';
-
-import { Startup } from '@udchat/core/src/pages/startup/startupPage.native'
+import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { Startup } from '@udchat/core/src/pages/startup/startupPage.native';
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';

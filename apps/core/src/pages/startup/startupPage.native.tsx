@@ -31,7 +31,7 @@ export const Startup = () => {
     <View style={styles.container}>
       <ScrollView>
         <View>
-          <Text>estado: {state.value}</Text>
+          <Text>estado: {state.value.toString()}</Text>
           <Text>Contexto:</Text>
           <Text>{Object.keys(state.context)}</Text>
         </View>
