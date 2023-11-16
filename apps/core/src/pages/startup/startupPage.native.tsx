@@ -6,6 +6,8 @@ import { genereateNewUser, getPersistedUser, saveUser } from '../../managers/use
 import { storageService } from '../../services/storage';
 import { User } from '../../models/user/user';
 import { ContextFrom } from 'xstate';
+import { Organization } from '../../models/organization';
+import { getPersistedOrg, saveOrganization } from '../../managers/org/orgManager';
 
 const userStorage = storageService.withInstanceID('user').withEncryption().initialize();
 
@@ -13,9 +15,11 @@ export const Startup = () => {
   const [state, send] = useMachine(startupMachine, {
     services: {
       getUser: getUserService,
-      getOrg: () => new Promise((_, r) => r()),
+      getOrg: getOrgService,
       createUser: createUserService,
       saveUserToStorage: saveUserToStorageService,
+      createOrg: createOrgService,
+      saveOrgToStorage: saveOrgToStorageService,
     }
   });
 
@@ -27,13 +31,16 @@ export const Startup = () => {
   const started = state.matches('started');
   const savingFailure = state.matches('savingFailure');
 
+  const creatingOrg = state.matches('creatingOrganization') || state.matches('savingOrgToStorage');
+  const savingOrgFailure = state.matches('savingOrgFailure');
+
   return (
     <View style={styles.container}>
       <ScrollView>
         <View>
           <Text>estado: {state.value.toString()}</Text>
           <Text>Contexto:</Text>
-          <Text>{Object.keys(state.context)}</Text>
+          <Text>{Object.keys(state.context).join('\n')}</Text>
         </View>
         {!initialState ? null : (
           <Text>Initial state</Text>
@@ -44,13 +51,19 @@ export const Startup = () => {
             <ActivityIndicator />
           </View>
         )}
+        {!creatingOrg ? null : (
+          <View>
+            <Text>Criando organization</Text>
+            <ActivityIndicator />
+          </View>
+        )}
         {!noUSer ? null : (
           <>
             <Text>no user</Text>
             <Button title={'Create user'} onPress={() => send({ type: 'CREATE_USER' })} />
           </>
         )}
-        {!savingFailure ? null : (
+        {!(savingFailure || savingOrgFailure) ? null : (
           <>
             <Text>Falha ao salvar no storage</Text>
             <Button title={'tentar novamente'} onPress={() => send({ type: 'RETRY' })} />
@@ -111,6 +124,42 @@ export const getUserService = () => {
           return;
         }
         resolve({ user: value.right });
+      })
+  })
+}
+
+/** Rejectable promised version of Createorg */
+const createOrgService = () => {
+  return new Promise<{ organization: Organization }>((resolve, reject) => {
+    const newOrg = Organization({ creationDate: (new Date()).toISOString(), members: [] });
+    if (isLeft(newOrg)) {
+      return reject(newOrg.left);
+    }
+    return resolve({ organization: newOrg.right });
+  });
+}
+
+const saveOrgToStorageService = (context: ContextFrom<typeof startupMachine>) => {
+  return new Promise((resolve, reject) => {
+    saveOrganization(context.organization)
+      .then(val => {
+        if (isLeft(val)) {
+          return reject(val.left);
+        }
+        resolve(true);
+      })
+  })
+}
+
+const getOrgService = () => {
+  return new Promise<{ organization: Organization }>((resolve, reject) => {
+    getPersistedOrg()
+      .then(value => {
+        if (isLeft(value)) {
+          reject(value.left);
+          return;
+        }
+        resolve({ organization: value.right });
       })
   })
 }
