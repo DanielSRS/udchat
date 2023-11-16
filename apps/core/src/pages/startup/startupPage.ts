@@ -2,11 +2,16 @@ import { ContextFrom, interpret } from "xstate";
 import { startupMachine } from "../../machines";
 import { createInterface } from "readline";
 import { stdin, stdout } from "process";
-import { isLeft } from "fp-ts/lib/Either";
 import { User } from "../../models/user/user";
-import { genereateNewUser, getPersistedUser, saveUser } from "../../managers/user/userManager";
 import { Organization } from "../../models/organization";
-import { getPersistedOrg, saveOrganization } from "../../managers/org/orgManager";
+import {
+  createOrgService,
+  createUserService,
+  getOrgService,
+  getUserService,
+  saveOrgToStorageService,
+  saveUserToStorageService
+} from "./startupHelper";
 
 export const startup = () => {
   const startupActor = interpret(startupMachine.withConfig({
@@ -118,78 +123,4 @@ const createNewOrg = async () => {
       return reject(false);
     });
   });
-}
-
-/** Rejectable promised version of createUser */
-const createUserService = () => {
-  return new Promise<{ user: User }>((resolve, reject) => {
-    genereateNewUser()
-      .then(val => {
-        if (isLeft(val)) {
-          return reject(val.left);
-        }
-        resolve({ user: val.right });
-      })
-  });
-}
-
-const saveUserToStorageService = (context: ContextFrom<typeof startupMachine>) => {
-  return new Promise((resolve, reject) => {
-    saveUser(context.user)
-      .then(val => {
-        if (isLeft(val)) {
-          return reject(val.left);
-        }
-        resolve(true);
-      })
-  })
-}
-
-export const getUserService = () => {
-  return new Promise<{ user: User }>((resolve, reject) => {
-    getPersistedUser()
-      .then(value => {
-        if (isLeft(value)) {
-          reject(value.left);
-          return;
-        }
-        resolve({ user: value.right });
-      })
-  })
-}
-
-/** Rejectable promised version of Createorg */
-const createOrgService = () => {
-  return new Promise<{ organization: Organization }>((resolve, reject) => {
-    const newOrg = Organization({ creationDate: (new Date()).toISOString(), members: [] });
-    if (isLeft(newOrg)) {
-      return reject(newOrg.left);
-    }
-    return resolve({ organization: newOrg.right });
-  });
-}
-
-const saveOrgToStorageService = (context: ContextFrom<typeof startupMachine>) => {
-  return new Promise((resolve, reject) => {
-    saveOrganization(context.organization)
-      .then(val => {
-        if (isLeft(val)) {
-          return reject(val.left);
-        }
-        resolve(true);
-      })
-  })
-}
-
-const getOrgService = () => {
-  return new Promise<{ organization: Organization }>((resolve, reject) => {
-    getPersistedOrg()
-      .then(value => {
-        if (isLeft(value)) {
-          reject(value.left);
-          return;
-        }
-        resolve({ organization: value.right });
-      })
-  })
 }
