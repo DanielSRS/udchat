@@ -10,6 +10,8 @@ import {
   saveOrgToStorageService,
   saveUserToStorageService
 } from './startupHelper';
+import Lottie from 'lottie-react-native';
+import badge from '../../assets/animations/verified_badge.json';
 
 const userStorage = storageService.withInstanceID('user').withEncryption().initialize();
 
@@ -38,56 +40,55 @@ export const Startup = () => {
 
   return (
     <View style={styles.container}>
-      <ScrollView>
+      <View>
+        <Text>estado: {state.value.toString()}</Text>
+        <Text>Contexto:</Text>
+        <Text>{Object.keys(state.context).join('\n')}</Text>
+      </View>
+      {!initialState ? null : (
+        <Text>Initial state</Text>
+        )}
+      {!loading ? null : (
         <View>
-          <Text>estado: {state.value.toString()}</Text>
-          <Text>Contexto:</Text>
-          <Text>{Object.keys(state.context).join('\n')}</Text>
+          <Text>Criando usuário</Text>
+          <ActivityIndicator />
         </View>
-        {!initialState ? null : (
-          <Text>Initial state</Text>
-          )}
-        {!loading ? null : (
-          <View>
-            <Text>Criando usuário</Text>
-            <ActivityIndicator />
-          </View>
-        )}
-        {!creatingOrg ? null : (
-          <View>
-            <Text>Criando organization</Text>
-            <ActivityIndicator />
-          </View>
-        )}
-        {!noUSer ? null : (
-          <>
-            <Text>no user</Text>
-            <Button title={'Create user'} onPress={() => send({ type: 'CREATE_USER' })} />
-          </>
-        )}
-        {!(savingFailure || savingOrgFailure) ? null : (
-          <>
-            <Text>Falha ao salvar no storage</Text>
-            <Button title={'tentar novamente'} onPress={() => send({ type: 'RETRY' })} />
-            <Button title={'Valtar ao inicio'} onPress={() => send({ type: 'START_OVER' })} />
-          </>
-        )}
-        {!findingOrg ? null : (
-          <Text>findingOrg</Text>
-        )}
-        {!noOrgFound ? null : (
-          <>
-            <Text>noOrgFound</Text>
-            <Button title={'Create organization'} onPress={() => send({ type: 'CREATE_ORG' })} />
-          </>
-        )}
-        {!started ? null : (
-          <View>
-            <Text>started</Text>
-            <Button title={'Delete user'} onPress={() => userStorage.removeItem('user')} />
-          </View>
-        )}
-      </ScrollView>
+      )}
+      {!creatingOrg ? null : (
+        <View>
+          <Text>Criando organization</Text>
+          <ActivityIndicator />
+        </View>
+      )}
+      {!noUSer ? null : (
+        <>
+          <Text>no user</Text>
+          <Button title={'Create user'} onPress={() => send({ type: 'CREATE_USER' })} />
+        </>
+      )}
+      {!(savingFailure || savingOrgFailure) ? null : (
+        <>
+          <Text>Falha ao salvar no storage</Text>
+          <Button title={'tentar novamente'} onPress={() => send({ type: 'RETRY' })} />
+          <Button title={'Valtar ao inicio'} onPress={() => send({ type: 'START_OVER' })} />
+        </>
+      )}
+      {!findingOrg ? null : (
+        <Text>findingOrg</Text>
+      )}
+      {!noOrgFound ? null : (
+        <>
+          <Text>noOrgFound</Text>
+          <Button title={'Create organization'} onPress={() => send({ type: 'CREATE_ORG' })} />
+        </>
+      )}
+      {!started ? null : (
+        <View style={{ flex: 1, justifyContent: 'space-between' }}>
+          <Text>started</Text>
+          <Lottie style={{ minHeight: 300 }} source={badge} autoPlay loop={false} />
+          <Button title={'Delete user'} onPress={() => userStorage.removeItem('user')} />
+        </View>
+      )}
     </View>
   );
 };
