@@ -36,6 +36,7 @@ export const startup = () => {
 
     const creatingOrg = snapshot.matches('creatingOrganization') || snapshot.matches('savingOrgToStorage');
     const savingOrgFailure = snapshot.matches('savingOrgFailure');
+    const orgCreationErr = snapshot.matches('orgCreationErr');
 
     if (initialState) {
       console.log('🔎 Buscando credenciais');
@@ -65,6 +66,10 @@ export const startup = () => {
     if (noOrgFound) {
       console.log('❌ Nenhuma organização, como pode?');
       await createNewOrg().then(() => startupActor.send({ type: 'CREATE_ORG' })).catch(() => {});
+    }
+    
+    if (orgCreationErr) {
+      console.log('ERRRRRROUUUU, como pode?');
     }
 
     if (started) {

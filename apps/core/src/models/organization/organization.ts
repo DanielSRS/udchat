@@ -33,7 +33,7 @@ export interface Organization {
 };
 
 const OrganizationSchema = z.object({
-  creationDate: z.string().datetime(),
+  creationDate: z.string(),
   members: z.array(MemberSchema),
   commits: z.array(OrgCommitSchema).min(1),
 });

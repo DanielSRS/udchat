@@ -49,6 +49,7 @@ export const createOrgService = (context: ContextFrom<typeof startupMachine>) =>
   return new Promise<{ organization: Organization }>((resolve, reject) => {
     const newOrg = createOrg({ createdBy: context.user.member });
     if (isLeft(newOrg)) {
+      console.log('o que rolou: ', JSON.stringify(newOrg.left, null, 2));
       return reject(newOrg.left);
     }
     return resolve({ organization: newOrg.right });
