@@ -69,6 +69,11 @@ export const startup = () => {
 
     if (started) {
       console.log('✨ Todos os dados validados');
+      console.log(`|--------------- Organization ----------------`);
+      console.log(`| Data de criação: ${snapshot.context.organization.creationDate}`);
+      console.log(`| Commits:        \n\t${snapshot.context.organization.commits.map(v => v.type + ': ' + v.createdAt).join('\n\t')}`);
+      console.log(`| membros:        \n\t ${snapshot.context.organization.members.map(m => m.username + ' aka ' + m.name).join('\n\t')}`);
+      console.log(`|---------------------------------------------\n`);
     }
   });
 

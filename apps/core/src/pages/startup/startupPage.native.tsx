@@ -84,7 +84,11 @@ export const Startup = () => {
       )}
       {!started ? null : (
         <View style={{ flex: 1, justifyContent: 'space-between' }}>
-          <Text>started</Text>
+          <Text>{`|--------------- Organization ----------------`}</Text>
+          <Text>{`| Data de criação: ${state.context.organization.creationDate}`}</Text>
+          <Text>{`| Commits:        \n\t${state.context.organization.commits.map(v => v.type + ': ' + v.createdAt).join('\n\t')}`}</Text>
+          <Text>{`| membros:        \n\t ${state.context.organization.members.map(m => m.username + ' aka ' + m.name).join('\n\t')}`}</Text>
+          <Text>{`|---------------------------------------------\n`}</Text>
           <Lottie style={{ minHeight: 300 }} source={badge} autoPlay loop={false} />
           <Button title={'Delete user'} onPress={() => userStorage.removeItem('user')} />
         </View>

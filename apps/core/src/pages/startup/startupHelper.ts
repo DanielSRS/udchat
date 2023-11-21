@@ -2,7 +2,7 @@ import { isLeft } from "fp-ts/lib/Either";
 import { Organization } from "../../models/organization";
 import { ContextFrom } from "xstate";
 import { startupMachine } from "../../machines";
-import { getPersistedOrg, saveOrganization } from "../../managers/org/orgManager";
+import { createOrg, getPersistedOrg, saveOrganization } from "../../managers/org/orgManager";
 import { User } from "../../models/user/user";
 import { genereateNewUser, getPersistedUser, saveUser } from "../../managers/user/userManager";
 
@@ -45,9 +45,9 @@ export const getUserService = () => {
 }
 
 /** Rejectable promised version of Createorg */
-export const createOrgService = () => {
+export const createOrgService = (context: ContextFrom<typeof startupMachine>) => {
   return new Promise<{ organization: Organization }>((resolve, reject) => {
-    const newOrg = Organization({ creationDate: (new Date()).toISOString(), members: [] });
+    const newOrg = createOrg({ createdBy: context.user.member });
     if (isLeft(newOrg)) {
       return reject(newOrg.left);
     }
