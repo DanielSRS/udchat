@@ -135,7 +135,7 @@ class MMKVStorageLoader implements StorageLoader {
     let db = database[this.instanceId];
     if (!db) {
       database[this.instanceId] = {};
-      db = database[this.instanceId];
+      db = database[this.instanceId] as {};
     }
     return db;
   }
@@ -144,7 +144,7 @@ class MMKVStorageLoader implements StorageLoader {
     let db = database[this.instanceId];
     if (!db) {
       database[this.instanceId] = {};
-      db = database[this.instanceId];
+      db = database[this.instanceId] as {};
     }
     return db;
   }
