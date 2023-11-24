@@ -4,7 +4,11 @@ import { match as EitherMatch } from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
 import { CoreError, ErrorCodes } from "../coreError";
 
-const VALID_ORGANIZATION = { creationDate: (new Date()).toISOString(), members: [] };
+const VALID_ORGANIZATION: Organization = {
+  creationDate: (new Date()).toISOString(),
+  members: [],
+  commits: [],
+};
 
 it('Retorna um "Organization" quando os dados são válidos', () => {
   const res = Organization(VALID_ORGANIZATION);
