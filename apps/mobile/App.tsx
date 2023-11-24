@@ -26,10 +26,6 @@ function App(): JSX.Element {
 
   useEffect(() => {
     nodejs.start('main.js');
-    nodejs.channel.addListener('message', msg => {
-      console.log('From node');
-      console.log(JSON.stringify({ e: msg }, null, 2));
-    });
   }, []);
 
   return (

@@ -12,7 +12,7 @@ import {
 } from './startupHelper';
 import Lottie from 'lottie-react-native';
 import badge from '../../assets/animations/verified_badge.json';
-import nodejs from 'nodejs-mobile-react-native';
+import { initNodeService, sendEventToNode } from '../../services/node/nodeService';
 
 const userStorage = storageService.withInstanceID('user').withEncryption().initialize();
 
@@ -4011,6 +4011,7 @@ Massa massa ultricies mi quis hendrerit dolor magna eget est. A iaculis at erat 
 
 Mauris in aliquam sem fringilla ut. Eget sit amet tellus cras adipiscing enim eu turpis egestas. Scelerisque eleifend donec pretium vulputate sapien nec sagittis. Enim lobortis scelerisque fermentum dui faucibus in ornare quam. Nulla aliquet enim tortor at auctor urna. Id consectetur purus ut faucibus pulvinar elementum integer. Amet massa vitae tortor condimentum lacinia quis vel eros. Sit amet venenatis urna cursus eget. Eu nisl nunc mi ipsum faucibus. Dolor sit amet consectetur adipiscing. Vestibulum lectus mauris ultrices eros in cursus turpis massa. Platea dictumst vestibulum rhoncus est pellentesque elit ullamcorper dignissim. Vel orci porta non pulvinar neque laoreet suspendisse interdum consectetur. Pellentesque adipiscing commodo elit at imperdiet dui. Pellentesque adipiscing commodo elit at imperdiet. Dolor sit amet consectetur adipiscing elit pellentesque habitant. Cursus risus at ultrices mi. Sed elementum tempus egestas sed sed risus pretium quam.`;
 
+initNodeService();
 
 export const Startup = () => {
   const [state, send] = useMachine(startupMachine, {
@@ -4092,43 +4093,58 @@ export const Startup = () => {
           <Button title={'Delete user'} onPress={() => userStorage.removeItem('user')} />
           <Button title={'Delete org'} onPress={() => userStorage.removeItem('org')} />
           <View style={{ paddingVertical: 20, gap: 10 }}>
-            <Button title={'Encript data'} onPress={() => {
-              nodejs.channel.send({
-                type: 'publicEncrypt',
-                data: {
-                  key: state.context.user.encriptionKeys.publicKey,
-                  value: 'daniel es la santa rosa',
-                }
-              });
-            }} />
-            <Button title={'Decript data'} onPress={() => {
-              nodejs.channel.send({
-                type: 'privateDecrypt',
-                data: {
-                  key: state.context.user.encriptionKeys.privateKey,
-                  value: 'RxvzptxbdmFc6VBXjzQ2iPP8Ris/bfHnCuzFGgnw/WgSUGpMq9JjoYc+D3kEaqLXJpIvTS9gJjDT7SBL+fsLCQsPDrJgkGPyj5CB+YC25arL9SwQU0Ea52U/0YaQLuqNEYAsytNC3aoKZXel/TRBJObA+xS/VaZPX6i39mtOKH18cUnW3GxX3mHX17eB3A4o2nLip/qJuJ+xAkqgXibdCswBvl3X3HMlZFXRPiRmgU78VNI5fS8h3wy1dJytrklbyh0DPCSCz3MbUANfLRqfNR+CUuVNXlTxkGFbw64QQxv7lWGOhgGrPxZh7tpOPFzyoWq5n0UebBte/zHEfd1CZQ==',
-                }
-              });
-            }} />
-            <Button title={'sign'} onPress={() => {
-              nodejs.channel.send({
+            <Button title={'Encript data'} onPress={async () => {
+                const i = (new Date()).getTime();
+                const response = await sendEventToNode({
+                  type: 'publicEncrypt',
+                  data: {
+                    key: state.context.user.encriptionKeys.publicKey,
+                    value: 'daniel es la santa rosa',
+                  }
+                })
+                const f = (new Date()).getTime();
+                console.log(JSON.stringify({ a: `O que veio em: ${f - i}ms`, e: response }, null, 2));
+              }} 
+            />
+            <Button title={'Decript data'} onPress={async () => {
+                const i = (new Date()).getTime();
+                const response = await sendEventToNode({
+                    type: 'privateDecrypt',
+                    data: {
+                      key: state.context.user.encriptionKeys.privateKey,
+                      value: 'RxvzptxbdmFc6VBXjzQ2iPP8Ris/bfHnCuzFGgnw/WgSUGpMq9JjoYc+D3kEaqLXJpIvTS9gJjDT7SBL+fsLCQsPDrJgkGPyj5CB+YC25arL9SwQU0Ea52U/0YaQLuqNEYAsytNC3aoKZXel/TRBJObA+xS/VaZPX6i39mtOKH18cUnW3GxX3mHX17eB3A4o2nLip/qJuJ+xAkqgXibdCswBvl3X3HMlZFXRPiRmgU78VNI5fS8h3wy1dJytrklbyh0DPCSCz3MbUANfLRqfNR+CUuVNXlTxkGFbw64QQxv7lWGOhgGrPxZh7tpOPFzyoWq5n0UebBte/zHEfd1CZQ==',
+                    }
+                  }
+                );
+                const f = (new Date()).getTime();
+                console.log(JSON.stringify({ a: `O que veio em: ${f - i}ms`, e: response }, null, 2));
+              }}
+            />
+            <Button title={'sign'} onPress={async () => {
+                const i = (new Date()).getTime();
+                const response = await sendEventToNode({
                   type: 'sign',
                   data: {
                     key: state.context.user.encriptionKeys.privateKey,
                     value: superLonog,
                   }
-                });
+                })
+                const f = (new Date()).getTime();
+                console.log(JSON.stringify({ a: `O que veio em: ${f - i}ms`, e: response }, null, 2));
               }}
             />
-            <Button title={'verify'} onPress={() => {
-              nodejs.channel.send({
+            <Button title={'verify'} onPress={async () => {
+                const i = (new Date()).getTime();
+                const response = await sendEventToNode({
                   type: 'verify',
                   data: {
                     key: state.context.user.encriptionKeys.publicKey,
                     value: superLonog,
                     signature: 'qtc2ItQorIoiGgACZjMBB8Y6MAxYSUx7RAlRRWMBUtZro5bUNGogCFX8E1i5sFwN7StnbLttdINBungJvdPtt5O2ts44GBOePU7rA3Q4KSXxIei2Q1brJeBAzPUnHyNB42EnZVDfbrmwjXrrLXyOArItVcHAHvHwYqfo0vZz7zjQqL+ys5rEpCoiy9qwmZB6d0ix27mEfp6OP9YFQXjDG7NJtvCKhptlyC5hi3hg9bQ87hYk7KmcKgnmEWRzdIujxvrjQ2ofzM1EauVHoZhXAFJZNtwcPV6LfSSF9776yzKfOVaIJA1RuAtW0dxmEx2ltK4FWckNf1Z3xgj5MvAS0Q==',
                   }
-                });
+                })
+                const f = (new Date()).getTime();
+                console.log(JSON.stringify({ a: `O que veio em: ${f - i}ms`, e: response }, null, 2));
               }}
             />
             <Button title={'keys'} onPress={() => {
