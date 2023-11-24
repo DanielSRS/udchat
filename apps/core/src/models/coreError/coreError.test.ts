@@ -1,8 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import { CoreError } from "./coreError";
+import { ErrorCode } from "./errorCode";
 
 const message = 'Err msg';
-const errorCode = 'UEIUKLOC';
+const errorCode: ErrorCode = 'CUFWNIER';
 const errors: string[] = [];
 
 describe('Instanciando CoreError', () => {
