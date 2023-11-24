@@ -5,7 +5,7 @@
  * @format
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   SafeAreaView,
   StatusBar,
@@ -15,6 +15,7 @@ import {
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Startup } from '@udchat/core/src/pages/startup/startupPage.native';
+import nodejs from 'nodejs-mobile-react-native';
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -22,6 +23,14 @@ function App(): JSX.Element {
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  useEffect(() => {
+    nodejs.start('main.js');
+    nodejs.channel.addListener('message', msg => {
+      console.log('From node');
+      console.log(JSON.stringify({ e: msg }, null, 2));
+    });
+  }, []);
 
   return (
     <SafeAreaView style={[backgroundStyle, styles.appContainer]}>

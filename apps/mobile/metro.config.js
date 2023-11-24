@@ -1,4 +1,5 @@
-const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const exclusionList = require('metro-config/src/defaults/exclusionList');
 const path = require('path');
 
 // Find the project and workspace directories
@@ -27,6 +28,12 @@ const config = {
     // 3. Force Metro to resolve (sub)dependencies only from the `nodeModulesPaths`
     disableHierarchicalLookup: true,
     unstable_enableSymlinks: true,
+    // node js mobile
+    blacklistRE: exclusionList([
+      /\nodejs-assets\/.*/,
+      /\android\/.*/,
+      /\/ios\/.*/
+    ]),
   },
 };
 
