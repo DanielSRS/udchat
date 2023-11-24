@@ -7,7 +7,15 @@ import { CoreError, ErrorCodes } from "../coreError";
 const VALID_ORGANIZATION: Organization = {
   creationDate: (new Date()).toISOString(),
   members: [],
-  commits: [],
+  commits: [{
+    createdAt: '',
+    createdBy: {
+      name: 'name',
+      username: 'username'
+    },
+    previousCommit: 'none',
+    type: 'orgCreation',
+  }],
 };
 
 it('Retorna um "Organization" quando os dados são válidos', () => {
