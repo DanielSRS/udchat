@@ -72,6 +72,43 @@ function dispatchMessage(message) {
       });
     }
 
+    // Se for symetricDecryption
+    if (
+      message !== null
+    && typeof message === 'object'
+    && 'type' in message
+    && 'data' in message
+    && message?.type === 'symetricDecryption'
+    && typeof message.data === 'object'
+    && message.data !== null
+    && 'key' in message.data
+    && 'value' in message.data
+    && typeof message.data.key === 'string'
+    && typeof message.data.value === 'string'
+    ) {
+      return symetricDecryption(
+        message.data.value,
+        message.data.key,
+      );
+    }
+
+    // Se for symetricEncryption
+    if (
+      message !== null
+    && typeof message === 'object'
+    && 'type' in message
+    && 'data' in message
+    && message?.type === 'symetricEncryption'
+    && typeof message.data === 'object'
+    && message.data !== null
+    && 'value' in message.data
+    && typeof message.data.value === 'string'
+    ) {
+      return symetricEncryption(
+        message.data.value
+      );
+    }
+
     // Se for verify
     if (
       message !== null
@@ -271,5 +308,80 @@ function verify (params) {
       success: true,
       error: e,
     }
+  }
+}
+
+/**
+ * 
+ * @param {string} data 
+ * @returns 
+ */
+const symetricEncryption = (data) => {
+  // Configurando criptografia
+  const encryptionAlgorithm = 'aes-256-ctr';
+  const ENCRYPTION_KEY = crypto.randomBytes(32);
+  const IV_LENGTH = 16;
+  /** @type {BufferEncoding} */
+  const encoding = 'base64'
+
+  // criando cifra
+  const iv = crypto.randomBytes(IV_LENGTH);
+  const cipher = crypto.createCipheriv(encryptionAlgorithm, ENCRYPTION_KEY, iv);
+
+  // encriptando
+  const partialEncryption = cipher.update(data);
+  const encryptedText = Buffer.concat([partialEncryption, cipher.final()]);
+  return {
+    encryptedText: iv.toString(encoding) + ':' + encryptedText.toString(encoding),
+    base64EncryptionKey: ENCRYPTION_KEY.toString(encoding),
+    encryptionAlgorithm,
+  };
+}
+
+/**
+ * 
+ * @param {string} encryptedDataInBase64 
+ * @param {string} encryptionKeyInBase64 
+ * @returns 
+ */
+function symetricDecryption(encryptedDataInBase64, encryptionKeyInBase64) {
+  const initiated = new Date();
+  /** @type {Array<string>}  */
+  const logs = [];
+  logs.push(`Initiated at: ${initiated.toTimeString()}`);
+
+  // Configurando criptografia
+  const encryptionAlgorithm = 'aes-256-ctr';
+  const ENCRYPTION_KEY = Buffer.from(encryptionKeyInBase64, 'base64');
+  /** @type {BufferEncoding} */
+  const encoding = 'base64'
+
+  const textParts = encryptedDataInBase64.split(':');
+  /** Se o texto encriptado não estiver no formato correto */
+  if (textParts.length !== 2) {
+    const finalized = new Date();
+    logs.push(`Found error at: ${finalized.toTimeString()}`);
+    logs.push(`Done in: ${finalized.getTime() - initiated.getTime()}ms`);
+    return {
+      success: false,
+      logs: logs,
+    }
+  }
+
+
+  // Decriptando
+  const iv = Buffer.from(textParts[0], encoding);
+  const encryptedText = Buffer.from(textParts[1], encoding);
+  const decipher = crypto.createDecipheriv(encryptionAlgorithm, ENCRYPTION_KEY, iv);
+  const partialDecrypted = decipher.update(encryptedText);
+  const decrypted = Buffer.concat([partialDecrypted, decipher.final()]);
+
+  const finalized = new Date();
+  logs.push(`Finalized at: ${finalized.toTimeString()}`);
+  logs.push(`Done in: ${finalized.getTime() - initiated.getTime()}ms`);
+  return {
+    decryptedData: decrypted.toString(),
+    success: true,
+    logs: logs,
   }
 }

@@ -4089,7 +4089,7 @@ export const Startup = () => {
             <Text>{`| membros:        \n\t ${state.context.organization.members.map(m => m.username + ' aka ' + m.name).join('\n\t')}`}</Text>
             <Text>{`|---------------------------------------------\n`}</Text>
           </View>
-          <Lottie style={{ minHeight: 300 }} source={badge} autoPlay loop={false} />
+          <Lottie style={{ minHeight: 200 }} source={badge} autoPlay loop={false} />
           <Button title={'Delete user'} onPress={() => userStorage.removeItem('user')} />
           <Button title={'Delete org'} onPress={() => userStorage.removeItem('org')} />
           <View style={{ paddingVertical: 20, gap: 10 }}>
@@ -4141,6 +4141,35 @@ export const Startup = () => {
                     key: state.context.user.encriptionKeys.publicKey,
                     value: superLonog,
                     signature: 'qtc2ItQorIoiGgACZjMBB8Y6MAxYSUx7RAlRRWMBUtZro5bUNGogCFX8E1i5sFwN7StnbLttdINBungJvdPtt5O2ts44GBOePU7rA3Q4KSXxIei2Q1brJeBAzPUnHyNB42EnZVDfbrmwjXrrLXyOArItVcHAHvHwYqfo0vZz7zjQqL+ys5rEpCoiy9qwmZB6d0ix27mEfp6OP9YFQXjDG7NJtvCKhptlyC5hi3hg9bQ87hYk7KmcKgnmEWRzdIujxvrjQ2ofzM1EauVHoZhXAFJZNtwcPV6LfSSF9776yzKfOVaIJA1RuAtW0dxmEx2ltK4FWckNf1Z3xgj5MvAS0Q==',
+                  }
+                })
+                const f = (new Date()).getTime();
+                console.log(JSON.stringify({ a: `O que veio em: ${f - i}ms`, e: response }, null, 2));
+              }}
+            />
+            <Button title={'symetric encryption'} onPress={async () => {
+                const dataToEncrypt = 'Me nom é julia e eu dei duas facadas do meu namorado pq ele não dividiu o lanche';
+                const i = (new Date()).getTime();
+                console.log('text length: ', superLonog.length.toString());
+                const response = await sendEventToNode({
+                  type: 'symetricEncryption',
+                  data: {
+                    // key: state.context.user.encriptionKeys.publicKey,
+                    value: superLonog,
+                  }
+                })
+                const f = (new Date()).getTime();
+                console.log(JSON.stringify({ a: `O que veio em: ${f - i}ms`, e: {...response, response: {...response?.response, encryptedText: (response?.response?.encryptedText || '' as string).length + ' in lenght'} } }, null, 2));
+              }}
+            />
+            <Button title={'symetric decryption'} onPress={async () => {
+                const dataToDecrypt = 'aMtaK+ORZEy+2jn9/biTyQ==:DJIN9Q6ip8AIhb5nAG2W3E+AaWARYeLniFUPFS6T7T0wkc16gdMgJ5B9LCkPYaN95k+Mg8dH9FLO3bpPZYiQ8vK9G/HGNNVdBAO9DFToWseXZg==';
+                const i = (new Date()).getTime();
+                const response = await sendEventToNode({
+                  type: 'symetricDecryption',
+                  data: {
+                    key: 'dWun/7LcQemayvG8VbFAOXH7SBEyjYa2DPYFg1klETQ="',
+                    value: dataToDecrypt,
                   }
                 })
                 const f = (new Date()).getTime();
