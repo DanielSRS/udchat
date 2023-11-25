@@ -4168,7 +4168,7 @@ export const Startup = () => {
                 const response = await sendEventToNode({
                   type: 'symetricDecryption',
                   data: {
-                    key: 'dWun/7LcQemayvG8VbFAOXH7SBEyjYa2DPYFg1klETQ="',
+                    key: 'dWun/7LcQemayvG8VbFAOXH7SBEyjYa2DPYFg1klETQ=',
                     value: dataToDecrypt,
                   }
                 })

@@ -17,12 +17,9 @@ const nodeEventHandler = (message: unknown) => {
 
 nodejs.channel.addListener('message', nodeEventHandler);
 
-export const sendEventToNode = (event: object) => {
-  if (!event) {
-    return new Promise((_, reject) => reject());
-  }
-  const res = new Promise(resolve => {
-    responseQueue.push(resolve);
+export const sendEventToNode = <T extends nodeResponseEventType>(event: { type: T } & nodeRequestEvent) => {
+  const res = new Promise<nodeResponseEventMap[T]>(resolve => {
+    responseQueue.push(resolve as (m: unknown) => void);
     nodejs.channel.send(event);
   });
   return res;
