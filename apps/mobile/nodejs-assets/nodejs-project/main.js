@@ -209,7 +209,6 @@ function publicEncrypt (params) {
       success: true,
       encryptedDataInBase64: data,
       logs: logs,
-      error: undefined,
     };
   } catch(e) {
     return {
@@ -305,7 +304,7 @@ function verify (params) {
     }
   } catch(e) {
     return {
-      success: true,
+      success: false,
       error: e,
     }
   }
