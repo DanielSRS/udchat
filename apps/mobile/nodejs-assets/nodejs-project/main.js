@@ -1,3 +1,4 @@
+// @ts-check
 'use strinct';
 
 const { publicEncrypt, privateDecrypt, sign, symetricDecryption, symetricEncryption, verify } = require('./encryption');
@@ -6,27 +7,25 @@ const { Worker } = require('worker_threads');
 const rn_bridge = require('rn-bridge');
 
 
-/**
- * 
- * @param {unknown} message 
- */
-function dispatchMessage(message) {
+function dispatchMessage( /** @type {unknown} */ message) {
   const data = (() => {
 
+    if (message === null || typeof message !== 'object') return { logs: ['message is not an object'] }
+    if (!('type' in message)) return { logs: ['evento não informado'] }
+    if (!('data' in message)) return { logs: ['no data sent'] }
+    if (typeof message.data !== 'object' || message.data === null) return { logs: ['data is not an object'] }
+    if (!('value' in message.data) || typeof message.data.value !== 'string') return { logs: ['no string value sent'] }
+
+    // Se for symetricEncryption
+    if (message?.type === 'symetricEncryption') {
+      return symetricEncryption(message.data.value);
+    }
+
+    if (!('key' in message.data) || typeof message.data.key !== 'string') return { logs: ['no string key sent'] }
+
+
     // Se for encrypt
-    if (
-      message !== null
-    && typeof message === 'object'
-    && 'type' in message
-    && 'data' in message
-    && message?.type === 'publicEncrypt'
-    && typeof message.data === 'object'
-    && message.data !== null
-    && 'key' in message.data
-    && 'value' in message.data
-    && typeof message.data.key === 'string'
-    && typeof message.data.value === 'string'
-    ) {
+    if (message?.type === 'publicEncrypt') {
       return publicEncrypt({
         key: message.data.key,
         data: message.data.value
@@ -34,19 +33,7 @@ function dispatchMessage(message) {
     }
 
     // Se for privateDecrypt
-    if (
-      message !== null
-    && typeof message === 'object'
-    && 'type' in message
-    && 'data' in message
-    && message?.type === 'privateDecrypt'
-    && typeof message.data === 'object'
-    && message.data !== null
-    && 'key' in message.data
-    && 'value' in message.data
-    && typeof message.data.key === 'string'
-    && typeof message.data.value === 'string'
-    ) {
+    if (message?.type === 'privateDecrypt') {
       return privateDecrypt({
         key: message.data.key,
         data: message.data.value
@@ -54,19 +41,7 @@ function dispatchMessage(message) {
     }
 
     // Se for sign
-    if (
-      message !== null
-    && typeof message === 'object'
-    && 'type' in message
-    && 'data' in message
-    && message?.type === 'sign'
-    && typeof message.data === 'object'
-    && message.data !== null
-    && 'key' in message.data
-    && 'value' in message.data
-    && typeof message.data.key === 'string'
-    && typeof message.data.value === 'string'
-    ) {
+    if (message?.type === 'sign') {
       return sign({
         key: message.data.key,
         data: message.data.value
@@ -74,58 +49,17 @@ function dispatchMessage(message) {
     }
 
     // Se for symetricDecryption
-    if (
-      message !== null
-    && typeof message === 'object'
-    && 'type' in message
-    && 'data' in message
-    && message?.type === 'symetricDecryption'
-    && typeof message.data === 'object'
-    && message.data !== null
-    && 'key' in message.data
-    && 'value' in message.data
-    && typeof message.data.key === 'string'
-    && typeof message.data.value === 'string'
-    ) {
+    if (message?.type === 'symetricDecryption') {
       return symetricDecryption(
         message.data.value,
         message.data.key,
       );
     }
 
-    // Se for symetricEncryption
-    if (
-      message !== null
-    && typeof message === 'object'
-    && 'type' in message
-    && 'data' in message
-    && message?.type === 'symetricEncryption'
-    && typeof message.data === 'object'
-    && message.data !== null
-    && 'value' in message.data
-    && typeof message.data.value === 'string'
-    ) {
-      return symetricEncryption(
-        message.data.value
-      );
-    }
+    if (!('signature' in message.data) || typeof message.data.signature !== 'string') return { logs: ['no string signature sent'] }
 
     // Se for verify
-    if (
-      message !== null
-    && typeof message === 'object'
-    && 'type' in message
-    && 'data' in message
-    && message?.type === 'verify'
-    && typeof message.data === 'object'
-    && message.data !== null
-    && 'key' in message.data
-    && 'value' in message.data
-    && 'signature' in message.data
-    && typeof message.data.key === 'string'
-    && typeof message.data.value === 'string'
-    && typeof message.data.signature === 'string'
-    ) {
+    if (message?.type === 'verify') {
       return verify({
         key: message.data.key,
         data: message.data.value,
@@ -134,9 +68,7 @@ function dispatchMessage(message) {
     }
 
     // se for desconhecido
-    return {
-      logs: ['evento desconhecido'],
-    }
+    return { logs: ['evento super desconhecido'] }
 
   })();
   const response = {
@@ -156,27 +88,6 @@ rn_bridge.channel.on('serverWorker', ( /** @type {unknown} */ message) => {
 // Inform react-native node is initialized.
 rn_bridge.channel.send({ eventType: 'nodeStarted', logs: ["Node was initialized."] });
 
-
-/** @param {unknown} event  */
-function isEncryptEvent(event) {
-  if (
-    event !== null
-    && typeof event === 'object'
-    && 'type' in event
-    && 'data' in event
-    && event?.type === 'encrypt'
-    && typeof event.data === 'object'
-    && event.data !== null
-    && 'key' in event.data
-    && 'value' in event.data
-    && typeof event.data.key === 'string'
-    && typeof event.data.value === 'string'
-  ) {
-    return true;
-  }
-
-  return false;
-}
 
 /**
  * 
