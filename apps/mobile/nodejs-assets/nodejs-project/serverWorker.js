@@ -1,4 +1,5 @@
 // @ts-check
+'use strict';
 const { parentPort } = require('worker_threads');
 const dgram = require('node:dgram');
 
