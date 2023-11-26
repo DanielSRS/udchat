@@ -12,10 +12,14 @@ const nodeEventHandler = (message: unknown) => {
     return resolve(message);
   }
   console.log("não tem callback");
-  // console.log(JSON.stringify({ e: message }, null, 2));
+  console.log(JSON.stringify({ e: message }, null, 2));
 }
 
 nodejs.channel.addListener('message', nodeEventHandler);
+nodejs.channel.addListener('serverWorker', (msg) => {
+  console.log('from serverWorker: ');
+  console.log(JSON.stringify({ msg: msg }, null, 2));
+});
 
 export const sendEventToNode = <T extends nodeResponseEventType>(event: { type: T } & nodeRequestEvent) => {
   const res = new Promise<nodeResponseEventMap[T]>(resolve => {
@@ -23,6 +27,10 @@ export const sendEventToNode = <T extends nodeResponseEventType>(event: { type: 
     nodejs.channel.send(event);
   });
   return res;
+}
+
+export const sendEventToServer = <T extends { type: 'serverWorker' }>(event: T) => {
+  nodejs.channel.post('serverWorker', event);
 }
 
 export const initNodeService = () => console.log('nodeservice');

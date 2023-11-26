@@ -3,6 +3,7 @@
 // @ts-ignore
 var rn_bridge = require('rn-bridge');
 var crypto = require('crypto');
+const { Worker } = require('worker_threads');
 
 
 /**
@@ -148,6 +149,9 @@ function dispatchMessage(message) {
 
 // Echo every message received from react-native.
 rn_bridge.channel.on('message', dispatchMessage);
+rn_bridge.channel.on('serverWorker', ( /** @type {unknown} */ message) => {
+  serverWorker?.postMessage(message);
+});
 
 // Inform react-native node is initialized.
 rn_bridge.channel.send({ eventType: 'nodeStarted', logs: ["Node was initialized."] });
@@ -383,4 +387,27 @@ function symetricDecryption(encryptedDataInBase64, encryptionKeyInBase64) {
     success: true,
     logs: logs,
   }
+}
+
+
+/**
+ * 
+ * 
+ * 
+ * 
+ * 
+ * Worker area
+ */
+
+/** @type {Worker | undefined} */
+let serverWorker = undefined;
+
+try {
+  serverWorker = new Worker(__dirname + '/serverWorker.js');
+
+  serverWorker.on('message', val => {
+    rn_bridge.channel.post('serverWorker', val);
+  });
+} catch(e) {
+  rn_bridge.channel.post('serverWorker', e);
 }

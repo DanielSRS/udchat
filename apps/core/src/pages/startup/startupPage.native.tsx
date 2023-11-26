@@ -12,7 +12,7 @@ import {
 } from './startupHelper';
 import Lottie from 'lottie-react-native';
 import badge from '../../assets/animations/verified_badge.json';
-import { initNodeService, sendEventToNode } from '../../services/node/nodeService';
+import { initNodeService, sendEventToNode, sendEventToServer } from '../../services/node/nodeService';
 
 const userStorage = storageService.withInstanceID('user').withEncryption().initialize();
 
@@ -4093,6 +4093,10 @@ export const Startup = () => {
           <Button title={'Delete user'} onPress={() => userStorage.removeItem('user')} />
           <Button title={'Delete org'} onPress={() => userStorage.removeItem('org')} />
           <View style={{ paddingVertical: 20, gap: 10 }}>
+            <Button title={'server'} onPress={() => {
+                sendEventToServer({ type: 'serverWorker', data: 'eita' })
+              }}
+            />
             <Button title={'Encript data'} onPress={async () => {
                 const i = (new Date()).getTime();
                 const response = await sendEventToNode({
