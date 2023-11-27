@@ -148,9 +148,9 @@ const symetricEncryption = (data) => {
 
   // encriptando
   const partialEncryption = cipher.update(data);
-  const encryptedText = Buffer.concat([partialEncryption, cipher.final()]);
+  const encryptedText = Buffer.concat([iv, partialEncryption, cipher.final()]);
   return {
-    encryptedText: iv.toString(encoding) + ':' + encryptedText.toString(encoding),
+    encryptedText: encryptedText.toString(encoding),
     base64EncryptionKey: ENCRYPTION_KEY.toString(encoding),
     encryptionAlgorithm,
   };
@@ -173,25 +173,14 @@ function symetricDecryption(encryptedDataInBase64, encryptionKeyInBase64) {
   const ENCRYPTION_KEY = Buffer.from(encryptionKeyInBase64, 'base64');
   /** @type {BufferEncoding} */
   const encoding = 'base64'
-
-  const textParts = encryptedDataInBase64.split(':');
-  /** Se o texto encriptado não estiver no formato correto */
-  if (textParts.length !== 2) {
-    const finalized = new Date();
-    logs.push(`Found error at: ${finalized.toTimeString()}`);
-    logs.push(`Done in: ${finalized.getTime() - initiated.getTime()}ms`);
-    return {
-      success: false,
-      logs: logs,
-    }
-  }
+  const IV_LENGTH = 16;
 
 
   // Decriptando
-  const iv = Buffer.from(textParts[0], encoding);
-  const encryptedText = Buffer.from(textParts[1], encoding);
+  const encryptedText = Buffer.from(encryptedDataInBase64, encoding);
+  const iv = encryptedText.subarray(0, IV_LENGTH);
   const decipher = crypto.createDecipheriv(encryptionAlgorithm, ENCRYPTION_KEY, iv);
-  const partialDecrypted = decipher.update(encryptedText);
+  const partialDecrypted = decipher.update(encryptedText.subarray(IV_LENGTH));
   const decrypted = Buffer.concat([partialDecrypted, decipher.final()]);
 
   const finalized = new Date();
