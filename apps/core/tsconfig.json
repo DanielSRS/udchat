@@ -1,22 +1,11 @@
 {
+  "extends": "@tsconfig/react-native/tsconfig.json",
   "compilerOptions": {
-    "lib": ["ESNext"],
-    "module": "esnext",
-    "target": "esnext",
-    "moduleResolution": "bundler",
-    "moduleDetection": "force",
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
-    "composite": true,
-    "strict": true,
-    "downlevelIteration": true,
-    "skipLibCheck": true,
-    "jsx": "react-jsx",
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "allowJs": true,
+    "noUncheckedIndexedAccess": true,
+    "allowJs": false,
     "types": [
-      "bun-types" // add Bun global
+      "bun-types", // add Bun global
+      "react-native"
     ]
   }
 }

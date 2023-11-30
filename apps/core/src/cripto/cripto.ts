@@ -1,6 +1,7 @@
 import { RSAKeyPairOptions, generateKeyPair } from "crypto";
 import { Either, left, right } from "fp-ts/lib/Either";
-import { CoreError } from "../models/coreError";
+import { CoreError, ErrorCodes } from "../models/coreError";
+import { KeyPair } from "../models/keyPair/keyPair";
 
 const options: RSAKeyPairOptions<"pem", "pem"> = {
   modulusLength: 2048,
@@ -12,16 +13,6 @@ const options: RSAKeyPairOptions<"pem", "pem"> = {
     type: 'pkcs8',
     format: 'pem',
   }
-}
-
-/**
- * Par de chaves assimetricas
- */
-export interface KeyPair {
-  /** Chave publica  */
-  publicKey: string;
-  /** Chave privada */
-  privateKey: string;
 }
 
 /**
@@ -38,7 +29,7 @@ export const generateAssimetricKeys = async () => {
         code: 'EKCF0000',
         details: error,
         erros: [error.message],
-        message: '',
+        message: ErrorCodes['EKCF0000'],
       })));
     });
   });

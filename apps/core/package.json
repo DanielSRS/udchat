@@ -2,15 +2,24 @@
   "name": "@udchat/core",
   "main": "./src/index.ts",
   "dependencies": {
+    "@xstate/react": "3.2.2",
     "fp-ts": "2.16.1",
     "xstate": "4.38.2",
     "zod": "3.22.4",
     "zod-validation-error": "1.5.0"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "4.8.4"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "@tsconfig/react-native": "^3.0.0",
+    "@types/react": "^18.0.24",
+    "bun-types": "latest",
+    "lottie-react-native": "6.4.1",
+    "nodejs-mobile-react-native": "18.17.3",
+    "react": "18.2.0",
+    "react-native": "0.72.6",
+    "react-native-mmkv-storage": "0.9.1",
+    "react-native-svg": "14.0.0"
   }
 }
