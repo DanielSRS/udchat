@@ -4,7 +4,7 @@
     "noUncheckedIndexedAccess": true,
     "allowJs": false,
     "types": [
-      "bun-types", // add Bun global
+      "node", // add Bun global
       "react-native"
     ]
   }
