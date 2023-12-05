@@ -176,3 +176,6 @@ dist
 
 # banco de dados
 database/
+
+# bundle
+bundle

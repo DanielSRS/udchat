@@ -3,15 +3,17 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun run src/index.ts",
-    "testing": "bun test --watch"
+    "start": "node bundle/bundle.js",
+    "testing": "bun test --watch",
+    "bundle": "node ./bundle.js"
   },
   "dependencies": {
     "@udchat/core": "workspace:*",
     "@udchat/socket": "workspace:*"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "esbuild": "0.19.8"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
