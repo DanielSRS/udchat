@@ -1,9 +1,10 @@
-import nodejs from "nodejs-mobile-react-native";
+import { nodeRequestEvent, nodeResponseEventMap, nodeResponseEventType } from './nodeEventTypes';
+import nodejs from './nodejs';
 
 // nodejs.start('main.js');
 const initializationMessage = (message: unknown) => console.log(JSON.stringify({ e: message }, null, 2));
 
-const responseQueue: Array<(v: unknown) => void> = [initializationMessage];
+const responseQueue: Array<(v: unknown) => void> = [];
 
 const nodeEventHandler = (message: unknown) => {
   console.log('From nodeEventHandler');
@@ -33,4 +34,9 @@ export const sendEventToServer = <T extends { type: 'serverWorker' }>(event: T) 
   nodejs.channel.post('serverWorker', event);
 }
 
-export const initNodeService = () => console.log('nodeservice');
+export const initNodeService = (mobile: boolean = false) => {
+  console.log('nodeservice');
+  if (mobile) {
+    responseQueue.push(initializationMessage);
+  }
+};

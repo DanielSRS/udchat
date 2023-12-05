@@ -12,6 +12,9 @@ import {
   saveOrgToStorageService,
   saveUserToStorageService
 } from "./startupHelper";
+import { initNodeService, sendEventToNode } from "../../services/node/nodeService";
+
+initNodeService();
 
 export const startup = () => {
   const startupActor = interpret(startupMachine.withConfig({
@@ -79,6 +82,21 @@ export const startup = () => {
       console.log(`| Commits:        \n\t${snapshot.context.organization.commits.map(v => v.type + ': ' + v.createdAt).join('\n\t')}`);
       console.log(`| membros:        \n\t ${snapshot.context.organization.members.map(m => m.username + ' aka ' + m.name).join('\n\t')}`);
       console.log(`|---------------------------------------------\n`);
+      console.log('oxe1');
+      
+      const i = (new Date()).getTime();
+      console.log('oxe2');
+      const response = await sendEventToNode({
+        type: 'publicEncrypt',
+        data: {
+          key: snapshot.context.user.encriptionKeys.publicKey,
+          value: 'daniel es la santa rosa',
+        }
+      })
+      console.log('oxe3');
+      const f = (new Date()).getTime();
+      console.log(JSON.stringify({ a: `O que veio em: ${f - i}ms`, e: response }, null, 2));
+      console.log('oxe');
     }
   });
 
