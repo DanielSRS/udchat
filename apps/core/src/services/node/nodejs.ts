@@ -21,5 +21,6 @@ export default {
     addListener: addChannelListner,
     post: sendMessageToBridge,
     send: sendMessageToDefaultChannel,
-  }
+  },
+  start: (file: string) => {},
 }

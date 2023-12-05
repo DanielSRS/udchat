@@ -39,4 +39,5 @@ export const initNodeService = (mobile: boolean = false) => {
   if (mobile) {
     responseQueue.push(initializationMessage);
   }
+  nodejs.start('main.js');
 };
