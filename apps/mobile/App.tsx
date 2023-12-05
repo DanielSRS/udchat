@@ -4,7 +4,7 @@
  *
  * @format
  */
-
+import 'react-native-gesture-handler';
 import React from 'react';
 import {
   SafeAreaView,
@@ -15,6 +15,7 @@ import {
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Startup } from '@udchat/core/src/pages/startup/startupPage.native';
+import { NavigationContainer } from '@react-navigation/native';
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -24,13 +25,15 @@ function App(): JSX.Element {
   };
 
   return (
-    <SafeAreaView style={[backgroundStyle, styles.appContainer]}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <Startup />
-    </SafeAreaView>
+    <NavigationContainer>
+      <SafeAreaView style={[backgroundStyle, styles.appContainer]}>
+        <StatusBar
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={backgroundStyle.backgroundColor}
+        />
+        <Startup />
+      </SafeAreaView>
+    </NavigationContainer>
   );
 }
 
