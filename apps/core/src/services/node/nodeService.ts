@@ -21,6 +21,9 @@ nodejs.channel.addListener('serverWorker', (msg) => {
   console.log('from serverWorker: ');
   console.log(JSON.stringify({ msg: msg }, null, 2));
 });
+nodejs.channel.addListener('ip', (msg) => {
+  console.log(JSON.stringify(msg, null, 2));
+});
 
 export const sendEventToNode = <T extends nodeResponseEventType>(event: { type: T } & nodeRequestEvent) => {
   const res = new Promise<nodeResponseEventMap[T]>(resolve => {
@@ -35,9 +38,10 @@ export const sendEventToServer = <T extends { type: 'serverWorker' }>(event: T) 
 }
 
 export const initNodeService = (mobile: boolean = false) => {
-  console.log('nodeservice');
+  // console.log('nodeservice');
   if (mobile) {
     responseQueue.push(initializationMessage);
   }
   nodejs.start('main.js');
+  nodejs.channel.post('ip', {});
 };

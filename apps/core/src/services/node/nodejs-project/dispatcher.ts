@@ -1,6 +1,7 @@
 import { publicEncrypt, privateDecrypt, sign, symetricDecryption, symetricEncryption, verify } from './encryption';
 import { initServer } from './server';
 import rn_bridge from '../nodeBridge';
+import { ipHandler } from './ip';
 
 
 function dispatchMessage(message: unknown) {
@@ -78,13 +79,14 @@ function dispatchMessage(message: unknown) {
 
 // Echo every message received from react-native.
 rn_bridge.channel.on('message', dispatchMessage);
+rn_bridge.channel.on('ip', ipHandler);
 initServer();
 
 
 
 // Inform react-native node is initialized.
 rn_bridge.channel.send({ eventType: 'nodeStarted', logs: ["Node was initialized."] });
-console.log('nodeStarted');
+// console.log('nodeStarted');
 
-export const initDispatcher = () => console.log('diapatcher initiated');
+export const initDispatcher = () => { /* console.log('diapatcher initiated') */ };
 
