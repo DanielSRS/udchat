@@ -1,20 +1,15 @@
 import dgram from 'dgram';
 
-/**
- * 
- * @param {object} params 
- * @param {number} params.port
- * @param {string} params.broadcastIp
- * @typedef {object} BroadcastResponse
- * @property {boolean} success
- * @property {number} bytesSent
- * @property {unknown=} error
- * @returns {Promise<BroadcastResponse>}
- */
+type BroadcastResponse = Promise<
+  | { success: true; bytesSent: number; }
+  | { success: false; bytesSent: 0; error: unknown }
+>
+
+
 const broadcastMessage = (params: {
   port: number;
   broadcastIp: string;
-}) => {
+}): BroadcastResponse => {
   const { broadcastIp, port } = params;
   const data = Buffer.from(JSON.stringify({ event: 'broadcast', myIp: 'none' }));
   
@@ -27,7 +22,7 @@ const broadcastMessage = (params: {
         // console.error(`Socket error: ${err.stack}`);
         sk.close();
         return resolve({
-          success: true,
+          success: false,
           bytesSent: 0,
           error: err,
         });
@@ -44,14 +39,12 @@ const broadcastMessage = (params: {
   });
 }
 
-/**
- * 
- * @param {object} params 
- * @param {Array<Buffer>} params.packets
- * @param {string} params.ip
- * @param {number} params.port
- */
-const sendPackets = async (params) => {
+
+const sendPackets = async (params: {
+  packets: Array<Buffer>;
+  ip: string;
+  port: number;
+}) => {
   const { packets, ip, port } = params;
   const socket = dgram.createSocket('udp4');
 
@@ -64,9 +57,13 @@ const sendPackets = async (params) => {
   /** Enviando todos os pacotes */
   for (let a = 0; a < packets.length; a++) {
     await wait(300);
+    const data = packets[a];
+    if (!data) continue;
+  
+    const length = data.length;
     const b = await new Promise((resolve, reject) => {
       // logs.push(`sending packet Nº ${a}: length ${packets[a].length}`);
-      socket.send(packets[a], 0, packets[a].length, port, ip, (err, bytes) => {
+      socket.send(data, 0, length, port, ip, (err, bytes) => {
         // Check for errors
         if (err) {
           logs.push(`Socket error: ${err.stack}`);
@@ -88,17 +85,14 @@ const sendPackets = async (params) => {
   return logs;
 }
 
-/**
- * 
- * @param {object} params 
- * @param {string} params.id
- * @param {string} params.ip
- * @param {number} params.port
- * @param {number} params.dataTotalLength
- * @param {number} params.totalNumberOfPackets
- * @param {string} params.base64EncryptionKey
- */
-const sendLeadingPacket = async (params) => {
+const sendLeadingPacket = async (params: {
+  id: string;
+  ip: string;
+  port: number;
+  dataTotalLength: number;
+  totalNumberOfPackets: number;
+  base64EncryptionKey: string;
+}) => {
   const { ip, port, dataTotalLength, totalNumberOfPackets, id, base64EncryptionKey } = params;
   const socket = dgram.createSocket('udp4');
 
@@ -140,7 +134,7 @@ const sendLeadingPacket = async (params) => {
   socket.close();
 }
 
-async function wait( /** @type {number} */ millisseconds) {
+async function wait(millisseconds: number) {
   await new Promise((resolve) => setTimeout(() => resolve(undefined), millisseconds));
 }
 
