@@ -1,9 +1,10 @@
-import { SystemError } from "bun";
 import { StorageInstance, StorageLoader } from ".";
 import { CoreError, ErrorCodes } from "../../models/coreError";
 import { Either, left, right } from "fp-ts/lib/Either";
 import { StorageReadingError, StorageWritingError } from "./instance";
 import fs from 'node:fs/promises';
+
+interface SystemError extends Error {};
 
 
 const DATABASE_DIR = 'database';
@@ -46,29 +47,33 @@ interface CreateDirectories {
   >;
 }
 
-const createDirectories: CreateDirectories = async (directories) => {
-  const errors: CoreError<SystemError>[] = [];
-  directories.map(async dir => {
-    try {
-      await fs.mkdir(dir, { recursive: true });
-      // console.log('diretorio criado: ', dir);
-    } catch (error) {
-      const err = error as SystemError;
-      errors.push(CoreError({
-        code: 'NFPCDIR0',
-        details: err,
-        erros: [err?.message],
-        message: 'Erro ao criar diretório',
-      }));
-    }
-  });
-  
-  if (errors.length === 0) {
-    return { success: true };
-  }
+const createDirectories: CreateDirectories = async (directories) => 
+  new Promise(async (resolve) => {
+    const errors: CoreError<SystemError>[] = [];
+    const numberOfDirectories = directories.length;
+    for (let i = 0; i < numberOfDirectories; i++) {
+      const dir = directories[i];
+      if (!dir) continue;
 
-  return { success: false, error: errors };
-}
+      try {
+        await fs.mkdir(dir, { recursive: true });
+      } catch (error) {
+        const err = error as SystemError;
+        errors.push(CoreError({
+          code: 'NFPCDIR0',
+          details: err,
+          erros: [err?.message],
+          message: 'Erro ao criar diretório',
+        }));
+      }
+    }
+    
+    if (errors.length === 0) {
+      return resolve({ success: true, error: undefined });
+    }
+
+    return resolve({ success: false, error: errors });
+  });
 
 interface FileStorageProps {
   fileInstance: {
