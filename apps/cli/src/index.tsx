@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {render, Box, useStdout, Text} from 'ink';
-import { StartupPage } from '@udchat/core';
+import { App } from '@udchat/core';
 
 // clear screen before using the app. This is to be able to use the hole terminal area without previos text
 const clearScreen = () => console.log("\x1b[2J\x1b[H");
@@ -32,4 +32,4 @@ const RootView = ({ children }: { children?: React.ReactElement }) => {
 	);
 }
 
-render(<RootView children={<StartupPage />} />, { patchConsole: true });
+render(<RootView children={<App />} />, { patchConsole: true });
