@@ -1,8 +1,7 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 export function publicEncrypt (params: { key: string; data: string }) {
-  /** @type {Array<string>} */
-  const logs = [];
+  const logs: Array<string> = [];
   try {
     const d = () => (new Date());
     const antes = d();
@@ -60,8 +59,7 @@ export function sign (params: { key: string; data: string }) {
     });
 
     return {
-      /** @type {string[]} */
-      logs: [],
+      logs: [] as string[],
       signature: signature.toString('base64'),
       sucess: true,
     }
@@ -89,8 +87,7 @@ export function verify (params: { key: string; data: string; signature: string }
     );
 
     return {
-      /** @type {string[]} */
-      logs: [],
+      logs: [] as string[],
       valid: isVerified,
       success: true,
     }
@@ -107,8 +104,7 @@ export const symetricEncryption = (data: string) => {
   const encryptionAlgorithm = 'aes-256-ctr';
   const ENCRYPTION_KEY = crypto.randomBytes(32);
   const IV_LENGTH = 16;
-  /** @type {BufferEncoding} */
-  const encoding = 'base64'
+  const encoding: BufferEncoding = 'base64'
 
   // criando cifra
   const iv = crypto.randomBytes(IV_LENGTH);
@@ -126,15 +122,13 @@ export const symetricEncryption = (data: string) => {
 
 export function symetricDecryption(encryptedDataInBase64: string, encryptionKeyInBase64: string) {
   const initiated = new Date();
-  /** @type {Array<string>}  */
-  const logs = [];
+  const logs: Array<string> = [];
   logs.push(`Initiated at: ${initiated.toTimeString()}`);
 
   // Configurando criptografia
   const encryptionAlgorithm = 'aes-256-ctr';
   const ENCRYPTION_KEY = Buffer.from(encryptionKeyInBase64, 'base64');
-  /** @type {BufferEncoding} */
-  const encoding = 'base64'
+  const encoding: BufferEncoding = 'base64'
   const IV_LENGTH = 16;
 
 

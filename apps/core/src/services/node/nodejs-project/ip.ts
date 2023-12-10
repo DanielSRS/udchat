@@ -4,9 +4,8 @@
 
 // console.log(networkInterfaces);
 
-'use strict';
 
-import { networkInterfaces } from 'os';
+import { networkInterfaces } from 'node:os';
 import rn_bridge from '../nodeBridge';
 // import fetch from 'fetch';
 

@@ -1,3 +1,3 @@
-const { initDispatcher } = require("./dispatcher");
+import { initDispatcher } from "./dispatcher";
 
 initDispatcher();

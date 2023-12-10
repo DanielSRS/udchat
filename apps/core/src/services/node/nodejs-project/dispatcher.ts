@@ -1,7 +1,14 @@
-import { publicEncrypt, privateDecrypt, sign, symetricDecryption, symetricEncryption, verify } from './encryption';
+import {
+  publicEncrypt,
+  privateDecrypt,
+  sign,
+  symetricDecryption,
+  symetricEncryption,
+  verify,
+} from './encryption';
 import { initServer } from './server';
-import rn_bridge from '../nodeBridge';
 import { ipHandler } from './ip';
+import rn_bridge from '../nodeBridge';
 
 
 function dispatchMessage(message: unknown) {
