@@ -26,8 +26,7 @@ const useStdoutDimensions = (): [number, number] => {
 const RootView = ({ children }: { children?: React.ReactElement }) => {
 	const [c, r] = useStdoutDimensions();
 	return (
-		<Box height={r - 1} width={c - 1} borderStyle={'round'} borderColor={'red'} flexDirection='column'>
-			<Text>{`c: ${c} - r: ${r}`}</Text>
+		<Box height={r - 1} width={c - 1} borderStyle={'round'} borderColor={'red'}>
 			{children}
 		</Box>
 	);
