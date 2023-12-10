@@ -5,6 +5,7 @@
   "dependencies": {
     "@xstate/react": "3.2.2",
     "fp-ts": "2.16.1",
+    "ink-select-input": "5.0.0",
     "xstate": "4.38.2",
     "zod": "3.22.4",
     "zod-validation-error": "1.5.0"

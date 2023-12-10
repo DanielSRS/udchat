@@ -1,2 +1,2 @@
 export { AboutPage } from './pages/about/aboutPage';
-export { startup } from './pages/startup/startupPage';
+export { StartupPage } from './pages/startup/startupPage';

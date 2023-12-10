@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node bundle/bundle.js",
     "testing": "bun test --watch",
-    "bundle": "node ./bundle.js"
+    "bundle": "node ./bundle.js",
+    "brun": "yarn bundle && yarn start"
   },
   "dependencies": {
     "@udchat/core": "workspace:*",
