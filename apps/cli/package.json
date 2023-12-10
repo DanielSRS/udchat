@@ -12,7 +12,8 @@
     "@udchat/core": "workspace:*",
     "@udchat/socket": "workspace:*",
     "ink": "4.4.1",
-    "react": "18.2.0"
+    "react": "18.2.0",
+    "use-context-selector": "1.4.1"
   },
   "devDependencies": {
     "bun-types": "latest",

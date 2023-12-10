@@ -8,7 +8,7 @@ build({
   platform: 'node',
   bundle: true,
   entryPoints: ['src/index.tsx'],
-  external: ['react', 'ink'],
+  external: ['react', 'ink', 'use-context-selector'],
   minify: true,
   format: 'esm',
   target: 'node18.0',
