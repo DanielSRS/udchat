@@ -7,8 +7,8 @@ import {build} from 'esbuild';
 build({
   platform: 'node',
   bundle: true,
-  entryPoints: ['src/index.ts'],
-  external: ['aws-sdk'],
+  entryPoints: ['src/index.tsx'],
+  external: ['react', 'ink'],
   minify: true,
   format: 'esm',
   target: 'node18.0',
@@ -23,7 +23,6 @@ build({
   platform: 'node',
   bundle: true,
   entryPoints: ['../core/src/services/node/nodejs-project/server.worker.ts'],
-  external: ['aws-sdk'],
   minify: true,
   format: 'esm',
   target: 'node18.0',

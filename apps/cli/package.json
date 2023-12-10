@@ -1,6 +1,6 @@
 {
   "name": "@udchat/cli",
-  "module": "src/index.ts",
+  "exports": "./src/index.tsx",
   "type": "module",
   "scripts": {
     "start": "node bundle/bundle.js",
@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "@udchat/core": "workspace:*",
-    "@udchat/socket": "workspace:*"
+    "@udchat/socket": "workspace:*",
+    "ink": "4.4.1",
+    "react": "18.2.0"
   },
   "devDependencies": {
     "bun-types": "latest",
@@ -20,5 +22,6 @@
   },
   "installConfig": {
     "hoistingLimits": "workspaces"
-  }
+  },
+  "node": ">=16"
 }
