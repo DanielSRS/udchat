@@ -4,7 +4,7 @@ import { useStatupMachine } from './useStatupMachine';
 import { initNodeService } from '../../services/node/nodeService';
 import SelectInput from 'ink-select-input';
 
-initNodeService();
+// initNodeService();
 
 export const StartupPage = () => {
   const { send, state } = useStatupMachine();

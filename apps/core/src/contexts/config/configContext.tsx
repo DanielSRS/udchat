@@ -1,5 +1,9 @@
 import React from "react";
 import { createContext } from "use-context-selector";
+import { initNodeService } from "../../services/node/nodeService";
+import { native } from "./platform";
+
+initNodeService(native);
 
 interface ConfigContextProps {
   appVersion: string;

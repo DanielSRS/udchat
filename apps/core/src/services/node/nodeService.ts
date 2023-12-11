@@ -17,10 +17,10 @@ const nodeEventHandler = (message: unknown) => {
 }
 
 nodejs.channel.addListener('message', nodeEventHandler);
-nodejs.channel.addListener('serverWorker', (msg) => {
-  console.log('from serverWorker: ');
-  console.log(JSON.stringify({ msg: msg }, null, 2));
-});
+// nodejs.channel.addListener('serverWorker', (msg) => {
+//   console.log('from serverWorker: ');
+//   console.log(JSON.stringify({ msg: msg }, null, 2));
+// });
 nodejs.channel.addListener('ip', (msg) => {
   console.log(JSON.stringify(msg, null, 2));
 });
@@ -40,6 +40,7 @@ export const sendEventToServer = <T extends { type: 'serverWorker' }>(event: T) 
 export const initNodeService = (mobile: boolean = false) => {
   // console.log('nodeservice');
   if (mobile) {
+    console.log('started as mobile');
     responseQueue.push(initializationMessage);
   }
   nodejs.start('main.js');

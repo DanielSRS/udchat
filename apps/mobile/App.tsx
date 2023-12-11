@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { Startup } from '@udchat/core/src/pages/startup/startupPage.native';
+import { App as Startup } from '@udchat/core/src/App';
 import { NavigationContainer } from '@react-navigation/native';
 
 function App(): JSX.Element {
