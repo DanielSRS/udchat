@@ -14,6 +14,16 @@ const addChannelListner = (channelName: string, callbackFunction: (msg: unknown)
   nodejsListners[channelName] = [callbackFunction];
 }
 
+const removeChannelListner = (channelName: string, callbackFunction: (msg: unknown) => void) => {
+  const channel = nodejsListners[channelName];                  // Canal com os listners
+  if (!channel) return;                                         // Se não tem listners no canal
+
+  let index = channel.findIndex((v) => v === callbackFunction); // Encontra o indice do listner pra remover
+  if (index === -1) return;                                     // Se listner não esta registrado no canal
+
+  channel.splice(index, 1);                                     // Remove o registro
+}
+
 const sendMessageToDefaultChannel = (message: unknown) => sendMessageToBridge('message', message);
 
 export default {
@@ -21,6 +31,7 @@ export default {
     addListener: addChannelListner,
     post: sendMessageToBridge,
     send: sendMessageToDefaultChannel,
+    removeListener: removeChannelListner,
   },
   start: (file: string) => {},
 }
