@@ -3464,6 +3464,7 @@ __metadata:
     fp-ts: 2.16.1
     ink: 4.4.1
     ink-select-input: 5.0.0
+    ink-text-input: 5.0.1
     lottie-react-native: 6.4.1
     nodejs-mobile-react-native: 18.17.3
     react: 18.2.0
@@ -6950,6 +6951,19 @@ __metadata:
     ink: ^4.0.0
     react: ^18.0.0
   checksum: 9e21351f7ae1ad1721eca04038e25afd4b6f85ea0abd51235db2ed6894e209198687924a2ae8aca972571cb0601d735810c462676b7ebfd68ae3cafd0d67613c
+  languageName: node
+  linkType: hard
+
+"ink-text-input@npm:5.0.1":
+  version: 5.0.1
+  resolution: "ink-text-input@npm:5.0.1"
+  dependencies:
+    chalk: ^5.2.0
+    type-fest: ^3.6.1
+  peerDependencies:
+    ink: ^4.0.0
+    react: ^18.0.0
+  checksum: 045ade486eb472e2de3d4fa2a195ca7a6af509789f350c3bb194b0f3349c554f5dd2daa720cd77518b3f2d52a4678e9894b4dc5d4470b103e6c142b22d61d161
   languageName: node
   linkType: hard
 
@@ -11619,7 +11633,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:^3.0.0":
+"type-fest@npm:^3.0.0, type-fest@npm:^3.6.1":
   version: 3.13.1
   resolution: "type-fest@npm:3.13.1"
   checksum: c06b0901d54391dc46de3802375f5579868949d71f93b425ce564e19a428a0d411ae8d8cb0e300d330071d86152c3ea86e744c3f2860a42a79585b6ec2fdae8e
