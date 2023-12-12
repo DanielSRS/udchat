@@ -3,6 +3,7 @@ import { createContext } from 'use-context-selector';
 // import { logger } from '../../services/log/logService';
 import nodejs from '../../services/node/nodejs';
 import { NetworkStats, NewMessageEvent, SendMessageEvent, SendMessageResponseEvent } from './networkEventTypes';
+import { BufferLib } from '../../libs/buffer/bufferLib';
 
 const NETWORK_CHANNEL_NAME = 'network';
 
@@ -39,6 +40,8 @@ const networkContextData = (): NetworkContextProps => {
             totalPacketsReceived: s.totalPacketsReceived + 1,
           }
         });
+
+        processNewMessage(event);
       }
       if (event.type === 'sendMessageResponse') {
         /** Dispara o callback de resposta */
@@ -60,24 +63,6 @@ const networkContextData = (): NetworkContextProps => {
     }
 
     nodejs.channel.addListener(NETWORK_CHANNEL_NAME, propagateNetworkEvent as (msg: unknown) => void);
-    const d = {
-      ip: '192.168.1.3',
-      message: { message: 'daniel', encoding: 'utf8' },
-      messageId: 'lkjsd',
-      port: 4322
-    } satisfies {
-      message: Buffer | { message: string; encoding: BufferEncoding };
-      ip: string;
-      port: number;
-      messageId: string;
-    }
-
-    // const interval = setInterval(() => {
-    //   nodejs.channel.post('network', {
-    //     type: 'sendMessage',
-    //     data: d,
-    //   });
-    // }, 1000);
 
     return () => {
       // nodejs?.channel?.removeListener(NETWORK_CHANNEL_NAME, propagateNetworkEvent);
@@ -145,4 +130,20 @@ export const NetworkProvider = ({ children }: { children: React.ReactElement }) 
       {children}
     </NetworkContext.Provider>
   );
+}
+
+const processNewMessage = (event: NewMessageEvent) => {
+  const msg = BufferLib.from(event.data.message.data, event.data.message.enconding).toString().split('\r\n');
+  
+  const p = msg[0] && msg[1]
+  ? {
+    header: JSON.parse(msg[0]),
+    body: JSON.parse(msg[1]),
+  }
+  : {
+    header: {},
+    body: {},
+  }
+
+  console.log(JSON.stringify(p, null, 2));
 }
