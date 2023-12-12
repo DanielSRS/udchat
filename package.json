@@ -9,7 +9,8 @@
     ]
   },
   "scripts": {
-    "cli": "cd apps/cli && bun start",
+    "cli": "cd apps/cli && yarn start",
+    "bundle": "cd apps/cli && yarn bundle",
     "mobile": "cd apps/mobile && yarn start"
   },
   "author": "Daniel Santa Rosa",

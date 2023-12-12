@@ -4,8 +4,8 @@
  *
  * @format
  */
-
-import React, { useEffect } from 'react';
+import 'react-native-gesture-handler';
+import React from 'react';
 import {
   SafeAreaView,
   StatusBar,
@@ -14,8 +14,8 @@ import {
 } from 'react-native';
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { Startup } from '@udchat/core/src/pages/startup/startupPage.native';
-import nodejs from 'nodejs-mobile-react-native';
+import { App as Startup } from '@udchat/core/src/App';
+import { NavigationContainer } from '@react-navigation/native';
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -24,18 +24,16 @@ function App(): JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  useEffect(() => {
-    nodejs.start('main.js');
-  }, []);
-
   return (
-    <SafeAreaView style={[backgroundStyle, styles.appContainer]}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <Startup />
-    </SafeAreaView>
+    <NavigationContainer>
+      <SafeAreaView style={[backgroundStyle, styles.appContainer]}>
+        <StatusBar
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={backgroundStyle.backgroundColor}
+        />
+        <Startup />
+      </SafeAreaView>
+    </NavigationContainer>
   );
 }
 

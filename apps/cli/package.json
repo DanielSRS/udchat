@@ -1,22 +1,29 @@
 {
   "name": "@udchat/cli",
-  "module": "src/index.ts",
+  "exports": "./src/index.tsx",
   "type": "module",
   "scripts": {
-    "start": "bun run src/index.ts",
-    "testing": "bun test --watch"
+    "start": "node bundle/bundle.js",
+    "testing": "bun test --watch",
+    "bundle": "node ./bundle.js",
+    "brun": "yarn bundle && yarn start"
   },
   "dependencies": {
     "@udchat/core": "workspace:*",
-    "@udchat/socket": "workspace:*"
+    "@udchat/socket": "workspace:*",
+    "ink": "4.4.1",
+    "react": "18.2.0",
+    "use-context-selector": "1.4.1"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "esbuild": "0.19.8"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "installConfig": {
     "hoistingLimits": "workspaces"
-  }
+  },
+  "node": ">=16"
 }

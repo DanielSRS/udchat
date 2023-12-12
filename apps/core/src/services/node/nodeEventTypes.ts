@@ -1,6 +1,6 @@
 //nodeEventTypes.ts
 
-type nodeRequestEvent =
+export type nodeRequestEvent =
   | {
       type: 'publicEncrypt',
       data: {
@@ -52,9 +52,9 @@ type nodeRequestEvent =
       }
     };
 
-type nodeResponseEventType = 'unkown' | 'publicEncrypt' | 'privateDecrypt' | 'sign' | 'symetricDecryption' | 'symetricEncryption' | 'verify';
+export type nodeResponseEventType = 'unkown' | 'publicEncrypt' | 'privateDecrypt' | 'sign' | 'symetricDecryption' | 'symetricEncryption' | 'verify';
 
-interface nodeResponseEventMap {
+export interface nodeResponseEventMap {
   'unkown': {
     eventType: 'unkown';
     response: {
@@ -126,7 +126,7 @@ interface nodeResponseEventMap {
   };
 }
 
-type nodeResponseEvent =
+export type nodeResponseEvent =
   | {
       eventType: 'unkown';
       response: {
