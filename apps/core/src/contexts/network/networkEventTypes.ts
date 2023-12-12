@@ -50,3 +50,30 @@ export interface NetworkStats {
   /** Mensagens/pacotes que não forem enviados por alguma falha */
   failedMessages: number;
 }
+
+export interface SendMessageEvent {
+  type: 'sendMessage',
+  data: {
+    message: {
+      /** Mensagem que de fato vai ser enviada */
+      message: string;
+      /**
+       * Formado em que a mensagem esta codificasa. normalmente utf8.
+       * Importante pq essa mensagem vai ser convertia num Buffer,
+       * então passar o encodig correto garente que o dado naõ vai ser distorcido?
+       */
+      encoding: BufferEncoding
+    };
+    /** endereço ip de quem vai receber a mensage */
+    ip: string;
+    /** Porta para qual enviar a mensage */
+    port: number;
+    /**
+     * Id da mensagem.
+     * Nescessario para tracking interno da mensagem. Como o envio é assincrono
+     * esse id serve para associar o evento de reposeta SendMessageResponseEvent
+     * com uma mensagem enviada
+     */
+    messageId: string;
+  },
+}
