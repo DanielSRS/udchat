@@ -4,12 +4,14 @@ import { useContextSelector } from "use-context-selector";
 import { NetworkContext } from "../../contexts/network/networkContext";
 
 export const NetworkInfo = () => {
-  const count = useContextSelector(NetworkContext, data => data.receivedPackets);
+  const networkStats = useContextSelector(NetworkContext, data => data.networkStats);
   return (
-    <Box borderColor={'white'} borderStyle={'round'}>
-      <Text backgroundColor={'pink'}>
-        {count}
-      </Text>
+    <Box borderColor={'white'} borderStyle={'round'} flexDirection="column">
+      <Text>{`totalBytesReceived:       ${networkStats.totalBytesReceived}`}</Text>
+      <Text>{`totalBytesSent:           ${networkStats.totalBytesSent}`}</Text>
+      <Text>{`totalPacketsReceived:     ${networkStats.totalPacketsReceived}`}</Text>
+      <Text>{`totalPacketsSent:         ${networkStats.totalPacketsSent}`}</Text>
+      <Text>{`failedMessages:           ${networkStats.failedMessages}`}</Text>
     </Box>
   );
 };
