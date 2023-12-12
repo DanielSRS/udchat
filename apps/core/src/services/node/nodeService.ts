@@ -6,6 +6,26 @@ const initializationMessage = (message: unknown) => console.log(JSON.stringify({
 
 const responseQueue: Array<(v: unknown) => void> = [];
 
+const ipResponseQueue = [] as Array<(v: unknown) => void>;
+const ipEventHandler = (message: unknown) => {
+  const resolve = ipResponseQueue.shift();
+  resolve?.(message);
+}
+nodejs.channel.addListener('ip', ipEventHandler);
+export interface NET {
+  event: 'NETWORK_INTERFACES';
+  interfaces: {
+    [key: string]: string[];
+  };
+}
+export const getNetworkInterfaces = () => {
+  const res = new Promise<NET>(resolve => {
+    ipResponseQueue.push(resolve as (m: unknown) => void);
+    nodejs.channel.post('ip', {});
+  });
+  return res;
+}
+
 const nodeEventHandler = (message: unknown) => {
   console.log('From nodeEventHandler');
   const resolve = responseQueue.shift();
@@ -21,9 +41,6 @@ nodejs.channel.addListener('message', nodeEventHandler);
 //   console.log('from serverWorker: ');
 //   console.log(JSON.stringify({ msg: msg }, null, 2));
 // });
-nodejs.channel.addListener('ip', (msg) => {
-  console.log(JSON.stringify(msg, null, 2));
-});
 
 export const sendEventToNode = <T extends nodeResponseEventType>(event: { type: T } & nodeRequestEvent) => {
   const res = new Promise<nodeResponseEventMap[T]>(resolve => {
@@ -44,5 +61,4 @@ export const initNodeService = (mobile: boolean = false) => {
     responseQueue.push(initializationMessage);
   }
   nodejs.start('main.js');
-  nodejs.channel.post('ip', {});
 };
