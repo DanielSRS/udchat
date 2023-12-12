@@ -41,15 +41,15 @@ const userContextData = (): UserContextProps => {
     send({ type: 'CREATE_USER' });
   }
 
-  console.log(JSON.stringify({
-    findingUser,
-    noUserFound,
-    creatingUser,
-    userLoaded,
-    savingFailure,
-    user: user?.encriptionKeys ? user : placeholderUser,
-    createUser,
-  }, null, 2));
+  // console.log(JSON.stringify({
+  //   findingUser,
+  //   noUserFound,
+  //   creatingUser,
+  //   userLoaded,
+  //   savingFailure,
+  //   user: user?.encriptionKeys ? user : placeholderUser,
+  //   createUser,
+  // }, null, 2));
 
   return {
     findingUser,

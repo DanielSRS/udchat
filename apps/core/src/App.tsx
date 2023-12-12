@@ -7,6 +7,7 @@ import { UserBox } from './components/userBox/userBox';
 import { UserProvider } from './contexts/user/userContext';
 import { OrgBox } from './components/orgBox/orgBox';
 import { OrgProvider } from './contexts/organization/orgContext';
+import { Router } from './routes/router';
 
 export const App = () => {
   return (
@@ -14,11 +15,7 @@ export const App = () => {
       <NetworkProvider>
         <UserProvider>
           <OrgProvider>
-            <Box flexDirection='column'>
-              <NetworkInfo />
-              <UserBox />
-              <OrgBox />
-            </Box>
+            <Router />
           </OrgProvider>
         </UserProvider>
       </NetworkProvider>
