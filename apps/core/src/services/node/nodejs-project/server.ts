@@ -9,12 +9,23 @@ import rn_bridge from '../nodeBridge';
  * aqui nesse diretório
  */
 const serverWorker = new Worker('./bundle/server.worker.js');
-serverWorker.on('message', val => {
-  rn_bridge.channel.post('serverWorker', val);
+serverWorker.on('message', event => {
+  if (
+    event
+    && typeof event === 'object'
+    && 'type' in event
+    && (event.type === 'sendMessageResponse' || event.type === 'newMessage')) {
+    rn_bridge.channel.post('network', event);
+    return;
+  }
+  rn_bridge.channel.post('serverWorker', event);
 });
 
 export const initServer = () => {
   rn_bridge.channel.on('serverWorker', (message: unknown) => {
+    serverWorker?.postMessage(message);
+  });
+  rn_bridge.channel.on('network', (message: unknown) => {
     serverWorker?.postMessage(message);
   });
 }

@@ -1,5 +1,6 @@
 import { parentPort } from 'node:worker_threads';
 import { symetricDecryption } from './encryption';
+import { sendMessage } from './network';
 import dgram from 'node:dgram';
 
 const SEPARATOR = Buffer.from('\r\n');
@@ -13,7 +14,14 @@ const temporary: { [key: string]: {
 const createLogger = (logBuffer: Array<string>) => ({ log: (msg: string) => logBuffer.push(msg) });
 
 /** Processa as mensagens recebidas */
-const handleOnMessageEvent = (event: unknown) => parentPort?.postMessage(event);
+const handleOnMessageEvent = async (event: unknown) => {
+  if (event && typeof event === 'object' && 'type' in event && event.type === 'sendMessage' && 'data' in event) {
+    const res = await sendMessage(event.data as any);
+    parentPort?.postMessage(res);
+    return;
+  }
+  parentPort?.postMessage(event);
+};
 parentPort?.on('message', handleOnMessageEvent);
 
 // Create a new socket instance
@@ -201,4 +209,26 @@ socket.on('listening', () => {
   // Print the socket's address
   const address = socket.address();
   console.log(`Socket listening on ${address.address}:${address.port}`);
+});
+
+/// Servido para recebimento de mensagens não criptografadas:
+
+const nonEncriptedServer = dgram.createSocket('udp4');
+nonEncriptedServer.bind(4322);
+
+
+nonEncriptedServer.on('message', (msg, rinfo) => {
+  const logs = [] as Array<string>;
+  // const logger = createLogger(logs);
+
+  const response = {
+    type: 'newMessage',
+    data: {
+      message: { data: msg.toString('base64'), enconding: 'base64' },
+      info: rinfo,
+      logs,
+    }
+  }
+
+  parentPort?.postMessage(response);
 });

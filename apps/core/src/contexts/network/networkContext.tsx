@@ -3,7 +3,7 @@ import { createContext } from 'use-context-selector';
 // import { logger } from '../../services/log/logService';
 import nodejs from '../../services/node/nodejs';
 
-const NETWORK_CHANNEL_NAME = 'serverWorker';
+const NETWORK_CHANNEL_NAME = 'network';
 
 interface NetworkContextProps {
   receivedPackets: number;
@@ -21,10 +21,29 @@ const networkContextData = (): NetworkContextProps => {
     }
 
     nodejs.channel.addListener(NETWORK_CHANNEL_NAME, propagateNetworkEvent);
+    const d = {
+      ip: '192.168.1.3',
+      message: { message: 'daniel', encoding: 'utf8' },
+      messageId: 'lkjsd',
+      port: 4322
+    } satisfies {
+      message: Buffer | { message: string; encoding: BufferEncoding };
+      ip: string;
+      port: number;
+      messageId: string;
+    }
+
+    // const interval = setInterval(() => {
+    //   nodejs.channel.post('network', {
+    //     type: 'sendMessage',
+    //     data: d,
+    //   });
+    // }, 1000);
 
     return () => {
       // nodejs?.channel?.removeListener(NETWORK_CHANNEL_NAME, propagateNetworkEvent);
       console.log('listner removido??');
+      // clearInterval(interval);
     }
   }, []);
 

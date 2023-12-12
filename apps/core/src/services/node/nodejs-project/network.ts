@@ -6,7 +6,7 @@ type BroadcastResponse = Promise<
 >
 
 
-const broadcastMessage = (params: {
+export const broadcastMessage = (params: {
   port: number;
   broadcastIp: string;
 }): BroadcastResponse => {
@@ -40,7 +40,7 @@ const broadcastMessage = (params: {
 }
 
 
-const sendPackets = async (params: {
+export const sendPackets = async (params: {
   packets: Array<Buffer>;
   ip: string;
   port: number;
@@ -85,7 +85,7 @@ const sendPackets = async (params: {
   return logs;
 }
 
-const sendLeadingPacket = async (params: {
+export const sendLeadingPacket = async (params: {
   id: string;
   ip: string;
   port: number;
@@ -138,8 +138,64 @@ async function wait(millisseconds: number) {
   await new Promise((resolve) => setTimeout(() => resolve(undefined), millisseconds));
 }
 
-module.exports = {
-  broadcastMessage,
-  sendPackets,
-  sendLeadingPacket,
+export const sendMessage = async (params: {
+  message: Buffer | { message: string; encoding: BufferEncoding };
+  ip: string;
+  port: number;
+  messageId: string;
+}) => {
+  const { message, ip, port, messageId } = params;
+  const data = Buffer.isBuffer(message) ? message : Buffer.from(message.message, message.encoding);
+  const socket = dgram.createSocket('udp4');
+
+  const logs: Array<string> = [];
+  logs.push(`preparing to send: ${data.length} bytes`);
+
+  /** To measure execution tme */
+  const start = new Date().getTime();
+
+  const res = await new Promise<{ success: true; bytesSent: number; error: undefined } | { success: false; bytesSent: 0; error: Error } >((resolve, reject) => {
+    // logs.push(`sending packet Nº ${a}: length ${packets[a].length}`);
+    socket.send(data, 0, data.length, port, ip, (err, bytes) => {
+      // Check for errors
+      if (err) {
+        logs.push(`Socket error: ${err.stack}`);
+        return resolve({
+          error: err,
+          bytesSent: 0,
+          success: false,
+        });
+      } else {
+        // Print the number of bytes sent
+        logs.push(`Socket sent ${bytes} bytes`);
+        return resolve({
+          error: undefined,
+          bytesSent: bytes,
+          success: true,
+        });
+      }
+    });
+  })
+  const end = new Date().getTime();
+  logs.push(`Done sending packets in ${end - start}ms`);
+  // Close the socket
+  socket.close();
+
+  return {
+    type: 'sendMessageResponse',
+    data: {
+      bytesSent: res.bytesSent,
+      logs,
+      sucess: res.success,
+      error: res.error,
+      messageId,
+    }
+  };
 }
+
+// module.exports = {
+//   broadcastMessage,
+//   sendPackets,
+//   sendLeadingPacket,
+//   sendMessage,
+// }

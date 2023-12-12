@@ -1,5 +1,8 @@
 // @ts-check
 'use strict';
+
+const { sendMessage } = require('./network');
+
 const { parentPort } = require('worker_threads');
 const { symetricDecryption } = require('./encryption');
 const dgram = require('node:dgram');
@@ -18,7 +21,14 @@ const temporary = {}
 const createLogger = (/** @type {Array<string>} */ logBuffer) => ({ log: (/** @type {string} */ msg) => logBuffer.push(msg) });
 
 /** Processa as mensagens recebidas */
-const handleOnMessageEvent = (/** @type {unknown} */ event) => parentPort?.postMessage(event);
+const handleOnMessageEvent = async (/** @type {{ type: string; data: { message: any; ip: any; port: any; messageId: any; }; }} */ event) => {
+  if (event && typeof event === 'object' && 'type' in event && event.type === 'sendMessage' && 'data' in event) {
+    const res = await sendMessage(event.data);
+    parentPort?.postMessage(res);
+    return;
+  }
+  parentPort?.postMessage(event);
+};
 parentPort?.on('message', handleOnMessageEvent);
 
 // Create a new socket instance
@@ -207,4 +217,29 @@ socket.on('listening', () => {
   // Print the socket's address
   const address = socket.address();
   console.log(`Socket listening on ${address.address}:${address.port}`);
+});
+
+/// Servido para recebimento de mensagens não criptografadas:
+
+const nonEncriptedServer = dgram.createSocket('udp4');
+nonEncriptedServer.bind(4322);
+
+
+nonEncriptedServer.on('message', (msg, rinfo) => {
+  /**
+   * @type {string[]}
+   */
+  const logs = [];
+  // const logger = createLogger(logs);
+
+  const response = {
+    type: 'newMessage',
+    data: {
+      message: { data: msg.toString('base64'), enconding: 'base64' },
+      info: rinfo,
+      logs,
+    }
+  }
+
+  parentPort?.postMessage(response);
 });

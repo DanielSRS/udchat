@@ -143,8 +143,59 @@ async function wait( /** @type {number} */ millisseconds) {
   await new Promise((resolve) => setTimeout(() => resolve(undefined), millisseconds));
 }
 
+const sendMessage = async (/** @type {{ message: any; ip: any; port: any; messageId: any; }} */ params) => {
+  const { message, ip, port, messageId } = params;
+  const data = Buffer.isBuffer(message) ? message : Buffer.from(message.message, message.encoding);
+  const socket = dgram.createSocket('udp4');
+
+  const logs = [];
+  logs.push(`preparing to send: ${data.length} bytes`);
+
+  /** To measure execution tme */
+  const start = new Date().getTime();
+
+  const res = await new Promise((resolve, reject) => {
+    // logs.push(`sending packet Nº ${a}: length ${packets[a].length}`);
+    socket.send(data, 0, data.length, port, ip, (err, bytes) => {
+      // Check for errors
+      if (err) {
+        logs.push(`Socket error: ${err.stack}`);
+        return resolve({
+          error: err,
+          bytesSent: 0,
+          success: false,
+        });
+      } else {
+        // Print the number of bytes sent
+        logs.push(`Socket sent ${bytes} bytes`);
+        return resolve({
+          error: undefined,
+          bytesSent: bytes,
+          success: true,
+        });
+      }
+    });
+  })
+  const end = new Date().getTime();
+  logs.push(`Done sending packets in ${end - start}ms`);
+  // Close the socket
+  socket.close();
+
+  return {
+    type: 'sendMessageResponse',
+    data: {
+      bytesSent: res.bytesSent,
+      logs,
+      sucess: res.success,
+      error: res.error,
+      messageId,
+    }
+  };
+}
+
 module.exports = {
   broadcastMessage,
   sendPackets,
   sendLeadingPacket,
+  sendMessage,
 }
