@@ -4,7 +4,7 @@ import { orgMachine } from '../../machines';
 import { createOrgService, getOrgService, saveOrgToStorageService } from './orgContextHelper';
 import { Organization } from '../../models/organization';
 
-type MachineState = Pick<StateFrom<typeof orgMachine>, 'matches' | 'context'>;
+type MachineState = Pick<StateFrom<typeof orgMachine>, 'matches' | 'context' | 'value'>;
 
 export const useOrgMachine = () => {
   const [actor] = useState(interpret(orgMachine.withConfig({
@@ -13,7 +13,7 @@ export const useOrgMachine = () => {
       getOrg: getOrgService,
       saveOrgToStorage: saveOrgToStorageService,
     }
-  }).withContext({ organization: {} as Organization })));
+  }).withContext({ organization: {} as Organization, orgInvitationCode: 0 })));
   const [state, setState] = useState<MachineState>();
 
   useEffect(() => {
