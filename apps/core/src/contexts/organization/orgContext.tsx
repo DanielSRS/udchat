@@ -18,6 +18,7 @@ interface OrgContextProps {
   org: Organization;
   stateValue: string;
   createOrg: () =>  void;
+  deleteOrg: () =>  void;
   addMember: (ip: string) => void;
   joinOrg: () => void;
 }
@@ -75,6 +76,10 @@ const orgContextData = (): OrgContextProps => {
     send({ type: 'CREATE_ORG' });
   }
 
+  const deleteOrg = () => {
+    send({ type: 'DELETE_ORG' });
+  }
+
   const addMember = (ip: string) => {
     send({ type: 'ADD_MEMBER', data: { ip } });
   }
@@ -100,6 +105,7 @@ const orgContextData = (): OrgContextProps => {
     createOrg,
     addMember,
     joinOrg,
+    deleteOrg,
   }
 }
 

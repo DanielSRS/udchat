@@ -1,7 +1,7 @@
 import { isLeft } from "fp-ts/lib/Either";
 import { Organization } from "../../models/organization";
 import { ContextFrom } from "xstate";
-import { createOrg, getPersistedOrg, saveOrganization } from "../../managers/org/orgManager";
+import { createOrg, deleteOrganization, getPersistedOrg, saveOrganization } from "../../managers/org/orgManager";
 import { orgMachine } from "../../machines";
 
 /** Rejectable promised version of Createorg */
@@ -22,6 +22,18 @@ export const createOrgService = (context: ContextFrom<typeof orgMachine>) => {
 export const saveOrgToStorageService = (context: ContextFrom<typeof orgMachine>) => {
   return new Promise((resolve, reject) => {
     saveOrganization(context.organization)
+      .then(val => {
+        if (isLeft(val)) {
+          return reject(val.left);
+        }
+        resolve(true);
+      })
+  })
+}
+
+export const deleteOrgFromStorageService = (context: ContextFrom<typeof orgMachine>) => {
+  return new Promise((resolve, reject) => {
+    deleteOrganization(context.organization)
       .then(val => {
         if (isLeft(val)) {
           return reject(val.left);

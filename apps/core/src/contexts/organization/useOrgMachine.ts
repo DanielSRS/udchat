@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { interpret, StateFrom } from "xstate";
 import { orgMachine } from '../../machines';
-import { createOrgService, getOrgService, saveOrgToStorageService } from './orgContextHelper';
+import { createOrgService, deleteOrgFromStorageService, getOrgService, saveOrgToStorageService } from './orgContextHelper';
 import { Organization } from '../../models/organization';
 import { useMessagesWith } from '../../hooks/useMessagesWith';
 import { useUser } from '../../hooks';
@@ -88,6 +88,7 @@ export const useOrgMachine = () => {
             });
         });
       },
+      deleteOrg: deleteOrgFromStorageService,
     }
   }).withContext({
     organization: {} as Organization,
