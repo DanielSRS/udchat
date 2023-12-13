@@ -13,7 +13,11 @@ interface NetworkContextProps {
     message: string;
     ip: string;
     port: number;
-}) => Promise<SendMessageResponseEvent>
+  }) => Promise<SendMessageResponseEvent>;
+  listenForMessagesWith: (params: {
+    commitId: string;
+    callback: (msg: unknown) => void;
+  }) => void;
 }
 
 export const NetworkContext = createContext({} as NetworkContextProps);
@@ -29,8 +33,15 @@ const networkContextData = (): NetworkContextProps => {
   const sentMessagesCallbacks = useRef<{
     [key: string]: (res: SendMessageResponseEvent) => void;
   }>({});
+  const messageListners = useRef<{
+    [key: string]: Array<(event: unknown) => void>;
+  }>({});
 
   useEffect(() => {
+    const unknownMessagesHandler = (msg: unknown) => {
+      console.log(`unknownMessagesHandler: ${JSON.stringify(msg, null, 2)}`)
+    };
+    messageListners.current['unknown'] = [unknownMessagesHandler];
     const propagateNetworkEvent = (event: NewMessageEvent | SendMessageResponseEvent) => {
       if (event.type === 'newMessage') {
         setNetworkStats(s => {
@@ -41,7 +52,15 @@ const networkContextData = (): NetworkContextProps => {
           }
         });
 
-        processNewMessage(event);
+        const msg = processNewMessage(event);
+
+        // dispatch to listners // 
+        const listners = messageListners.current[msg.header.commitId];
+        if (listners) {
+          listners.map((listner) => listner(msg.body));
+        } else {
+          console.log(`defaultMessagesHandler: ${JSON.stringify(msg, null, 2)}`);
+        }
       }
       if (event.type === 'sendMessageResponse') {
         /** Dispara o callback de resposta */
@@ -116,9 +135,20 @@ const networkContextData = (): NetworkContextProps => {
     }
   })
 
+  const listenForMessagesWith = (params: { commitId: string, callback: (msg: unknown) => void }) => {
+    const commitGroup = messageListners.current[params.commitId];
+    if (commitGroup) {
+      if (commitGroup.includes(params.callback)) return;
+      commitGroup.push(params.callback);
+      return;
+    }
+    messageListners.current[params.commitId] = [params.callback];
+  };
+
   return {
     networkStats,
     sendMessage,
+    listenForMessagesWith,
   };
 }
 
@@ -134,16 +164,46 @@ export const NetworkProvider = ({ children }: { children: React.ReactElement }) 
 
 const processNewMessage = (event: NewMessageEvent) => {
   const msg = BufferLib.from(event.data.message.data, event.data.message.enconding).toString().split('\r\n');
-  
-  const p = msg[0] && msg[1]
-  ? {
-    header: JSON.parse(msg[0]),
-    body: JSON.parse(msg[1]),
-  }
-  : {
-    header: {},
+
+  const errorMessage = {
+    header: {
+      commitId: 'unknown'
+    },
     body: {},
+  };
+
+  let p = errorMessage;
+
+  const headerString = msg[0];
+  const bodyString = msg[1];
+
+  if (!headerString || !bodyString) {
+    return p;
   }
 
-  console.log(JSON.stringify(p, null, 2));
+  try {
+    const header = JSON.parse(headerString) ?? { commitId: 'unknown' };
+    const body = JSON.parse(bodyString);
+
+    if (typeof header?.commitId === 'string') {
+      const index = (header.commitId as string).lastIndexOf(':');
+      if (index === -1 || index > (header.commitId as string).length - 3) {
+        header.commitId = 'malformed';
+      } else {
+        const commitGroupId = (header.commitId as string).substring(index + 1);
+        header.commitId = commitGroupId;
+        // console.log('commitGroupId: ', commitGroupId);
+      }
+    }
+
+    p = {
+      header,
+      body,
+    };
+  } catch(e) {
+    p = errorMessage;
+    console.log('processNewMessage error', JSON.stringify(p, null, 2));
+  }
+
+  return p;
 }

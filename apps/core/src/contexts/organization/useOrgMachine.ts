@@ -10,7 +10,9 @@ type MachineState = Pick<StateFrom<typeof orgMachine>, 'matches' | 'context' | '
 
 export const useOrgMachine = () => {
   const user = useUser();
-  const sendMessage = useMessagesWith({ commitId: 'não implementado', callback: () => {} });
+  const sendMessage = useMessagesWith({ commitId: 'joinOrg', callback: (msg) => { 
+    console.log('joinOrg request: ', JSON.stringify(msg, null, 2));
+   } });
   const [actor] = useState(interpret(orgMachine.withConfig({
     services: {
       createOrg: createOrgService,
