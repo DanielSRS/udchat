@@ -149,9 +149,13 @@ As informações básicas são:
   actions: {
     saveOrgToContext: assign((_, event) => event.data),
     saveUserToContext: assign((_, event) => event.data),
-    generateInvitationCode: assign(() => ({ orgInvitationCode: 345 })),
+    generateInvitationCode: assign(() => ({ orgInvitationCode: generateRandomInteger(100, 999) })),
   },
   services: {
     sendOrg: () => new Promise((_, reject) => reject()),
   },
 });
+
+const generateRandomInteger = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
