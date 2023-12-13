@@ -13,20 +13,30 @@ export const NoOrgPage = () => {
   const orgCreationErr = useContextSelector(OrgContext, data => data.orgCreationErr);
   const createOrg = useContextSelector(OrgContext, data => data.createOrg);
 
+  const addMember = useContextSelector(OrgContext, data => data.addMember);
+  const joinOrg = useContextSelector(OrgContext, data => data.joinOrg);
+  const invitationNotSent = useContextSelector(OrgContext, data => data.invitationNotSent);
+  const orgLoaded = useContextSelector(OrgContext, data => data.orgLoaded);
+  const sendingInvitation = useContextSelector(OrgContext, data => data.sendingInvitation);
+  const sendingOrgInfo = useContextSelector(OrgContext, data => data.sendingOrgInfo);
+  const waitingResponse = useContextSelector(OrgContext, data => data.waitingResponse);
+  const waitingForInvite = useContextSelector(OrgContext, data => data.waitingForInvite);
+
 
   const createOrgResponse = (item: { value: boolean }) => {
 		if (item.value) {
-      createOrg();
+      return createOrg();
     }
+    return joinOrg();
 	};
 
 	const createOrgOptions = [
 		{
-			label: 'Sim',
+			label: 'Criar nova organização',
 			value: true
 		},
 		{
-			label: 'Não',
+			label: 'Entrar numa organização',
 			value: false
 		},
 	];
@@ -46,13 +56,19 @@ export const NoOrgPage = () => {
         <Box flexDirection='column' justifyContent='space-between'>
           <Text>{`❌ Nenhuma organização, como pode?`}</Text>
           <Box flexDirection='column'>
-            <Text>{`Deseja criar nova organização?`}</Text>
+            <Text>{`Crie uma organização ou entre na organização de outro usuário`}</Text>
             <SelectInput items={createOrgOptions} onSelect={createOrgResponse} />
           </Box>
         </Box>
       )}
       {!orgCreationErr ? null : (
         <Text>{`ERRRRRROUUUU, como pode?`}</Text>
+      )}
+      {!orgLoaded ? null : (
+        <Text>{`Dentro da org`}</Text>
+      )}
+      {!waitingForInvite ? null : (
+        <Text>{`Aguardando Convite`}</Text>
       )}
     </Box>
   );

@@ -14,10 +14,12 @@ interface OrgContextProps {
   invitationNotSent: boolean;
   waitingResponse: boolean;
   sendingOrgInfo: boolean;
+  waitingForInvite: boolean;
   org: Organization;
+  stateValue: string;
   createOrg: () =>  void;
   addMember: (ip: string) => void;
-  stateValue: string;
+  joinOrg: () => void;
 }
 
 export const OrgContext = createContext({} as OrgContextProps);
@@ -44,7 +46,7 @@ const orgContextData = (): OrgContextProps => {
 
   const findingOrg = state?.matches('findingOrg') || false;
   const noOrgFound = state?.matches('noOrgFound') || false;
-  const orgLoaded = state?.matches('orgLoaded') || false;
+  const orgLoaded = state?.matches('orgLoaded.idle') || false;
   const creatingOrg = state?.matches('creatingOrganization') || state?.matches('savingOrgToStorage') || false;
   const savingOrgFailure = state?.matches('savingOrgFailure') || false;
   const orgCreationErr = state?.matches('orgCreationErr') || false;
@@ -52,6 +54,7 @@ const orgContextData = (): OrgContextProps => {
   const sendingInvitation = state?.matches('orgLoaded.sendingInvitation')|| false;
   const invitationNotSent = state?.matches('orgLoaded.invitationNotSent') || false;
   const waitingResponse = state?.matches('orgLoaded.waitingResponse') || false;
+  const waitingForInvite = state?.matches('JoinAnOrganization.waitingForInvite') || false;
   const sendingOrgInfo = state?.matches('orgLoaded.sendingOrgInfo') || false;
 
   const stateValue = (() => {
@@ -76,6 +79,10 @@ const orgContextData = (): OrgContextProps => {
     send({ type: 'ADD_MEMBER', data: { ip } });
   }
 
+  const joinOrg = () => {
+    send({ type: 'JOIN_ORG' });
+  }
+
   return {
     findingOrg,
     noOrgFound,
@@ -87,10 +94,12 @@ const orgContextData = (): OrgContextProps => {
     sendingInvitation,
     waitingResponse,
     sendingOrgInfo,
+    waitingForInvite,
     org: org?.creationDate ? org : placeholderOrg,
+    stateValue,
     createOrg,
     addMember,
-    stateValue,
+    joinOrg,
   }
 }
 

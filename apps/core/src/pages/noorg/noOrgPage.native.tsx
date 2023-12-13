@@ -12,6 +12,13 @@ export const NoOrgPage = () => {
   const orgCreationErr = useContextSelector(OrgContext, data => data.orgCreationErr);
   const createOrg = useContextSelector(OrgContext, data => data.createOrg);
 
+  const addMember = useContextSelector(OrgContext, data => data.addMember);
+  const invitationNotSent = useContextSelector(OrgContext, data => data.invitationNotSent);
+  const orgLoaded = useContextSelector(OrgContext, data => data.orgLoaded);
+  const sendingInvitation = useContextSelector(OrgContext, data => data.sendingInvitation);
+  const sendingOrgInfo = useContextSelector(OrgContext, data => data.sendingOrgInfo);
+  const waitingResponse = useContextSelector(OrgContext, data => data.waitingResponse);
+
   return (
     <View>
       {!creatingOrg ? null : (
@@ -34,6 +41,9 @@ export const NoOrgPage = () => {
       )}
       {!orgCreationErr ? null : (
         <Text>{`ERRRRRROUUUU, como pode?`}</Text>
+      )}
+      {!orgLoaded ? null : (
+        <Text>{`Dentro da org`}</Text>
       )}
     </View>
   );
