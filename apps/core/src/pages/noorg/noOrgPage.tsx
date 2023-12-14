@@ -7,6 +7,7 @@ import TextInput from 'ink-text-input';
 
 export const NoOrgPage = () => {
   const [query, setQuery] = useState('');
+  const [code, setCode] = useState('');
   const findingOrg = useContextSelector(OrgContext, data => data.findingOrg);
   const noOrgFound = useContextSelector(OrgContext, data => data.noOrgFound);
   const creatingOrg = useContextSelector(OrgContext, data => data.creatingOrg);
@@ -18,6 +19,7 @@ export const NoOrgPage = () => {
   const newMember = useContextSelector(OrgContext, data => data.newMember);
   const joinOrg = useContextSelector(OrgContext, data => data.joinOrg);
   const deleteOrg = useContextSelector(OrgContext, data => data.deleteOrg);
+  const acceptInvite = useContextSelector(OrgContext, data => data.acceptInvite);
   const cancellOrgJoin = useContextSelector(OrgContext, data => data.cancellOrgJoin);
   const invitationNotSent = useContextSelector(OrgContext, data => data.invitationNotSent);
   const orgLoaded = useContextSelector(OrgContext, data => data.orgLoaded);
@@ -27,6 +29,8 @@ export const NoOrgPage = () => {
   const waitingForInvite = useContextSelector(OrgContext, data => data.waitingForInvite);
   const ReceivedInviteToJoinOrg = useContextSelector(OrgContext, data => data.ReceivedInviteToJoinOrg);
   const addingNewMember = useContextSelector(OrgContext, data => data.addingNewMember);
+  const waitingOrgData = useContextSelector(OrgContext, data => data.waitingOrgData);
+  const orgInfoNotSent = useContextSelector(OrgContext, data => data.orgInfoNotSent);
   
   const invitingMember = useContextSelector(OrgContext, data => data.invitingMember);
   const invitationCode = useContextSelector(OrgContext, data => data.invitationCode);
@@ -129,46 +133,118 @@ export const NoOrgPage = () => {
       {!ReceivedInviteToJoinOrg || !invitingMember ? null : (
         <Box justifyContent='space-between' alignItems='center' height={'100%'} width={'100%'} flexDirection='column'>
           <Text>{`Chegou convite`}</Text>
-          <Box paddingLeft={2} paddingRight={2} padding={1} borderStyle={'round'}>
+          <Box paddingLeft={2} paddingRight={2} padding={1} borderStyle={'round'} flexDirection="column">
             <Text>{`Enviado por:`}</Text>
             <Text>{`${invitingMember.name}`}</Text>
             <Text>{`@${invitingMember.username}`}</Text>
           </Box>
-          <Box width={'100%'}>
+          <Box width={'100%'} flexDirection="column">
+            <Text>{`Digite o código informado por: ${invitingMember.name}`}</Text>
+            <Box flexDirection="column" borderStyle={'round'}>
+              <TextInput value={query} onChange={setQuery} onSubmit={() => {
+                  acceptInvite(+code);
+                  setCode('');
+                }}
+              />
+            </Box>
             <SelectInput
-              items={[{ label: 'Cencelar', value: true }]}
+              items={[{ label: 'Aceitar', value: true }, { label: 'Cencelar', value: false }]}
               onSelect={({value}: { value: boolean }) => {
-                if (value) cancellOrgJoin();
+                if (value) {
+                  acceptInvite(+code);
+                  setCode('');
+                } else {
+                  cancellOrgJoin()
+                }
               }}
             />
           </Box>
         </Box>
       )}
       {!addingNewMember ? null : (
-        <Box flexDirection='column' justifyContent='space-between'>
-          <Text>{`Informe o ip do novo membro`}</Text>
-          <Box
-            flexDirection="column"
-            borderStyle={'round'}
-          >
-            <TextInput value={query} onChange={setQuery} onSubmit={() => {
-                addMember(query);
-                setQuery('');
+        <Box flexDirection='column' justifyContent='space-between' width={'100%'}>
+          <Box></Box>
+          <Box flexDirection='column' width={'100%'}>
+            <Text>{`Informe o ip do novo membro`}</Text>
+            <Box flexDirection="column" borderStyle={'round'}>
+              <TextInput value={query} onChange={setQuery} onSubmit={() => {
+                  addMember(query);
+                  setQuery('');
+                }}
+              />
+            </Box>
+            <SelectInput
+              items={[{ label: 'Enviar convite', value: true }, { label: 'Cencelar', value: false }]}
+              onSelect={({value}: { value: boolean }) => {
+                if (value) {
+                  addMember(query);
+                  setQuery('');
+                } else {
+                  cancellOrgJoin()
+                }
               }}
             />
           </Box>
         </Box>
       )}
+
+      {/* Esperando as informações da organização */}
+      {!waitingOrgData ? null : (
+        <Box flexDirection='column' justifyContent='space-between' width={'100%'}>
+          <Box>
+            <Text>{`Aguardando dados da organização`}</Text>
+          </Box>
+          <Box flexDirection='column' width={'100%'}>
+            {/* <Text>{`Informe o ip do novo membro`}</Text> */}
+            {/* <Box flexDirection="column" borderStyle={'round'}>
+              <TextInput value={query} onChange={setQuery} onSubmit={() => {
+                  addMember(query);
+                  setQuery('');
+                }}
+              />
+            </Box> */}
+            <SelectInput
+              items={[{ label: 'Cancelar', value: true }]}
+              onSelect={cancellOrgJoin}
+            />
+          </Box>
+        </Box>
+      )}
+
+      {/* Esperando as informações da organização */}
+      {!orgInfoNotSent ? null : (
+        <Box flexDirection='column' justifyContent='space-between' width={'100%'}>
+          <Box>
+            <Text>{`Não foi possivel enviar informações da organização`}</Text>
+          </Box>
+          <Box flexDirection='column' width={'100%'}>
+            {/* <Text>{`Informe o ip do novo membro`}</Text> */}
+            {/* <Box flexDirection="column" borderStyle={'round'}>
+              <TextInput value={query} onChange={setQuery} onSubmit={() => {
+                  addMember(query);
+                  setQuery('');
+                }}
+              />
+            </Box> */}
+            <SelectInput
+              items={[{ label: 'Cancelar', value: true }]}
+              onSelect={cancellOrgJoin}
+            />
+          </Box>
+        </Box>
+      )}
       {!waitingResponse ? null : (
-        <Box flexDirection='column' justifyContent='space-between'>
-          <Box flexDirection='column'>
-            <Text>{`Convite enviado`}</Text>
-            <Text>{`Informe o código de convite ao usuáraio:`}</Text>
-            <Box paddingLeft={2} paddingRight={2} borderStyle={'round'}>
-              <Text>{invitationCode}</Text>
+        <Box flexDirection='column' justifyContent='space-between' width={'100%'} height={'100%'}>
+          <Box flexDirection='column' justifyContent='center' alignItems='center' width={'100%'} height={'100%'}>
+            <Box flexDirection='column'>
+              <Text>{`Convite enviado`}</Text>
+              <Text>{`Informe o código de convite ao usuáraio:`}</Text>
+              <Box padding={2} borderStyle={'round'} justifyContent='center' alignItems='center'>
+                <Text>{invitationCode}</Text>
+              </Box>
             </Box>
           </Box>
-          {/* <SelectInput items={[{ label: 'Cencelar', value: true }]} onSelect={onCancellOrgJoining} /> */}
+          <SelectInput items={[{ label: 'Cencelar', value: true }]} onSelect={({value}: { value: boolean }) => cancellOrgJoin()} />
         </Box>
       )}
     </Box>

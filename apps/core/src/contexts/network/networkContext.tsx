@@ -15,7 +15,7 @@ interface NetworkContextProps {
     port: number;
   }) => Promise<SendMessageResponseEvent>;
   listenForMessagesWith: (params: {
-    commitId: string;
+    commitId: string | string[];
     callback: (msg: unknown) => void;
   }) => void;
 }
@@ -135,7 +135,7 @@ const networkContextData = (): NetworkContextProps => {
     }
   })
 
-  const listenForMessagesWith = (params: { commitId: string, callback: (msg: unknown) => void }) => {
+  const _listenForMessagesWith = (params: { commitId: string, callback: (msg: unknown) => void }) => {
     const commitGroup = messageListners.current[params.commitId];
     if (commitGroup) {
       if (commitGroup.includes(params.callback)) return;
@@ -143,6 +143,14 @@ const networkContextData = (): NetworkContextProps => {
       return;
     }
     messageListners.current[params.commitId] = [params.callback];
+  };
+
+  const listenForMessagesWith = ({ callback, commitId }: { commitId: string | string[], callback: (msg: unknown) => void }) => {
+    if (Array.isArray(commitId)) {
+      commitId.map((id) => _listenForMessagesWith({ commitId: id, callback }));
+      return;
+    } 
+    _listenForMessagesWith({ commitId, callback });
   };
 
   return {

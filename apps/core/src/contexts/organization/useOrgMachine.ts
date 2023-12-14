@@ -64,7 +64,7 @@ export const useOrgMachine = () => {
             /** Versão o programa/protocolo */
             version: '0.0.1',
             /** Id do grupo de pacotes. todas as partes precisam ter o mesmo id */
-            commitId: 'orphan:65165sd:ACCEPT_INVITE',
+            commitId: 'orphan:65165sd:INVITE_ACEPTED',
           };
           const body: INVITE_ACEPTED_EVENT = {
             type: 'INVITE_ACEPTED',
@@ -101,7 +101,7 @@ export const useOrgMachine = () => {
   })));
   const [state, setState] = useState<MachineState>();
 
-  useMessagesWith({ commitId: 'JOIN_ORG_INVITE', callback: (msg) => actor.send(msg as any) });
+  useMessagesWith({ commitId: ['JOIN_ORG_INVITE', 'INVITE_ACEPTED'], callback: (msg) => actor.send(msg as any) });
 
   useEffect(() => {
     actor.subscribe((s) => {

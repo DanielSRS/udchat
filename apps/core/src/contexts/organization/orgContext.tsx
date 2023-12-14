@@ -17,6 +17,8 @@ interface OrgContextProps {
   waitingForInvite: boolean;
   ReceivedInviteToJoinOrg: boolean;
   addingNewMember: boolean;
+  waitingOrgData: boolean;
+  orgInfoNotSent: boolean;
   org: Organization;
   stateValue: string;
   createOrg: () =>  void;
@@ -68,9 +70,11 @@ const orgContextData = (): OrgContextProps => {
   const waitingResponse = state?.matches('orgLoaded.waitingResponse') || false;
   const sendingOrgInfo = state?.matches('orgLoaded.sendingOrgInfo') || false;
   const addingNewMember = state?.matches('orgLoaded.addingNewMember') || false;
+  const orgInfoNotSent = state?.matches('orgLoaded.orgInfoNotSent') || false;
 
   const waitingForInvite = state?.matches('JoinAnOrganization.waitingForInvite') || false;
   const ReceivedInviteToJoinOrg = state?.matches('JoinAnOrganization.ReceivedInviteToJoinOrg') || false;
+  const waitingOrgData = state?.matches('JoinAnOrganization.WaitingOrgData') || false;
 
   const invitationCode = state?.context.orgInvitationCode || -1;
 
@@ -133,6 +137,8 @@ const orgContextData = (): OrgContextProps => {
     waitingForInvite,
     addingNewMember,
     ReceivedInviteToJoinOrg,
+    waitingOrgData,
+    orgInfoNotSent,
     org: org?.creationDate ? org : placeholderOrg,
     stateValue,
     createOrg,

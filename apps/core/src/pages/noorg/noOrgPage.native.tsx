@@ -27,6 +27,8 @@ export const NoOrgPage = () => {
   const waitingForInvite = useContextSelector(OrgContext, data => data.waitingForInvite);
   const ReceivedInviteToJoinOrg = useContextSelector(OrgContext, data => data.ReceivedInviteToJoinOrg);
   const addingNewMember = useContextSelector(OrgContext, data => data.addingNewMember);
+  const waitingOrgData = useContextSelector(OrgContext, data => data.waitingOrgData);
+  const orgInfoNotSent = useContextSelector(OrgContext, data => data.orgInfoNotSent);
 
   const invitingMember = useContextSelector(OrgContext, data => data.invitingMember);
   const invitationCode = useContextSelector(OrgContext, data => data.invitationCode);
@@ -115,16 +117,64 @@ export const NoOrgPage = () => {
           </View>
         </View>
       )}
-      {!waitingResponse ? null : (
-        <View style={{ justifyContent: 'space-between' }}>
+
+      {/* Esperando as informações da organização */}
+      {!waitingOrgData ? null : (
+        <View style={{ flex: 1, padding: 20, justifyContent: 'space-between' }}>
           <View>
-            <Text>{`Convite enviado`}</Text>
-            <Text>{`Informe o código de convite ao usuáraio:`}</Text>
-            <View style={{ paddingHorizontal: 20, borderRadius: 8, borderWidth: 1 }}>
-              <Text>{invitationCode}</Text>
+            <Text>{`Aguardando dados da organização`}</Text>
+          </View>
+          <View style={{ width: '100%' }}>
+            {/* <Text>{`Informe o ip do novo membro`}</Text> */}
+            {/* <Box flexDirection="column" borderStyle={'round'}>
+              <TextInput value={query} onChange={setQuery} onSubmit={() => {
+                  addMember(query);
+                  setQuery('');
+                }}
+              />
+            </Box> */}
+            <TouchableOpacity style={{ paddingVertical: 15, backgroundColor: 'red', borderWidth: 1, borderRadius: 10 }} onPress={cancellOrgJoin}>
+              <Text style={{ fontSize: 16, color: 'white', alignSelf: 'center'}}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* Esperando as informações da organização */}
+      {!orgInfoNotSent ? null : (
+        <View style={{ flex: 1, justifyContent: 'space-between', padding: 20  }}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 20 }}>{`Não foi possivel enviar informações da organização`}</Text>
+          </View>
+          <View style={{ width: '100%' }}>
+            {/* <Text>{`Informe o ip do novo membro`}</Text> */}
+            {/* <Box flexDirection="column" borderStyle={'round'}>
+              <TextInput value={query} onChange={setQuery} onSubmit={() => {
+                  addMember(query);
+                  setQuery('');
+                }}
+              />
+            </Box> */}
+            <TouchableOpacity style={{ paddingVertical: 15, backgroundColor: 'red', borderRadius: 10 }} onPress={cancellOrgJoin}>
+              <Text style={{ fontSize: 16, color: 'white', alignSelf: 'center' }}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+      {!waitingResponse ? null : (
+        <View style={{ justifyContent: 'space-between', flex: 1, padding: 20 }}>
+          <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+            <View>
+              <Text style={{ fontSize: 22 }}>{`Convite enviado`}</Text>
+              <Text style={{ fontSize: 18 }}>{`Informe o código de convite ao usuáraio:`}</Text>
+              <View style={{ padding: 30, borderRadius: 8, borderWidth: 1, alignItems: 'center' }}>
+                <Text style={{ fontSize: 30, fontWeight: '900', color: 'black' }}>{invitationCode}</Text>
+              </View>
             </View>
           </View>
-          {/* <SelectInput items={[{ label: 'Cencelar', value: true }]} onSelect={onCancellOrgJoining} /> */}
+          <TouchableOpacity style={{ paddingVertical: 15, backgroundColor: 'red', borderRadius: 10 }} onPress={cancellOrgJoin}>
+            <Text style={{ fontSize: 16, color: 'white', alignSelf: 'center' }}>Cancelar</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
