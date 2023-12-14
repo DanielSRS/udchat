@@ -31,11 +31,9 @@ export interface ACCEPT_INVITE {
 
 export interface JOINED_ORG_INFO {
   type: 'JOINED_ORG_INFO';
-  data: unknown;
 }
 
 export interface CANCELL_ORG_JOIN {
   type: 'CANCELL_ORG_JOIN';
-  data: unknown;
 }
 

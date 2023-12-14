@@ -21,6 +21,7 @@ interface OrgContextProps {
   deleteOrg: () =>  void;
   addMember: (ip: string) => void;
   joinOrg: () => void;
+  cancellOrgJoin: () => void;
 }
 
 export const OrgContext = createContext({} as OrgContextProps);
@@ -88,6 +89,10 @@ const orgContextData = (): OrgContextProps => {
     send({ type: 'JOIN_ORG' });
   }
 
+  const cancellOrgJoin = () => {
+    send({ type: 'CANCELL_ORG_JOIN' });
+  }
+
   return {
     findingOrg,
     noOrgFound,
@@ -106,6 +111,7 @@ const orgContextData = (): OrgContextProps => {
     addMember,
     joinOrg,
     deleteOrg,
+    cancellOrgJoin,
   }
 }
 

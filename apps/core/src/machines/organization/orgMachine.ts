@@ -12,8 +12,8 @@ type Events =
   | { type: 'JOIN_ORG_INVITE'; data: JOIN_ORG_INVITE['data'] }
   | { type: 'ACCEPT_INVITE'; data: ACCEPT_INVITE['data'] }
   | { type: 'JOIN_ORG'; }
-  | { type: 'JOINED_ORG_INFO'; data: JOINED_ORG_INFO['data'] }
-  | { type: 'CANCELL_ORG_JOIN'; data: CANCELL_ORG_JOIN['data'] }
+  | { type: 'JOINED_ORG_INFO'; }
+  | { type: 'CANCELL_ORG_JOIN'; }
   | { type: 'DELETE_ORG'; }
   | { type: 'INVITE_ACEPTED'; data: INVITE_ACEPTED_EVENT['data'] };
 
