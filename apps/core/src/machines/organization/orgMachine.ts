@@ -31,6 +31,7 @@ type Context = {
   user: User;
   /** Usuário que enviou uma solicitação de entrar em uma organização */
   invitingMember: JOIN_ORG_INVITE['data']['invitingMember'];
+  ip: JOIN_ORG_INVITE['data']['ip'];
 };
 
 export const orgMachine = createMachine({

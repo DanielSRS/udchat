@@ -35,9 +35,10 @@ export const useOrgMachine = () => {
                 publicKey: context.user.encriptionKeys.publicKey,
                 name: context.user.member.name,
                 username: context.user.member.username,
-                ip: ' ',
                 // port: ' ',
               },
+              ip: '',
+              port: 0,
             },
           }
           const message = `${JSON.stringify(header)}\r\n${JSON.stringify(body)}`;
@@ -56,7 +57,7 @@ export const useOrgMachine = () => {
       },
       sendInviteAcceptance: (context, event) => {
         return new Promise((resolve, reject) => {
-          const ip = context.invitingMember.ip;
+          const ip = context.ip;
           const port = 4322;
           const code = event.data.code;
           const header = {
@@ -73,6 +74,7 @@ export const useOrgMachine = () => {
                 username: context.user.member.username,
                 publicKey: context.user.encriptionKeys.publicKey,
               },
+              code,
             },
           };
           const message = `${JSON.stringify(header)}\r\n${JSON.stringify(body)}`;
@@ -94,7 +96,8 @@ export const useOrgMachine = () => {
     organization: {} as Organization,
     orgInvitationCode: 0,
     user,
-    invitingMember: {} as JOIN_ORG_INVITE['data']['invitingMember']
+    invitingMember: {} as JOIN_ORG_INVITE['data']['invitingMember'],
+    ip: ''
   })));
   const [state, setState] = useState<MachineState>();
 

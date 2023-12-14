@@ -5,9 +5,9 @@ export interface JOIN_ORG_INVITE {
       publicKey: string;
       name: string;
       username: string;
-      ip: string;
-      // port: string;
     };
+    ip: string;
+    port: number;
   };
 };
 
@@ -19,6 +19,7 @@ export interface INVITE_ACEPTED_EVENT {
       name: string;
       username: string;
     };
+    code: number;
   };
 };
 

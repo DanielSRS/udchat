@@ -22,6 +22,7 @@ interface OrgContextProps {
   createOrg: () =>  void;
   deleteOrg: () =>  void;
   addMember: (ip: string) => void;
+  acceptInvite: (code: number) => void;
   joinOrg: () => void;
   newMember: () => void;
   cancellOrgJoin: () => void;
@@ -29,7 +30,6 @@ interface OrgContextProps {
     publicKey: string;
     name: string;
     username: string;
-    ip: string;
   } | undefined,
   invitationCode: number;
 }
@@ -104,6 +104,11 @@ const orgContextData = (): OrgContextProps => {
     send({ type: 'ADD_MEMBER', data: { ip } });
   }
 
+  /** Aceita o convite enviado por outro usuário para entrar numa organização */
+  const acceptInvite = (code: number) => {
+    send({ type: 'ACCEPT_INVITE', data: { code } });
+  }
+
   const joinOrg = () => {
     send({ type: 'JOIN_ORG' });
   }
@@ -136,6 +141,7 @@ const orgContextData = (): OrgContextProps => {
     deleteOrg,
     cancellOrgJoin,
     newMember,
+    acceptInvite,
     invitingMember,
     invitationCode,
   }

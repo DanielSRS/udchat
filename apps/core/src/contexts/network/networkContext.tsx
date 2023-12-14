@@ -198,7 +198,14 @@ const processNewMessage = (event: NewMessageEvent) => {
 
     p = {
       header,
-      body,
+      body: {
+        ...body,
+        data: {
+          ...body.data,
+          ip: event.data.info.address,
+          port: event.data.info.port,
+        }
+      },
     };
   } catch(e) {
     p = errorMessage;

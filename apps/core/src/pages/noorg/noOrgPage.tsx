@@ -25,8 +25,10 @@ export const NoOrgPage = () => {
   const sendingOrgInfo = useContextSelector(OrgContext, data => data.sendingOrgInfo);
   const waitingResponse = useContextSelector(OrgContext, data => data.waitingResponse);
   const waitingForInvite = useContextSelector(OrgContext, data => data.waitingForInvite);
+  const ReceivedInviteToJoinOrg = useContextSelector(OrgContext, data => data.ReceivedInviteToJoinOrg);
   const addingNewMember = useContextSelector(OrgContext, data => data.addingNewMember);
   
+  const invitingMember = useContextSelector(OrgContext, data => data.invitingMember);
   const invitationCode = useContextSelector(OrgContext, data => data.invitationCode);
 
   const createOrgResponse = (item: { value: boolean }) => {
@@ -122,6 +124,24 @@ export const NoOrgPage = () => {
         <Box flexDirection='column' justifyContent='space-between'>
           <Text>{`Aguardando Convite`}</Text>
           <SelectInput items={[{ label: 'Cencelar', value: true }]} onSelect={onCancellOrgJoining} />
+        </Box>
+      )}
+      {!ReceivedInviteToJoinOrg || !invitingMember ? null : (
+        <Box justifyContent='space-between' alignItems='center' height={'100%'} width={'100%'} flexDirection='column'>
+          <Text>{`Chegou convite`}</Text>
+          <Box paddingLeft={2} paddingRight={2} padding={1} borderStyle={'round'}>
+            <Text>{`Enviado por:`}</Text>
+            <Text>{`${invitingMember.name}`}</Text>
+            <Text>{`@${invitingMember.username}`}</Text>
+          </Box>
+          <Box width={'100%'}>
+            <SelectInput
+              items={[{ label: 'Cencelar', value: true }]}
+              onSelect={({value}: { value: boolean }) => {
+                if (value) cancellOrgJoin();
+              }}
+            />
+          </Box>
         </Box>
       )}
       {!addingNewMember ? null : (
