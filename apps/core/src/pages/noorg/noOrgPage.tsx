@@ -4,7 +4,6 @@ import { useContextSelector } from 'use-context-selector';
 import { OrgContext } from '../../contexts/organization/orgContext';
 import SelectInput from 'ink-select-input';
 
-
 export const NoOrgPage = () => {
   const findingOrg = useContextSelector(OrgContext, data => data.findingOrg);
   const noOrgFound = useContextSelector(OrgContext, data => data.noOrgFound);
@@ -15,6 +14,8 @@ export const NoOrgPage = () => {
 
   const addMember = useContextSelector(OrgContext, data => data.addMember);
   const joinOrg = useContextSelector(OrgContext, data => data.joinOrg);
+  const deleteOrg = useContextSelector(OrgContext, data => data.deleteOrg);
+  const cancellOrgJoin = useContextSelector(OrgContext, data => data.cancellOrgJoin);
   const invitationNotSent = useContextSelector(OrgContext, data => data.invitationNotSent);
   const orgLoaded = useContextSelector(OrgContext, data => data.orgLoaded);
   const sendingInvitation = useContextSelector(OrgContext, data => data.sendingInvitation);
@@ -41,6 +42,29 @@ export const NoOrgPage = () => {
 		},
 	];
 
+	const DeleteOrgOptions = [
+    {
+			label: 'Não fazer nada',
+			value: false
+		},
+		{
+			label: 'Deletar organização',
+			value: true
+		}
+	];
+
+  const onDeleteOrgResponse = (item: { value: boolean }) => {
+		if (item.value) {
+      return deleteOrg();
+    }
+	};
+
+  const onCancellOrgJoining = (item: { value: boolean }) => {
+		if (item.value) {
+      return cancellOrgJoin();
+    }
+	};
+
   return (
     <Box>
       {!creatingOrg ? null : (
@@ -65,10 +89,16 @@ export const NoOrgPage = () => {
         <Text>{`ERRRRRROUUUU, como pode?`}</Text>
       )}
       {!orgLoaded ? null : (
-        <Text>{`Dentro da org`}</Text>
+        <Box flexDirection='column' justifyContent='space-between'>
+          <Text>{`Dentro da org`}</Text>
+          <SelectInput items={DeleteOrgOptions} onSelect={onDeleteOrgResponse} />
+        </Box>
       )}
       {!waitingForInvite ? null : (
-        <Text>{`Aguardando Convite`}</Text>
+        <Box flexDirection='column' justifyContent='space-between'>
+          <Text>{`Aguardando Convite`}</Text>
+          <SelectInput items={[{ label: 'Cencelar', value: true }]} onSelect={onCancellOrgJoining} />
+        </Box>
       )}
     </Box>
   );
