@@ -6,6 +6,7 @@ import { User } from "../../models/user/user";
 import { StorageInstance, storageService } from "../../services/storage";
 import { ZodIssue } from "zod";
 import { StorageWritingError } from "../../services/storage/instance";
+import { getNetworkInterfaces } from "../../services/node/nodeService";
 
 const userStorage = storageService.withInstanceID('user').withEncryption().initialize();
 
@@ -18,7 +19,18 @@ export const genereateNewUser = async () => {
   const pair = await generateAssimetricKeys();
   const username = `${(new Date().getTime().toString(36))}${generateRandomInteger(123456789, 987654321).toString(36)}`
   const name = `user_${generateRandomInteger(123456789, 987654321).toString(36)}`
-  const newMember = Member({ name, username });
+  const ip = await (async () => {
+    const interfaces = await getNetworkInterfaces();
+    const keys = Object.keys(interfaces.interfaces);
+    const primeiraInterface = interfaces.interfaces[keys[0]+'']?.[0]+ '';
+    return primeiraInterface;
+  })();
+  const publicKey = (() => {
+    if (pair._tag === 'Left') return ' pk ';
+    return pair.right.publicKey;
+  })();
+  console.log('member to create: ', JSON.stringify({ name, username, ip, publicKey }), null, 2);
+  const newMember = Member({ name, username, ip, publicKey });
 
   if (isLeft(pair) || isLeft(newMember)) {
     const a = [];

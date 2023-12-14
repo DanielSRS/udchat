@@ -1,3 +1,5 @@
+import { Organization } from "../../models/organization";
+
 export interface JOIN_ORG_INVITE {
   type: 'JOIN_ORG_INVITE';
   data: {
@@ -36,5 +38,12 @@ export interface JOINED_ORG_INFO {
 
 export interface CANCELL_ORG_JOIN {
   type: 'CANCELL_ORG_JOIN';
+}
+
+export interface JOINED_ORG_INFO {
+  type: 'JOINED_ORG_INFO';
+  data: {
+    org: Organization;
+  };
 }
 

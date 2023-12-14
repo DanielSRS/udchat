@@ -10,7 +10,7 @@ export const OrgBox = () => {
       <Text>{`| Commits:`}</Text>
       {org.commits.map((item) => {
         return (
-          <Text key={item.createdAt} >{`|     ${item.type}: ${item.createdAt}`}</Text>
+          <Text key={item.data.createdAt} >{`|     ${item.type}: ${item.data.createdAt}`}</Text>
         );
       })}
       <Text>{`| membros:`}</Text>

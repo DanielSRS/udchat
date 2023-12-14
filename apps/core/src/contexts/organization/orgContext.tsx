@@ -39,19 +39,27 @@ interface OrgContextProps {
 export const OrgContext = createContext({} as OrgContextProps);
 
 const placeholderOrg: Organization = {
+  firstCommit: 'laskdjf',
   commits: [{
-    createdAt: 'lskdfj',
-    createdBy: {
-      name: 'lskajd',
-      username: 'kasldfj',
-    },
-    previousCommit: 'none',
     type: 'orgCreation',
+    data: {
+      createdAt: 'lskdfj',
+      createdBy: {
+        name: 'lskajd',
+        username: 'kasldfj',
+        ip: 'lksdfj',
+        publicKey: 'dkfçj'
+      },
+      commitId: 'aksldjf',
+      previousCommit: 'none',
+    }
   }],
   creationDate: 'dalkja',
   members: [{
     name: 'rklas',
-    username: 'lksdjf'
+    username: 'lksdjf',
+    ip: 'lksdfj',
+    publicKey: 'dkfçj'
   }],
 };
 

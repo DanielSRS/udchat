@@ -8,8 +8,10 @@ import { orgMachine } from "../../machines";
 export const createOrgService = (context: ContextFrom<typeof orgMachine>) => {
   return new Promise<{ organization: Organization }>((resolve, reject) => {
     const newOrg = createOrg({ createdBy: {
-      name: 'member',
-      username: 'member',
+      name: context.user.member.name,
+      username: context.user.member.username,
+      ip: context.user.member.ip,
+      publicKey: context.user.member.publicKey,
     } });
     if (isLeft(newOrg)) {
       console.log('o que rolou: ', JSON.stringify(newOrg.left, null, 2));

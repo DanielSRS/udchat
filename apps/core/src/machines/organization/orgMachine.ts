@@ -1,7 +1,8 @@
 import { assign, createMachine } from "xstate";
 import { Organization } from "../../models/organization";
 import { User } from "../../models/user/user";
-import { ACCEPT_INVITE, INVITE_ACEPTED_EVENT, JOIN_ORG_INVITE } from "../../contexts/organization/orgEventTypes";
+import { ACCEPT_INVITE, INVITE_ACEPTED_EVENT, JOINED_ORG_INFO, JOIN_ORG_INVITE } from "../../contexts/organization/orgEventTypes";
+import { SendMessageResponseEvent } from "../../contexts/network/networkEventTypes";
 
 type Events =
   | { type: 'CREATE_ORG'; }
@@ -11,7 +12,7 @@ type Events =
   | { type: 'JOIN_ORG_INVITE'; data: JOIN_ORG_INVITE['data'] }
   | { type: 'ACCEPT_INVITE'; data: ACCEPT_INVITE['data'] }
   | { type: 'JOIN_ORG'; }
-  | { type: 'JOINED_ORG_INFO'; }
+  | { type: 'JOINED_ORG_INFO'; data: JOINED_ORG_INFO['data'] }
   | { type: 'CANCELL_ORG_JOIN'; }
   | { type: 'DELETE_ORG'; }
   | { type: 'NEW_MEMBER'; }
@@ -23,6 +24,13 @@ type Services = {
   createOrg: { data: { organization: Organization } };
   sendInvitation: { data: unknown };
   sendInviteAcceptance: { data: unknown };
+  sendOrg: { data: {
+    type: 'sendOrg';
+    data: {
+      net: SendMessageResponseEvent,
+      commit: JOINED_ORG_INFO,
+    };
+  } };
 };
 
 type Context = {
@@ -35,7 +43,7 @@ type Context = {
 };
 
 export const orgMachine = createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QHsBOUCyBDAxgCwEsA7MAYgGUBRAFQH0BVKgJQG0AGAXUVAAdlYCAFwLIi3EAA9EAJgCMAZlkA6ABwA2adICcbAOxs5AVlkAaEAE9EstQBY1Smyptbd8rWq2ebsgL4+zaJi4hCRKAGbEEMRQAPLopBCiYErEAG7IANbJgdj4xMkRRFFEsegIacg4WMKi7Bx14nwCNWJIklZsKvJKbGxqujZssi6u8maWCGpsSoa9Nt7yavJd0h5+Aei5IQWR0XFQpGCoqGhKPAA21WFoALZKOcH54bsl++VE6VUtdQ1tTUIiVqgKQIZwqJSyWZsGy6HSuFTSNhjCyIeQ2bqyFRdKbyeS9NTDdYgB55UKBAAyyCwEEgpAAIpRyTRKLQYkwAOK-Xj8AGicQghSGeyGRb6VZaPHSQzjGTyaSqdw6WQGGFsIVEknbe7oSnUyApCDnMgAOUoAHVaBhKBgAEKUVicRo8lr82WdHq6FR6Wa4lw2aUohDyIVKNQqdyyWFybQuDWbR5knVUmkQJSwMBFaIASQ+QmqgISSRSH0y2XjpLLUF1KbTGeKUBzqTzLXen3ztU4XJA-xdbRB0lh4N0QvUbi06PUAYmWJsocM84l-qRhk8caCFe1VeT+vTmZKjebBaOJ1QZ0ugmuqDumqeFO3qd39YPgnbRFblVfP0df2dgNdCGkOxDB6Qw7EWSN-TsGUEFkORlAHXQ1EMcNPTYFwtDXLZbyTPVUwAdywAESiYOA+CIdNSCzY0ADUs2oFkAEEAGFKAABXoukux7P8+1RAYtB6VZbGDFRZDBZEJhFWc1BkhR1EA-o1n8Ylyy1O9cNrPdSgbIhrkLUIKiyTcsMTLcNMfPZ0Bza53y+QEvy4H9mh44FUUGXQIVmEUJSWWYtGg7RhUlPQNBURD50whNK2rfVqXrY0wDwjAwBuAAjI5SAYuk6Uta07QdRzuWcvleIAvFZzQ5YljDf1o2ggZ7H6QDpDcfpkKlSKNyIZB9gAMWQABXIpSCYphKAY+jWQ5LjfxK1yEFcexcQRZZ50hXppGg5CPP9BRIwMLpYJsTqtW6vrBuGgApGIqKmzlvyK3kgXaUFelDZZPRcTpZDEtRoJhATpGxJxgyRTEVBOp4cFQMB81edAsCIAgAC9X305JDMrEzkmh2HhHhqBEZR19bM-TsHu7WbnoFPppg8fo5TDNCtExeqVGA0Lw16FchQUSHQlxuHtKJ1GWkOY5TguK5bmMqKlEF-HhaR0XAVJ75ycKyniupxBEOmeZ9EQvEvWcaDlQUJQtAHK3R2NwllJvUJYCwJsCeoZByEENAsBgdHi3SIzHeSZ3Xe093Pe9mA1fsjWnW1-8xNxUNANE4cwyQzx-otsSraGOUtEMbQun54OXcsqBw691AfbIY9JfPS9r1Up4Q-LyvI7AaOO3qCnuLml7rDChxaYUaE9E2wNx2UNa0TEr0WYREu0zLgnesI84Bph0gxuoJgAE0Zvj0qxNhHo7AJOU1V0BCzaGeVvCcCUsWC3wHeb0JLuQYgGKIfYRbRpiDFjQsXJOSO6tBrpUUPk9BOyolADilKJYw0JBhoWgtVVQ84uj6FsEKFqS9P7f1-gjZWr4lAESIlAfqqBnxkEgcacBVFaL0Wgb2eaABaSEXoejhmQpCIGixDC6HQeoUMBJdCYgWI4Gw0gCFfyID-P+pCWhKBIjgMABBUiQFoe7QhxCDjMRYuxWgTC6KUFYS5F6nCebwLCtYZUaFYJCjNsqWczgpSRgLrCJEag5FEKUcTFR5A6zRAYuongL4iDqL9pjWWG49GKJIYEwEShglaTCWACJiN1FdyIA5OOMDSrsKcLOTE1gRRjgGMIwMDjZywmNohT0mJDB+IUfo-+KizSEUVvsOk1QsCkHoZQHKbJ2QmONL1GIFj+4gnYSzASEoWoeALsYOUKh0FCIcIoREngZL+mWEvGkRoenxESAZEsgd37JCOWAE5UBcn5KcoU+a455TQnkNfNwXRBjomgozHowxOgfKER4RwS91IphGkAkBYDRkQJusaaZOsAKrA8toH6gKPmaGqRMYYwFnDIScN41wsi37rjUjhGsFkCbWWQOLE8Z5pZXjiRSsyVKQk0t0sgB5scnlsJet4TEMwllCNcFbWwAV9BKEWOKgwywkTol0K0xJhNlEpLSfWDJWSom1wlqeKWF4ZZByUAk9parRCpI5VALVkSckVDst3JF-5inQh6NVTwiJr5WynFYBB0q1RhjEp0Quqw-DKW6jSeAbQg4FP5bM6wLNbESIJL0FmUo-qBk4asJQ9S8QszcDzFpZLsbPC0vsWNliQRVRmIqTQbhykDjNlbHNGgRRoWWboCR4LKWQArTMmQchAYsx+joLFjaal6FUIiLEnRbBdELvIbtbL9QEENGAPtyKWpqlUE4YY8xC6uB9QBcc8CxLbS+VMCUS6YoPitc+V8G7-xbvlEbEdqz2Y2GggiZQwZ5wDHZmFeci7i1ywhfqChisSKwDIumR9pUqrAQTZoZwSFvASi-V0BwmJOgs3plbYDGxyXYWXamNIh5RDGmQIINJgg4PzSlAYN1apwKgQOhJKwjhphIifiuLEioIYgY3GB29ZarJcroy9D5iahgrPFK89ZgZAJ1OvpCCp7Nr6dGvfeJQcVogJSSildKqAJP9iBsBRcMJIz1NmBmySP1pXzE6BIxCVtIxLzOugfqQ0IAmcQGGDyDNZirC9BnCeExBjyhXJ0IYBgkItUQkvBW5cOmWL7si+EWHkKKQVbMBTExO3dAMIXMMaIFj9CXq3N2Hsq4118zBQY4JxxIhajCYMBd6ruFDLBYcoF84yVJYRktlXtJrwIBvGGdXB72CBoiPOywugfJcRoHN9adCjgREDJdTEYavkoMcOriEf0fIGCuY7cWlsvvrcOVN-mBsqSIx-eRKqUv9zS866w6Ik32NTU42zqIliW0cx8tqzhxwEfuyW01ASVYWog9EahtC6vWIGDwoGEj2ruCcP9TreI5XDkVGs5VZrkkWrURorREAdHID0eWvllbEDI-sGKLE-EH7QXw6oTtabUPjljIJrUUOkkw6IJa9J4TbXrrp-2hAczHCW1-WGVOnhPQuMUBCAY3hPTLERBFfnTxBeqpJyLrplDen9KRyhOcMl81aHZooL92bYJYn6F4V54PjUG5eyLvRkBaePTjQzr00x1C28UFbeYu0tpohmNCOQDWVm4kOWAY55dJs-WAgiQVUlVinYCpCS2qxnDDgUCMa+WmNKBFpZR6jGZaNS+RY5iqoLRJyH0IXAKoFhULad1faEvi9ePf8ULshuBMkS+rzRpH458WJzY76UCZsfkzDCo-fNoFythqAA */
+  /** @xstate-layout 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-YCz1yLzBckTVYBtVlERZNXe3t94Co-PKaE-oEZdEGOiYMwcejDE6P6VhHhHB+C8ujGk8A2hL2gQEup1gw6NOabotpKt2yBPRLa0yLhlgvkMIMFGar7bPBGugENtSQSuRmIqTQbhLmPg4htB5GgRTlQ8CMARGx1WxSGnm1F7phhejDr6JEAZy13M9AiToWIkTcNMYnFqe4CDpjAK2gVNY1SqCcMMeYy1XD4ofB+L0Nk2ZuHUCDcd51hqwTcSRWd9553ymbr6YwjMtrtgRMoTs-4BiR3qv+VVjas0TtTI4hlclYAKWnGe4yrkwzhs0M4Pi3gJTBj4Q4TEnQw4eA8DWA9cUoJpAQqIY0yBBAwsEMB+aUoDA9CmCKAkabuZ2SsI4aYSJeEgSxIqFQaGhr4WCslMayBCMA39BGoYEZlp1vhioSq8wHkBkhFcyOwqWOZoGt+pQl1ojXVuvdJ6qAePVmkJHLuaIYT9kebMWN9kfS7R0fVfsKH+ysfin5FKOG8MzgI8c0NIIdGYo-NZOQ+hlqVTTTMHTuJOINlYdCAZ8nfKC3QNjPGEAtOIDgd2NdBgQ6XxQe2QY8oQKdCGKl5a-oIufoGsXE11KRn-StfeeE8HIz9BxEBUT7Y1rdAMEJx1Cx+h4NXvsd+m8Z2ufzTRzoXdBhyjRGuiMUN3Ddk4qmhN7gNDdfaoQggxCDYJZDLEnTiJ77LC6P6DpGgHmlp0G+BEOm0P6kdi0SgxxNu8Uff6AYIFnt8QyxMH0x31r9ihO4ZVlLIU0sqyo4ywTLKRoJNGqUJnURLFG24foLyRhLF0ID4Z3zf3RBcYUzb9SBhhJ000yMVUnCqxm3iAwnrFRyjk8V5ZqSqVfKyWAHJeSClESKcgEp+w8eQl4g87m9VnDcNQTWVQa0w6rDTR+YckWtQQox-YmFsE-nwoG79NziBAleb0-+HsZ9PAvI6YoCEAxvAvOWCwjN9OFeM6BxVpQdKnH7CZcRPHCs-zOTDrukUph72rAhDp9QsJZfww-d5JtyRFdrMd7gXZ6vHP4bxx+MM3h0RUebGmjiTqZjy2cD7tNXX5carAFq9qm2fSQlUHDH0DlpcwfbEYLum0XA3pGAGX1PggA */
   description: `Recupera as informações básicas para inicio do app:
 
 As informações básicas são:
@@ -103,7 +111,10 @@ As informações básicas são:
 
           invoke: {
             src: "sendOrg",
-            onDone: "idle",
+            onDone: {
+              target: "idle",
+              actions: "saveUpdatedOrg"
+            },
             onError: "orgInfoNotSent"
           }
         },
@@ -203,13 +214,13 @@ O convite tem o nome de quem convidou e sua chave publica`,
 
           on: {
             JOINED_ORG_INFO: {
-              target: "JoinedOrg",
-              description: `Aqui recebo as informações da organização que acabei de entrar`
+              target: "#orgMachine.orgLoaded",
+              description: `Aqui recebo as informações da organização que acabei de entrar`,
+              actions: "saveNewOrgToContext"
             }
           }
         },
 
-        JoinedOrg: {},
         aceptanceNotSent: {}
       },
 
@@ -245,10 +256,9 @@ O convite tem o nome de quem convidou e sua chave publica`,
     saveUserToContext: assign((_, event) => event.data),
     generateInvitationCode: assign(() => ({ orgInvitationCode: generateRandomInteger(100, 999) })),
     saveInvitingMemberToContext: assign((_, event) => event.data),
-  },
-  services: {
-    sendOrg: () => new Promise((_, reject) => reject()),
-  },
+    saveUpdatedOrg: assign((_, event) => ({ organization: event.data.data.commit.data.org })),
+    saveNewOrgToContext: assign((_, event) => ({ organization: event.data.org })),
+  }
 });
 
 const generateRandomInteger = (min: number, max: number) => {

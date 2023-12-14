@@ -5,7 +5,7 @@ import { createOrgService, deleteOrgFromStorageService, getOrgService, saveOrgTo
 import { Organization } from '../../models/organization';
 import { useMessagesWith } from '../../hooks/useMessagesWith';
 import { useUser } from '../../hooks';
-import { INVITE_ACEPTED_EVENT, JOIN_ORG_INVITE } from './orgEventTypes';
+import { INVITE_ACEPTED_EVENT, JOIN_ORG_INVITE, JOINED_ORG_INFO } from './orgEventTypes';
 import { useContextSelector } from 'use-context-selector';
 import { NetworkContext } from '../network/networkContext';
 
@@ -91,6 +91,52 @@ export const useOrgMachine = () => {
         });
       },
       deleteOrg: deleteOrgFromStorageService,
+      sendOrg: (context, event) => {
+        return new Promise((resolve, reject) => {
+          const org = context.organization;
+          org.commits.push({
+            type: 'ADD_MEMBER_TO_ORG_COMMIT',
+            data: {
+              commitId: generateCommitId(),
+              createdAt: (new Date()).getTime().toString(36),
+              newMember: {
+                ...context.invitingMember,
+                ip: context.ip,
+              },
+              previousCommit: org.commits[org.commits.length - 1]?.data.commitId || '',
+            },
+          });
+          const header = {
+            /** Versão o programa/protocolo */
+            version: '0.0.1',
+            /** Id do grupo de pacotes. todas as partes precisam ter o mesmo id */
+            commitId: 'orphan:kjh34kjh:JOINED_ORG_INFO',
+          };
+          const body: JOINED_ORG_INFO = {
+            type: 'JOINED_ORG_INFO',
+            data: {
+              org,
+            },
+          };
+          const message = `${JSON.stringify(header)}\r\n${JSON.stringify(body)}`;
+          sendMessage({
+            ip: context.ip,
+            message,
+            port: 4322,
+          })
+          .then(res => {
+            if (res.data.sucess) return resolve({
+              type: 'sendOrg',
+              data: {
+                net: res,
+                commit: body,
+              }
+            });
+            console.log('sendOrg res: ', JSON.stringify(res, null, 2));
+            return reject(res);
+          })
+        });
+      },
     }
   }).withContext({
     organization: {} as Organization,
@@ -101,7 +147,7 @@ export const useOrgMachine = () => {
   })));
   const [state, setState] = useState<MachineState>();
 
-  useMessagesWith({ commitId: ['JOIN_ORG_INVITE', 'INVITE_ACEPTED'], callback: (msg) => actor.send(msg as any) });
+  useMessagesWith({ commitId: ['JOIN_ORG_INVITE', 'INVITE_ACEPTED', 'JOINED_ORG_INFO'], callback: (msg) => actor.send(msg as any) });
 
   useEffect(() => {
     actor.subscribe((s) => {
@@ -122,4 +168,13 @@ export const useOrgMachine = () => {
     state,
     send: actor.send,
   };
+}
+
+const generateCommitId = () => {
+  const commitId = `${(new Date().getTime().toString(36))}${generateRandomInteger(1234506789, 9876054321).toString(36)}${(new Date().getTime().toString(36))}`;
+  return commitId;
+}
+
+const generateRandomInteger = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
 }
