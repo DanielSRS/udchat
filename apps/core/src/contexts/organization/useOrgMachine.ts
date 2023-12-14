@@ -6,14 +6,14 @@ import { Organization } from '../../models/organization';
 import { useMessagesWith } from '../../hooks/useMessagesWith';
 import { useUser } from '../../hooks';
 import { INVITE_ACEPTED_EVENT, JOIN_ORG_INVITE } from './orgEventTypes';
+import { useContextSelector } from 'use-context-selector';
+import { NetworkContext } from '../network/networkContext';
 
 type MachineState = Pick<StateFrom<typeof orgMachine>, 'matches' | 'context' | 'value'>;
 
 export const useOrgMachine = () => {
   const user = useUser();
-  const sendMessage = useMessagesWith({ commitId: 'JOIN_ORG_INVITE', callback: (msg) => { 
-    console.log('joinOrg request: ', JSON.stringify(msg, null, 2));
-   } });
+  const sendMessage = useContextSelector(NetworkContext, data => data.sendMessage);
   const [actor] = useState(interpret(orgMachine.withConfig({
     services: {
       createOrg: createOrgService,
@@ -97,6 +97,8 @@ export const useOrgMachine = () => {
     invitingMember: {} as JOIN_ORG_INVITE['data']['invitingMember']
   })));
   const [state, setState] = useState<MachineState>();
+
+  useMessagesWith({ commitId: 'JOIN_ORG_INVITE', callback: (msg) => actor.send(msg as any) });
 
   useEffect(() => {
     actor.subscribe((s) => {

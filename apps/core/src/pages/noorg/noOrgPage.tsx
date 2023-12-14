@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Text } from 'ink';
 import { useContextSelector } from 'use-context-selector';
 import { OrgContext } from '../../contexts/organization/orgContext';
 import SelectInput from 'ink-select-input';
+import TextInput from 'ink-text-input';
 
 export const NoOrgPage = () => {
+  const [query, setQuery] = useState('');
   const findingOrg = useContextSelector(OrgContext, data => data.findingOrg);
   const noOrgFound = useContextSelector(OrgContext, data => data.noOrgFound);
   const creatingOrg = useContextSelector(OrgContext, data => data.creatingOrg);
@@ -13,6 +15,7 @@ export const NoOrgPage = () => {
   const createOrg = useContextSelector(OrgContext, data => data.createOrg);
 
   const addMember = useContextSelector(OrgContext, data => data.addMember);
+  const newMember = useContextSelector(OrgContext, data => data.newMember);
   const joinOrg = useContextSelector(OrgContext, data => data.joinOrg);
   const deleteOrg = useContextSelector(OrgContext, data => data.deleteOrg);
   const cancellOrgJoin = useContextSelector(OrgContext, data => data.cancellOrgJoin);
@@ -22,7 +25,9 @@ export const NoOrgPage = () => {
   const sendingOrgInfo = useContextSelector(OrgContext, data => data.sendingOrgInfo);
   const waitingResponse = useContextSelector(OrgContext, data => data.waitingResponse);
   const waitingForInvite = useContextSelector(OrgContext, data => data.waitingForInvite);
-
+  const addingNewMember = useContextSelector(OrgContext, data => data.addingNewMember);
+  
+  const invitationCode = useContextSelector(OrgContext, data => data.invitationCode);
 
   const createOrgResponse = (item: { value: boolean }) => {
 		if (item.value) {
@@ -45,17 +50,33 @@ export const NoOrgPage = () => {
 	const DeleteOrgOptions = [
     {
 			label: 'Não fazer nada',
-			value: false
+			value: 1,
+		},
+		{
+			label: 'Adicionar membro',
+			value: 2,
 		},
 		{
 			label: 'Deletar organização',
-			value: true
-		}
+			value: 3,
+		},
 	];
 
-  const onDeleteOrgResponse = (item: { value: boolean }) => {
-		if (item.value) {
-      return deleteOrg();
+  const onDeleteOrgResponse = (item: { value: number }) => {
+    switch (item.value) {
+      case 1:
+        break;
+
+      case 2:
+        newMember();
+        break;
+
+      case 3:
+        deleteOrg();
+        break;
+    
+      default:
+        break;
     }
 	};
 
@@ -88,6 +109,9 @@ export const NoOrgPage = () => {
       {!orgCreationErr ? null : (
         <Text>{`ERRRRRROUUUU, como pode?`}</Text>
       )}
+      {!sendingInvitation ? null : (
+        <Text>{`Enviando convite`}</Text>
+      )}
       {!orgLoaded ? null : (
         <Box flexDirection='column' justifyContent='space-between'>
           <Text>{`Dentro da org`}</Text>
@@ -98,6 +122,33 @@ export const NoOrgPage = () => {
         <Box flexDirection='column' justifyContent='space-between'>
           <Text>{`Aguardando Convite`}</Text>
           <SelectInput items={[{ label: 'Cencelar', value: true }]} onSelect={onCancellOrgJoining} />
+        </Box>
+      )}
+      {!addingNewMember ? null : (
+        <Box flexDirection='column' justifyContent='space-between'>
+          <Text>{`Informe o ip do novo membro`}</Text>
+          <Box
+            flexDirection="column"
+            borderStyle={'round'}
+          >
+            <TextInput value={query} onChange={setQuery} onSubmit={() => {
+                addMember(query);
+                setQuery('');
+              }}
+            />
+          </Box>
+        </Box>
+      )}
+      {!waitingResponse ? null : (
+        <Box flexDirection='column' justifyContent='space-between'>
+          <Box flexDirection='column'>
+            <Text>{`Convite enviado`}</Text>
+            <Text>{`Informe o código de convite ao usuáraio:`}</Text>
+            <Box paddingLeft={2} paddingRight={2} borderStyle={'round'}>
+              <Text>{invitationCode}</Text>
+            </Box>
+          </Box>
+          {/* <SelectInput items={[{ label: 'Cencelar', value: true }]} onSelect={onCancellOrgJoining} /> */}
         </Box>
       )}
     </Box>

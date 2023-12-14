@@ -15,13 +15,23 @@ interface OrgContextProps {
   waitingResponse: boolean;
   sendingOrgInfo: boolean;
   waitingForInvite: boolean;
+  ReceivedInviteToJoinOrg: boolean;
+  addingNewMember: boolean;
   org: Organization;
   stateValue: string;
   createOrg: () =>  void;
   deleteOrg: () =>  void;
   addMember: (ip: string) => void;
   joinOrg: () => void;
+  newMember: () => void;
   cancellOrgJoin: () => void;
+  invitingMember: {
+    publicKey: string;
+    name: string;
+    username: string;
+    ip: string;
+  } | undefined,
+  invitationCode: number;
 }
 
 export const OrgContext = createContext({} as OrgContextProps);
@@ -56,8 +66,13 @@ const orgContextData = (): OrgContextProps => {
   const sendingInvitation = state?.matches('orgLoaded.sendingInvitation')|| false;
   const invitationNotSent = state?.matches('orgLoaded.invitationNotSent') || false;
   const waitingResponse = state?.matches('orgLoaded.waitingResponse') || false;
-  const waitingForInvite = state?.matches('JoinAnOrganization.waitingForInvite') || false;
   const sendingOrgInfo = state?.matches('orgLoaded.sendingOrgInfo') || false;
+  const addingNewMember = state?.matches('orgLoaded.addingNewMember') || false;
+
+  const waitingForInvite = state?.matches('JoinAnOrganization.waitingForInvite') || false;
+  const ReceivedInviteToJoinOrg = state?.matches('JoinAnOrganization.ReceivedInviteToJoinOrg') || false;
+
+  const invitationCode = state?.context.orgInvitationCode || -1;
 
   const stateValue = (() => {
     if (!state) return 'undefined';
@@ -81,6 +96,10 @@ const orgContextData = (): OrgContextProps => {
     send({ type: 'DELETE_ORG' });
   }
 
+  const newMember = () => {
+    send({ type: 'NEW_MEMBER' });
+  }
+
   const addMember = (ip: string) => {
     send({ type: 'ADD_MEMBER', data: { ip } });
   }
@@ -92,6 +111,8 @@ const orgContextData = (): OrgContextProps => {
   const cancellOrgJoin = () => {
     send({ type: 'CANCELL_ORG_JOIN' });
   }
+
+  const invitingMember = state?.context.invitingMember;
 
   return {
     findingOrg,
@@ -105,6 +126,8 @@ const orgContextData = (): OrgContextProps => {
     waitingResponse,
     sendingOrgInfo,
     waitingForInvite,
+    addingNewMember,
+    ReceivedInviteToJoinOrg,
     org: org?.creationDate ? org : placeholderOrg,
     stateValue,
     createOrg,
@@ -112,6 +135,9 @@ const orgContextData = (): OrgContextProps => {
     joinOrg,
     deleteOrg,
     cancellOrgJoin,
+    newMember,
+    invitingMember,
+    invitationCode,
   }
 }
 

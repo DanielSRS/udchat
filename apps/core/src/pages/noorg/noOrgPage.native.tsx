@@ -21,6 +21,9 @@ export const NoOrgPage = () => {
   const sendingOrgInfo = useContextSelector(OrgContext, data => data.sendingOrgInfo);
   const waitingResponse = useContextSelector(OrgContext, data => data.waitingResponse);
   const waitingForInvite = useContextSelector(OrgContext, data => data.waitingForInvite);
+  const ReceivedInviteToJoinOrg = useContextSelector(OrgContext, data => data.ReceivedInviteToJoinOrg);
+
+  const invitingMember = useContextSelector(OrgContext, data => data.invitingMember);
 
   return (
     <View style={{ flex: 1 }}>
@@ -57,6 +60,19 @@ export const NoOrgPage = () => {
       {!waitingForInvite ? null : (
         <View style={{ justifyContent: 'space-between', alignItems: 'center' ,flex: 1, padding: 20 }}>
           <Text>{`Aguardando convite`}</Text>
+          <View style={{ width: '100%' }}>
+            <Button title={'Cencelar'} onPress={cancellOrgJoin} />
+          </View>
+        </View>
+      )}
+      {!ReceivedInviteToJoinOrg || !invitingMember ? null : (
+        <View style={{ justifyContent: 'space-between', alignItems: 'center' ,flex: 1, padding: 20 }}>
+          <Text>{`Chegou convite`}</Text>
+          <View style={{ borderWidth: 1, borderRadius: 8, padding: 4, paddingHorizontal: 20 }}>
+            <Text>{`Enviado por:`}</Text>
+            <Text>{`${invitingMember.name}`}</Text>
+            <Text>{`@${invitingMember.username}`}</Text>
+          </View>
           <View style={{ width: '100%' }}>
             <Button title={'Cencelar'} onPress={cancellOrgJoin} />
           </View>
