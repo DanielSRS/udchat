@@ -16,7 +16,9 @@ const userStorage = storageService.withInstanceID('user').withEncryption().initi
  */
 export const genereateNewUser = async () => {
   const pair = await generateAssimetricKeys();
-  const newMember = Member({ name: 'name', username: 'username' });
+  const username = `${(new Date().getTime().toString(36))}${generateRandomInteger(123456789, 987654321).toString(36)}`
+  const name = `user_${generateRandomInteger(123456789, 987654321).toString(36)}`
+  const newMember = Member({ name, username });
 
   if (isLeft(pair) || isLeft(newMember)) {
     const a = [];
@@ -125,4 +127,8 @@ export const saveUser = (user: User, storage: StorageInstance = userStorage) => 
 export const getPersistedUser = (params: { storage?: StorageInstance } = {}) => {
   const { storage = userStorage } = params;
   return storage.getMap<User>('user');
+}
+
+const generateRandomInteger = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
 }
