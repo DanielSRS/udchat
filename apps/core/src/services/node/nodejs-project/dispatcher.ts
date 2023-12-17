@@ -8,7 +8,7 @@ import {
 } from './encryption';
 import { initServer } from './server';
 import { ipHandler } from './ip';
-import rn_bridge from '../nodeBridge';
+import { rn_bridge } from './libs';
 
 
 function dispatchMessage(message: unknown) {

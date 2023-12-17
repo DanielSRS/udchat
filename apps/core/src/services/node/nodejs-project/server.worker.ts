@@ -1,7 +1,6 @@
-import { parentPort } from 'node:worker_threads';
+import { dgram, parentPort } from './libs';
 import { symetricDecryption } from './encryption';
 import { sendMessage } from './network';
-import dgram from 'node:dgram';
 
 const SEPARATOR = Buffer.from('\r\n');
 const temporary: { [key: string]: {

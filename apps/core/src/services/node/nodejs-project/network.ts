@@ -1,4 +1,4 @@
-import dgram from 'node:dgram';
+import { dgram } from './libs';
 
 type BroadcastResponse = Promise<
   | { success: true; bytesSent: number; }

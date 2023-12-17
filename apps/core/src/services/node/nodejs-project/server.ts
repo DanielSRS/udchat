@@ -1,5 +1,4 @@
-import { Worker } from 'node:worker_threads';
-import rn_bridge from '../nodeBridge';
+import { Worker, rn_bridge } from './libs';
 
 /**
  * O caminho desse aquivo não existe no projeto. Ele é criado

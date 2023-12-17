@@ -5,8 +5,8 @@
 // console.log(networkInterfaces);
 
 
-import { networkInterfaces } from 'node:os';
-import rn_bridge from '../nodeBridge';
+
+import { rn_bridge, networkInterfaces } from './libs';
 // import fetch from 'fetch';
 
 const getInterfaces = () => {
