@@ -34,7 +34,7 @@ const handleOnMessageEvent = async (event: unknown) => {
     myCredentials.publicKey = credentials.publicKey;
     myCredentials.privateKey = credentials.privateKey;
     myCredentials.username = credentials.username;
-    console.log('UPDATE_CRYPTO_KEYS');
+    // console.log('UPDATE_CRYPTO_KEYS');
     parentPort?.postMessage({
       type: 'UPDATE_CRYPTO_KEYS_RESPONSE',
       data: myCredentials,
@@ -234,18 +234,24 @@ socket.on('listening', () => {
 
 /// Servido para recebimento de mensagens não criptografadas:
 
+/** Parte da mensagem que contem informação de controle do protocolo */
+const headerBytes = 1;
+const actCode = Buffer.from([10]);
+
 const nonEncriptedServer = dgram.createSocket('udp4');
 nonEncriptedServer.bind(4322);
 
 
 nonEncriptedServer.on('message', (msg, rinfo) => {
+  // send act
+  nonEncriptedServer.send(actCode, 0, actCode.length, rinfo.port, rinfo.address);
   const logs = [] as Array<string>;
   // const logger = createLogger(logs);
 
   const response = {
     type: 'newMessage',
     data: {
-      message: { data: msg.toString('base64'), enconding: 'base64' },
+      message: { data: msg.subarray(headerBytes).toString('base64'), enconding: 'base64' },
       info: rinfo,
       logs,
     }
