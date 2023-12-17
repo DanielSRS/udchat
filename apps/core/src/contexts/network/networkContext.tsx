@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createContext } from 'use-context-selector';
 // import { logger } from '../../services/log/logService';
 import nodejs from '../../services/node/nodejs';
-import { NetworkStats, NewMessageEvent, SendMessageEvent, SendMessageResponseEvent } from './networkEventTypes';
+import { NetworkStats, NewMessageEvent, SendMessageEvent, SendMessageResponseEvent, UPDATE_CRYPTO_KEYS, UPDATE_CRYPTO_KEYS_RESPONSE } from './networkEventTypes';
 import { BufferLib } from '../../libs/buffer/bufferLib';
 
 const NETWORK_CHANNEL_NAME = 'network';
@@ -18,6 +18,7 @@ interface NetworkContextProps {
     commitId: string | string[];
     callback: (msg: unknown) => void;
   }) => void;
+  updateETCPcredentials: (data: UPDATE_CRYPTO_KEYS['data']) => void;
 }
 
 export const NetworkContext = createContext({} as NetworkContextProps);
@@ -42,7 +43,7 @@ const networkContextData = (): NetworkContextProps => {
       console.log(`unknownMessagesHandler: ${JSON.stringify(msg, null, 2)}`)
     };
     messageListners.current['unknown'] = [unknownMessagesHandler];
-    const propagateNetworkEvent = (event: NewMessageEvent | SendMessageResponseEvent) => {
+    const propagateNetworkEvent = (event: NewMessageEvent | SendMessageResponseEvent | UPDATE_CRYPTO_KEYS_RESPONSE) => {
       if (event.type === 'newMessage') {
         setNetworkStats(s => {
           return {
@@ -77,6 +78,9 @@ const networkContextData = (): NetworkContextProps => {
         } else {
           setNetworkStats(s => ({...s, failedMessages: s.failedMessages + 1}));
         }
+      }
+      if (event.type === 'UPDATE_CRYPTO_KEYS_RESPONSE') {
+        // console.log(`Atualizado keys do server para: ${JSON.stringify(event.data, null, 2)}`);
       }
       // console.log(JSON.stringify({ event: event }, null, 2));
     }
@@ -133,7 +137,15 @@ const networkContextData = (): NetworkContextProps => {
         },
       } satisfies SendMessageEvent);
     }
-  })
+  });
+
+  const updateETCPcredentials = (data: UPDATE_CRYPTO_KEYS['data']) => {
+    // UPDATE_CRYPTO_KEYS_RESPONSE
+    nodejs.channel.post('network', {
+      type: 'UPDATE_CRYPTO_KEYS',
+      data,
+    } satisfies UPDATE_CRYPTO_KEYS);
+  }
 
   const _listenForMessagesWith = (params: { commitId: string, callback: (msg: unknown) => void }) => {
     const commitGroup = messageListners.current[params.commitId];
@@ -157,6 +169,7 @@ const networkContextData = (): NetworkContextProps => {
     networkStats,
     sendMessage,
     listenForMessagesWith,
+    updateETCPcredentials,
   };
 }
 
@@ -215,6 +228,7 @@ const processNewMessage = (event: NewMessageEvent) => {
         }
       },
     };
+    console.log(JSON.stringify(p, null, 2));
   } catch(e) {
     p = errorMessage;
     console.log('processNewMessage error', JSON.stringify(p, null, 2));

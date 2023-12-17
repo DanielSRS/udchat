@@ -14,6 +14,7 @@ type MachineState = Pick<StateFrom<typeof orgMachine>, 'matches' | 'context' | '
 export const useOrgMachine = () => {
   const user = useUser();
   const sendMessage = useContextSelector(NetworkContext, data => data.sendMessage);
+  const updateETCPcredentials = useContextSelector(NetworkContext, data => data.updateETCPcredentials);
   const [actor] = useState(interpret(orgMachine.withConfig({
     services: {
       createOrg: createOrgService,
@@ -125,6 +126,7 @@ export const useOrgMachine = () => {
             port: 4322,
           })
           .then(res => {
+            console.log('sendOrg res: ', JSON.stringify(res, null, 2));
             if (res.data.sucess) return resolve({
               type: 'sendOrg',
               data: {
@@ -162,6 +164,10 @@ export const useOrgMachine = () => {
 
   useEffect(() => {
     actor.send({ type: 'SET_USER', data: { user } });
+    if (user.encriptionKeys.publicKey.length > 5) {
+      // console.log(`update user: `, JSON.stringify(user.encriptionKeys, null, 2));
+      updateETCPcredentials({...user.encriptionKeys, username: user.member.username});
+    }
   }, [user]);
 
   return {

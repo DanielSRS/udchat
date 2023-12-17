@@ -10,6 +10,15 @@ const temporary: { [key: string]: {
   dataTotalLength: number;
 } } = {}
 
+/**
+ * Preciso das minhas chaves criptograficas para processar novos eventos
+ */
+const myCredentials = {
+  publicKey: '',
+  privateKey: '',
+  username: '',
+}
+
 const createLogger = (logBuffer: Array<string>) => ({ log: (msg: string) => logBuffer.push(msg) });
 
 /** Processa as mensagens recebidas */
@@ -17,6 +26,19 @@ const handleOnMessageEvent = async (event: unknown) => {
   if (event && typeof event === 'object' && 'type' in event && event.type === 'sendMessage' && 'data' in event) {
     const res = await sendMessage(event.data as any);
     parentPort?.postMessage(res);
+    return;
+  }
+  // atualiza as credenciais
+  if (event && typeof event === 'object' && 'type' in event && event.type === 'UPDATE_CRYPTO_KEYS' && 'data' in event) {
+    const credentials = event.data as { publicKey: string; privateKey: string; username: string };
+    myCredentials.publicKey = credentials.publicKey;
+    myCredentials.privateKey = credentials.privateKey;
+    myCredentials.username = credentials.username;
+    console.log('UPDATE_CRYPTO_KEYS');
+    parentPort?.postMessage({
+      type: 'UPDATE_CRYPTO_KEYS_RESPONSE',
+      data: myCredentials,
+    });
     return;
   }
   parentPort?.postMessage(event);

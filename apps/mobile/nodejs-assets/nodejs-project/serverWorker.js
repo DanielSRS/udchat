@@ -18,13 +18,35 @@ const SEPARATOR = Buffer.from('\r\n');
  */
 const temporary = {}
 
+/**
+ * Preciso das minhas chaves criptograficas para processar novos eventos
+ */
+const myCredentials = {
+  publicKey: '',
+  privateKey: '',
+  username: '',
+}
+
 const createLogger = (/** @type {Array<string>} */ logBuffer) => ({ log: (/** @type {string} */ msg) => logBuffer.push(msg) });
 
 /** Processa as mensagens recebidas */
-const handleOnMessageEvent = async (/** @type {{ type: string; data: { message: any; ip: any; port: any; messageId: any; }; }} */ event) => {
+const handleOnMessageEvent = async (/** @type {{ type: string; data: { message: any; ip: any; port: any; messageId: any; publicKey: string; privateKey: string; username: string }; }} */ event) => {
   if (event && typeof event === 'object' && 'type' in event && event.type === 'sendMessage' && 'data' in event) {
     const res = await sendMessage(event.data);
     parentPort?.postMessage(res);
+    return;
+  }
+  // atualiza as credenciais
+  if (event && typeof event === 'object' && 'type' in event && event.type === 'UPDATE_CRYPTO_KEYS' && 'data' in event) {
+    const credentials = event.data;
+    myCredentials.publicKey = credentials.publicKey;
+    myCredentials.privateKey = credentials.privateKey;
+    myCredentials.username = credentials.username;
+    console.log('UPDATE_CRYPTO_KEYS');
+    parentPort?.postMessage({
+      type: 'UPDATE_CRYPTO_KEYS_RESPONSE',
+      data: myCredentials,
+    });
     return;
   }
   parentPort?.postMessage(event);

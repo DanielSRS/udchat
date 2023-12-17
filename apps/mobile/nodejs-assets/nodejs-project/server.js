@@ -11,7 +11,7 @@ serverWorker.on('message', event => {
     event
     && typeof event === 'object'
     && 'type' in event
-    && (event.type === 'sendMessageResponse' || event.type === 'newMessage')) {
+    && (event.type === 'sendMessageResponse' || event.type === 'newMessage' || event.type ===  'UPDATE_CRYPTO_KEYS_RESPONSE')) {
     rn_bridge.channel.post('network', event);
     return;
   }

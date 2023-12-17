@@ -10,6 +10,14 @@ import { getNetworkInterfaces } from "../../services/node/nodeService";
 
 const userStorage = storageService.withInstanceID('user').withEncryption().initialize();
 
+const generateUsername = () => {
+  return `${(new Date().getTime().toString(36))}${generateRandomInteger(123456789, 987654321).toString(36)}`.substring(0, 14);
+}
+
+const generateName = () => {
+  return `user_${generateRandomInteger(123456789, 987654321).toString(36)}`;
+}
+
 /**
  * Na criação de um novo usuario, poder ocorrer os seguintes erros:
  * - Na criação das craves criptograficas
@@ -17,8 +25,8 @@ const userStorage = storageService.withInstanceID('user').withEncryption().initi
  */
 export const genereateNewUser = async () => {
   const pair = await generateAssimetricKeys();
-  const username = `${(new Date().getTime().toString(36))}${generateRandomInteger(123456789, 987654321).toString(36)}`
-  const name = `user_${generateRandomInteger(123456789, 987654321).toString(36)}`
+  const username = generateUsername();
+  const name = generateName();
   const ip = await (async () => {
     const interfaces = await getNetworkInterfaces();
     const keys = Object.keys(interfaces.interfaces);
@@ -29,7 +37,7 @@ export const genereateNewUser = async () => {
     if (pair._tag === 'Left') return ' pk ';
     return pair.right.publicKey;
   })();
-  console.log('member to create: ', JSON.stringify({ name, username, ip, publicKey }), null, 2);
+  // console.log('member to create: ', JSON.stringify({ name, username, ip, publicKey }), null, 2);
   const newMember = Member({ name, username, ip, publicKey });
 
   if (isLeft(pair) || isLeft(newMember)) {
@@ -143,4 +151,8 @@ export const getPersistedUser = (params: { storage?: StorageInstance } = {}) => 
 
 const generateRandomInteger = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
+export const deleteUser = (storage: StorageInstance = userStorage) => {
+  return storage.removeItem('user');
 }

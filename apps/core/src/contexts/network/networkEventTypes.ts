@@ -77,3 +77,20 @@ export interface SendMessageEvent {
     messageId: string;
   },
 }
+
+export interface UPDATE_CRYPTO_KEYS_RESPONSE {
+  type: 'UPDATE_CRYPTO_KEYS_RESPONSE',
+  data: {
+    publicKey: string;
+    privateKey: string;
+  },
+}
+
+export interface UPDATE_CRYPTO_KEYS {
+  type: 'UPDATE_CRYPTO_KEYS',
+  data: {
+    publicKey: string;
+    privateKey: string;
+    username: string;
+  },
+}
