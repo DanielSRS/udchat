@@ -95,18 +95,24 @@ export const useOrgMachine = () => {
       sendOrg: (context, event) => {
         return new Promise((resolve, reject) => {
           const org = context.organization;
+          // @ts-expect-error
+          const newMemberIp = event.data.ip;
+          const newMember = {
+            ip: newMemberIp,
+            name: event.data.joiningMember.name,
+            publicKey: event.data.joiningMember.publicKey,
+            username: event.data.joiningMember.username,
+          };
           org.commits.push({
             type: 'ADD_MEMBER_TO_ORG_COMMIT',
             data: {
               commitId: generateCommitId(),
               createdAt: (new Date()).getTime().toString(36),
-              newMember: {
-                ...context.invitingMember,
-                ip: context.ip,
-              },
+              newMember,
               previousCommit: org.commits[org.commits.length - 1]?.data.commitId || '',
             },
           });
+          org.members.push(newMember);
           const header = {
             /** Versão o programa/protocolo */
             version: '0.0.1',
@@ -121,12 +127,11 @@ export const useOrgMachine = () => {
           };
           const message = `${JSON.stringify(header)}\r\n${JSON.stringify(body)}`;
           sendMessage({
-            ip: context.ip,
+            ip: newMemberIp,
             message,
             port: 4322,
           })
           .then(res => {
-            console.log('sendOrg res: ', JSON.stringify(res, null, 2));
             if (res.data.sucess) return resolve({
               type: 'sendOrg',
               data: {
