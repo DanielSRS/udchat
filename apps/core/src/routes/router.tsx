@@ -5,6 +5,8 @@ import { OrgContext } from "../contexts/organization/orgContext";
 import { StatsPage } from "../pages/stats/statsPage";
 import { NoUserPage } from "../pages/nouser/noUserPage";
 import { NoOrgPage } from "../pages/noorg/noOrgPage";
+import { GroupsPage } from "../pages/groups/groupsPage";
+import { GroupsProvider } from "../contexts/groups/groupsContext";
 
 export const Router = () => {
   const userLoaded = useContextSelector(UserContext, data => data.userLoaded);
@@ -18,5 +20,9 @@ export const Router = () => {
     return <NoOrgPage />;
   }
 
-  return <StatsPage />;
+  return (
+    <GroupsProvider>
+      <GroupsPage />
+    </GroupsProvider>
+  );
 }
