@@ -8,7 +8,7 @@ interface TextProps {
 export const Text = (props: TextProps) => {
   const { children } = props;
   return (
-    <TextLib >
+    <TextLib>
       {children}
     </TextLib>
   );
