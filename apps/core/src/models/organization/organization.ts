@@ -8,19 +8,35 @@ type OrgCommitType = 'orgCreation' | 'addMemberToOrg';
 
 export interface OrgCreationCommit {
   type: 'orgCreation';
-  createdBy: Member;
-  createdAt: string;
-  previousCommit: 'none';
+  data: {
+    commitId: string;
+    createdBy: Member;
+    createdAt: string;
+    previousCommit: 'none';
+  };
+}
+
+export interface ADD_MEMBER_TO_ORG_COMMIT {
+  type: 'ADD_MEMBER_TO_ORG_COMMIT';
+  data: {
+    newMember: Member;
+    createdAt: string;
+    previousCommit: string;
+    commitId: string;
+  }
 }
 
 const OrgCreationCommitSchema = z.object({
   type: z.literal('orgCreation'),
-  createdBy: MemberSchema,
-  createdAt: z.string(),
-  previousCommit: z.literal('none'),
+  data: z.object({
+    createdBy: MemberSchema,
+    createdAt: z.string(),
+    commitId: z.string(),
+    previousCommit: z.literal('none'),
+  })
 });
 
-type OrgCommit = OrgCreationCommit;
+type OrgCommit = OrgCreationCommit | ADD_MEMBER_TO_ORG_COMMIT;
 
 const OrgCommitSchema = OrgCreationCommitSchema;
 
@@ -30,10 +46,12 @@ export interface Organization {
   /** Membros da organização */
   members: Array<Member>
   commits: OrgCommit[];
+  firstCommit: string;
 };
 
 const OrganizationSchema = z.object({
   creationDate: z.string(),
+  firstCommit: z.string(),
   members: z.array(MemberSchema),
   commits: z.array(OrgCommitSchema).min(1),
 });

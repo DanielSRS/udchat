@@ -5,13 +5,20 @@
 // console.log(networkInterfaces);
 
 
-import { networkInterfaces } from 'node:os';
-import rn_bridge from '../nodeBridge';
+
+import { rn_bridge, networkInterfaces } from './libs';
 // import fetch from 'fetch';
 
-const getInterfaces = () => {
+export const getInterfaces = () => {
   const nets = networkInterfaces();
   const results: { [key: string]: string[] } = {}; //Object.create(null); // Or just '{}', an empty object
+
+  const l = (nets[''])?.[0];
+  type iv4 = { family: 'IPv4' };
+  type b = NonNullable<typeof l>;
+  type C = b & iv4;
+  const v4NonInternal: { [key: string]: C[] } = {};
+  const list: C[] = [];
 
   for (const name of Object.keys(nets)) {
       const netName = nets[name];
@@ -24,18 +31,27 @@ const getInterfaces = () => {
               if (!results[name]) {
                   results[name] = [];
               }
+              if (!v4NonInternal[name]) {
+                v4NonInternal[name] = [];
+              }
               results[name]?.push(net.address);
+              v4NonInternal[name]?.push(net);
+              list.push(net);
           }
       }
   }
 
-  return results;
+  return {
+    results,
+    v4NonInternal,
+    list,
+  };
 }
 
 export const ipHandler = () => {
   rn_bridge.channel.post('ip', {
     event: 'NETWORK_INTERFACES',
-    interfaces: getInterfaces(),
+    interfaces: getInterfaces().results,
   });
 }
 

@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import { nodecrypto as crypto} from './libs';
 
 export function publicEncrypt (params: { key: string; data: string }) {
   const logs: Array<string> = [];

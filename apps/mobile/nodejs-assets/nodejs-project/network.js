@@ -143,7 +143,7 @@ async function wait( /** @type {number} */ millisseconds) {
   await new Promise((resolve) => setTimeout(() => resolve(undefined), millisseconds));
 }
 
-const sendMessage = async (/** @type {{ message: any; ip: any; port: any; messageId: any; }} */ params) => {
+const sendMessageOld = async (/** @type {{ message: any; ip: any; port: any; messageId: any; }} */ params) => {
   const { message, ip, port, messageId } = params;
   const data = Buffer.isBuffer(message) ? message : Buffer.from(message.message, message.encoding);
   const socket = dgram.createSocket('udp4');
@@ -191,6 +191,85 @@ const sendMessage = async (/** @type {{ message: any; ip: any; port: any; messag
       messageId,
     }
   };
+}
+
+
+const actCode = Buffer.from([10]);
+
+const sendMessage = (/** @type {{ message: any; ip: any; port: any; messageId: any; }} */ params) => {
+  return new Promise((resolve, reject) => {
+    const { message, ip, port, messageId } = params;
+    const clientSocket = dgram.createSocket('udp4');
+    const data = Buffer.concat([
+      actCode,
+      Buffer.isBuffer(message) ? message : Buffer.from(message.message, message.encoding)
+    ]);
+    const /** @type {string[]} */ logs = [];
+    logs.push(`preparing to send: ${data.length} bytes`);
+
+
+    const start = new Date().getTime();
+    clientSocket.send(data, 0, data.length, port, ip, (err, bytes) => {
+      // se erro, encerra
+      if(err) {
+        logs.push(`Socket error: ${err.stack}`);
+        return resolve({
+          type: 'sendMessageResponse',
+          data: {
+            bytesSent: 0,
+            logs,
+            sucess: false,
+            error: err,
+            messageId,
+          }
+        });
+      }
+
+      // encerra a conexão se ficar 5 segundos sem resposta
+      const timeout = setTimeout(() => {
+        logs.push(`Timeout error: no act received`);
+        resolve({
+          type: 'sendMessageResponse',
+          data: {
+            bytesSent: 0,
+            logs,
+            sucess: false,
+            error: new Error('timedout'),
+            messageId,
+          }
+        });
+      }, 5000);
+
+
+      const receivedAct = (/** @type {Buffer} */ msg, /** @type {dgram.RemoteInfo} */ rinfo) => {
+        if(!actCode.equals(msg.subarray(0, 1))) {
+          // console.log('não act');
+          return;
+        }
+        const end = new Date().getTime();
+        const elapsed = end - start;
+        logs.push(`Socket sent ${bytes} bytes`);
+        logs.push(`Done sending packets in ${elapsed}ms`);
+        // console.log(rinfo);
+        clearTimeout(timeout);        /// não há timeout. houve resposta
+        resolve({
+          type: 'sendMessageResponse',
+          data: {
+            bytesSent: bytes,
+            logs,
+            sucess: true,
+            error: undefined,
+            elapsed,
+            messageId,
+          }
+        });
+        clientSocket.close()          // conexão encerrou
+      }
+
+      // aguarda recebimento do act
+      clientSocket.on('message', receivedAct);
+    });
+  });
 }
 
 module.exports = {

@@ -11,11 +11,15 @@ export interface Member {
   readonly name: string;
   /** Nome de usuário do membro da organização. É unico */
   readonly username: string;
+  readonly ip: string;
+  readonly publicKey: string;
 };
 
 export const MemberSchema = z.object({
   name: z.string(),
   username: z.string(),
+  ip: z.string(),
+  publicKey: z.string(),
 });
 
 type MemberError = ReturnType<typeof CoreError<ZodIssue[]>>;
