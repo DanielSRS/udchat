@@ -13,6 +13,7 @@ interface GroupsContextProps {
   storeCreatedGroup: boolean;
   storeCreatedGroupFailed: boolean;
   loadedGroupsIdle: boolean;
+  // addingMembers: boolean;
   groups: Group[];
   createGroup: (groupName: string) => void;
   stateValue: string;
@@ -32,6 +33,8 @@ const groupsContextData = () => {
   const storeCreatedGroup = state?.matches('LoadedGroups.Groups.StoreCreatedGroup') || false;
   const storeCreatedGroupFailed = state?.matches('LoadedGroups.Groups.StoreCreatedGroupFailed') || false;
   const loadedGroupsIdle = state?.matches('LoadedGroups.Groups.idle') || false;
+
+  // const addingMembers = state?.matches('LoadedGroups.Groups.AddingMembers') || false;
 
   const groups = (() => {
     if (!state) return [];
@@ -56,6 +59,7 @@ const groupsContextData = () => {
     groups,
     createGroup,
     stateValue,
+    // addingMembers,
   }
 }
 

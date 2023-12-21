@@ -4,6 +4,7 @@ import { useContextSelector } from 'use-context-selector';
 import { OrgContext } from '../../contexts/organization/orgContext';
 import SelectInput from 'ink-select-input';
 import TextInput from 'ink-text-input';
+import { IpAddresses } from '../../components/ipaddresses/ipAddresses';
 
 export const NoOrgPage = () => {
   const [query, setQuery] = useState('');
@@ -127,6 +128,7 @@ export const NoOrgPage = () => {
       {!waitingForInvite ? null : (
         <Box flexDirection='column' justifyContent='space-between'>
           <Text>{`Aguardando Convite`}</Text>
+          <IpAddresses />
           <SelectInput items={[{ label: 'Cencelar', value: true }]} onSelect={onCancellOrgJoining} />
         </Box>
       )}

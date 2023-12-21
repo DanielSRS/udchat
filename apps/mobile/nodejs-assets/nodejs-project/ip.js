@@ -7,6 +7,9 @@ const getInterfaces = () => {
   const nets = networkInterfaces();
   const results = {}; //Object.create(null); // Or just '{}', an empty object
 
+  const v4NonInternal = {};
+  const list = [];
+
   for (const name of Object.keys(nets)) {
       const netName = nets[name];
       if (!netName) continue;
@@ -18,21 +21,31 @@ const getInterfaces = () => {
               if (!results[name]) {
                   results[name] = [];
               }
+              if (!v4NonInternal[name]) {
+                v4NonInternal[name] = [];
+              }
               results[name]?.push(net.address);
+              v4NonInternal[name]?.push(net);
+              list.push(net);
           }
       }
   }
 
-  return results;
+  return {
+    results,
+    v4NonInternal,
+    list,
+  };
 }
 
 const ipHandler = () => {
   rn_bridge.channel.post('ip', {
     event: 'NETWORK_INTERFACES',
-    interfaces: getInterfaces(),
+    interfaces: getInterfaces().results,
   });
 }
 
 module.exports = {
   ipHandler,
+  getInterfaces,
 }

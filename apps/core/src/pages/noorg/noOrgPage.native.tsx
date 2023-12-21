@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useContextSelector } from 'use-context-selector';
 import { OrgContext } from '../../contexts/organization/orgContext';
 import { ActivityIndicator, Button, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { deleteUser } from '../../managers/user/userManager';
+import { IpAddresses } from '../../components/ipaddresses/ipAddresses';
 
 export const NoOrgPage = () => {
   const [query, setQuery] = useState('');
@@ -66,6 +68,7 @@ export const NoOrgPage = () => {
         <View style={{ justifyContent: 'space-between', flex: 1, padding: 20 }}>
           <Text>{`Dentro da org`}</Text>
           <View style={{ width: '100%', gap: 20 }}>
+            <Button title={'Delete user'} onPress={() => deleteUser()} />
             <Button title={'Delete org'} onPress={deleteOrg} />
             <Button title={'Add new member'} onPress={newMember} />
           </View>
@@ -74,6 +77,7 @@ export const NoOrgPage = () => {
       {!waitingForInvite ? null : (
         <View style={{ justifyContent: 'space-between', alignItems: 'center' ,flex: 1, padding: 20 }}>
           <Text>{`Aguardando convite`}</Text>
+          <IpAddresses />
           <View style={{ width: '100%' }}>
             <Button title={'Cencelar'} onPress={cancellOrgJoin} />
           </View>

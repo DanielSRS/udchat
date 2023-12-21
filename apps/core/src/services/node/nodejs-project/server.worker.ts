@@ -1,6 +1,7 @@
 import { dgram, parentPort } from './libs';
 import { symetricDecryption } from './encryption';
 import { sendMessage } from './network';
+import { getInterfaces } from './ip';
 
 const SEPARATOR = Buffer.from('\r\n');
 const temporary: { [key: string]: {
@@ -229,13 +230,14 @@ socket.on('error', (err) => {
 socket.on('listening', () => {
   // Print the socket's address
   const address = socket.address();
-  console.log(`Socket listening on ${address.address}:${address.port}`);
+  // console.log(`Socket listening on ${address.address}:${address.port}`);
 });
 
 /// Servido para recebimento de mensagens não criptografadas:
 
 /** Parte da mensagem que contem informação de controle do protocolo */
 const headerBytes = 1;
+const amOnlineAt = Buffer.from([15]);
 const actCode = Buffer.from([10]);
 
 const nonEncriptedServer = dgram.createSocket('udp4');
@@ -248,6 +250,23 @@ nonEncriptedServer.on('message', (msg, rinfo) => {
   const logs = [] as Array<string>;
   // const logger = createLogger(logs);
 
+  const messageType = msg.subarray(0, 1);
+  if (messageType.equals(amOnlineAt)) {
+    const response = {
+      type: 'amOnlineAt',
+      data: {
+        username: msg.subarray(1, 15).toString(),
+        ip: rinfo.address,
+        info: rinfo,
+        logs,
+      }
+    }
+    // console.log(`my username: `, myCredentials.username);
+    // console.log(`message type: ${JSON.stringify(response, null, 2)}`)
+
+    return parentPort?.postMessage(response);
+  }
+
   const response = {
     type: 'newMessage',
     data: {
@@ -258,4 +277,74 @@ nonEncriptedServer.on('message', (msg, rinfo) => {
   }
 
   parentPort?.postMessage(response);
+});
+
+
+/**
+ * 
+ * 
+ * 
+ * 
+ * Broadcast server
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+/**
+ * Calcula o endereço de broadcast
+ */
+const getBroadcastAddress = (ip: string, subnetMask: string) => {
+  /**
+   * Transforma o endereço ipv4 em uma lista de numeros (4 octetos)
+   */
+  const _ip = ip.split('.').map(v => +v);
+  const _subnetMask = subnetMask.split('.').map(v => +v);
+
+  /**
+   * Transforma a lista de numeros em valores binários (32 bits no total)
+   */
+  const ip_buffer = Buffer.from(_ip);
+  const subnetMask_buffer = Buffer.from(_subnetMask);
+
+  /** Alocando espaço para a o endereço de broadcast */
+  const broadcast_buffer = Buffer.alloc(4);
+
+  /** Calcula o endereço de broadcast */
+  for (let i = 0; i < 4; i++) {
+    const subnetMask_byte = subnetMask_buffer[i];
+    const ip_byte = ip_buffer[i];
+    if (subnetMask_byte === undefined || ip_byte === undefined) continue;
+    // broadcast_buffer = (NOT subnetMask_buffer) OR ip_buffer
+    broadcast_buffer[i] = (~subnetMask_byte) | ip_byte;
+  }
+
+  /** Retorna o endereço no formato string ipv4 */
+  return broadcast_buffer.join('.');
+}
+
+const interfacesList = getInterfaces().list;
+const broadcastAddresses = interfacesList.map(netWorkInfo => getBroadcastAddress(netWorkInfo.address, netWorkInfo.netmask));
+
+const sk = dgram.createSocket('udp4');
+sk.bind();
+
+
+const notifyMyIp = (broadcastIp: string) => {
+  // const { broadcastIp, port } = params;
+  const userId = Buffer.from(myCredentials.username);
+  const data = Buffer.concat([amOnlineAt, userId]);
+  
+  sk.send(data, 0, data.length, 4323, broadcastIp);
+}
+
+
+sk.on('listening', () => {
+  sk.setBroadcast(true);
+  broadcastAddresses.map(address => setInterval(() => {
+    notifyMyIp(address);
+  }, 1000))
 });
