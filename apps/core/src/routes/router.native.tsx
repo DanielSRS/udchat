@@ -20,7 +20,7 @@ export const Router = () => {
     return <NoOrgPage />;
   }
 
-  return <StatsPage />;
+  // return <StatsPage />;
 
   return (
     <GroupsProvider>

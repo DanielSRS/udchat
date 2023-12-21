@@ -21,6 +21,9 @@ interface ViewProps {
     height?: string | number | undefined;
     width?: string | number | undefined;
     overflow?: "visible" | "hidden" | undefined;
+    justifyContent?: "center" | "flex-start" | "flex-end" | "space-between" | "space-around";
+    alignItems?: "center" | "flex-start" | "flex-end" | "stretch";
+    alignSelf?: "center" | "flex-start" | "flex-end" | "auto";
   }
 }
 

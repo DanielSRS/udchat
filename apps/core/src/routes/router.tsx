@@ -7,7 +7,7 @@ import { NoUserPage } from "../pages/nouser/noUserPage";
 import { NoOrgPage } from "../pages/noorg/noOrgPage";
 import { GroupsPage } from "../pages/groups/groupsPage";
 import { GroupsProvider } from "../contexts/groups/groupsContext";
-import { Box } from "ink";
+import { Box, useFocus, useInput } from "ink";
 import { Tab, Tabs } from "ink-tab";
 
 export const Router = () => {
@@ -27,6 +27,13 @@ export const Router = () => {
 
 const TabExample = () => {
   const [activeTabName, setSctiveTabName] = useState<string>('');
+  const [isTabFocused, setIsTabFocused] = useState(false);
+
+  useInput((input, key) => {
+    if (key.ctrl && input === 't') {
+      setIsTabFocused(p => !p);
+    }
+  })
 
   const handleTabChange = (name: string) => {
     // set the active tab name to do what you want with the content
@@ -44,20 +51,23 @@ const TabExample = () => {
           }}
           showIndex={false}
           onChange={handleTabChange}
+          isFocused={isTabFocused ? undefined : false}
         >
           <Tab name="group">{` Grupos `}</Tab>
           <Tab name="user">{` Usuário `}</Tab>
           <Tab name="org">{` Organização `}</Tab>
           <Tab name="stats">{` Estatísticas `}</Tab>
         </Tabs>
-        {activeTabName === 'group' && (
-          <GroupsProvider>
-            <GroupsPage />
-          </GroupsProvider>
-        )}
-        {activeTabName === 'org' &&  <NoOrgPage />}
-        {activeTabName === 'user' && <NoUserPage />}
-        {activeTabName === 'stats' && <StatsPage />}
+        <Box flexGrow={1} flexBasis={0} flexShrink={1}>
+          {activeTabName === 'group' && (
+            <GroupsProvider>
+              <GroupsPage />
+            </GroupsProvider>
+          )}
+          {activeTabName === 'org' &&  <NoOrgPage />}
+          {activeTabName === 'user' && <NoUserPage />}
+          {activeTabName === 'stats' && <StatsPage />}
+        </Box>
       </Box>
   );
 }
