@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useContextSelector } from "use-context-selector"
 import { UserContext } from "../contexts/user/userContext"
 import { OrgContext } from "../contexts/organization/orgContext";
@@ -7,6 +7,8 @@ import { NoUserPage } from "../pages/nouser/noUserPage";
 import { NoOrgPage } from "../pages/noorg/noOrgPage";
 import { GroupsPage } from "../pages/groups/groupsPage";
 import { GroupsProvider } from "../contexts/groups/groupsContext";
+import { Box } from "ink";
+import { Tab, Tabs } from "ink-tab";
 
 export const Router = () => {
   const userLoaded = useContextSelector(UserContext, data => data.userLoaded);
@@ -19,10 +21,43 @@ export const Router = () => {
   if (!orgLoaded) {
     return <NoOrgPage />;
   }
+  
+  return <TabExample />;
+}
+
+const TabExample = () => {
+  const [activeTabName, setSctiveTabName] = useState<string>('');
+
+  const handleTabChange = (name: string) => {
+    // set the active tab name to do what you want with the content
+    setSctiveTabName(name);
+  }
 
   return (
-    <GroupsProvider>
-      <GroupsPage />
-    </GroupsProvider>
+    <Box flexDirection="column" flexGrow={1} flexShrink={1} flexBasis={0}>
+        <Tabs
+          keyMap={{
+            next: [],
+            previous: [],
+            useNumbers: false,
+            useTab: true,
+          }}
+          showIndex={false}
+          onChange={handleTabChange}
+        >
+          <Tab name="group">{` Grupos `}</Tab>
+          <Tab name="user">{` Usuário `}</Tab>
+          <Tab name="org">{` Organização `}</Tab>
+          <Tab name="stats">{` Estatísticas `}</Tab>
+        </Tabs>
+        {activeTabName === 'group' && (
+          <GroupsProvider>
+            <GroupsPage />
+          </GroupsProvider>
+        )}
+        {activeTabName === 'org' &&  <NoOrgPage />}
+        {activeTabName === 'user' && <NoUserPage />}
+        {activeTabName === 'stats' && <StatsPage />}
+      </Box>
   );
 }
