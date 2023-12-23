@@ -1,15 +1,33 @@
 # udchat
 
-To install dependencies:
+Ambiente de desenvolvimento.
+- Instale o Nodejs >= 18
+- Habilite o [corepack](https://nodejs.org/api/corepack.html) (opção recomendada para instalar o yarn 3 como gerenciador de pacotes)
+- ```bash
+  corepack enable
+  ```
+  ou
+  ```bash
+  corepack enable yarn
+  ```
+  ou instale o [Yarn](https://yarnpkg.com/getting-started/install) de outra maneira.
+
+Instale as dependencias:
 
 ```bash
-bun install
+git clone https://github.com/DanielSRS/udchat
+cd udchat
+yarn install
 ```
 
-To run:
+Para compilar o app de linha de comando:
 
 ```bash
-bun run src/index.ts
+yarn bundle
 ```
 
-This project was created using `bun init` in bun v1.0.3. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+Para executar o app de linha de comando:
+
+```bash
+yarn cli
+```
