@@ -1,0 +1,5 @@
+# codigo nativo do android e arquivos de compilação
+apps/mobile/android
+
+# banco de dados
+apps/cli/database
