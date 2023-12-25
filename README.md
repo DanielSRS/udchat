@@ -1,5 +1,10 @@
 # udchat
 
+Com o docker:
+```bash
+docker container run -it danielsrs/udchat:v0.0.1
+```
+---
 Ambiente de desenvolvimento.
 - Instale o Nodejs >= 18
 - Habilite o [corepack](https://nodejs.org/api/corepack.html) (opção recomendada para instalar o yarn 3 como gerenciador de pacotes)
