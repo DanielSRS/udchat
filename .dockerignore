@@ -1,3 +1,8 @@
+# node_modules
+node_modules
+apps/**/node_modules
+packages/**/node_modules
+
 # codigo nativo do android e arquivos de compilação
 apps/mobile/android
 
