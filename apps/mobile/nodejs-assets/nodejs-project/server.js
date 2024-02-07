@@ -23,9 +23,9 @@ serverWorker.on('message', event => {
 });
 
 const initServer = () => {
-  rn_bridge.channel.on('serverWorker', ( /** @type {unknown} */ message) => {
-    serverWorker?.postMessage(message);
-  });
+  // rn_bridge.channel.on('serverWorker', ( /** @type {unknown} */ message) => {
+  //   serverWorker?.postMessage(message);
+  // });
   rn_bridge.channel.on('network', (/** @type {any} */ message) => {
     serverWorker?.postMessage(message);
   });
