@@ -6,6 +6,7 @@
     "types": [
       "node", // add Bun global
       "react-native"
-    ]
+    ],
+    "allowSyntheticDefaultImports": true,
   }
 }
