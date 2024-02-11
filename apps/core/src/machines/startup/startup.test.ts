@@ -1,4 +1,4 @@
-import { describe, expect, it, mock } from "bun:test";
+import { describe, expect, it, jest } from "@jest/globals";
 import { interpret } from "xstate";
 import { waitFor } from "xstate/lib/waitFor";
 import { startupMachine } from "./startup";
@@ -21,7 +21,7 @@ describe('Startup machine transita entre os estados como esperado', () => {
   });
 
   it('Busca usuário assim que a maquina inicializa', async () => {
-    const getUser = mock(() => new Promise((_, reject) => {
+    const getUser = jest.fn(() => new Promise((_, reject) => {
       reject();
     })) as () => Promise<{ user: User }>;
   
