@@ -92,7 +92,7 @@ export const StartupPage = () => {
           <Text>{`| Commits:`}</Text>
           {state.context.organization.commits.map((item) => {
             return (
-              <Text key={item.createdAt} >{`|     ${item.type}: ${item.createdAt}`}</Text>
+              <Text key={item.data.createdAt} >{`|     ${item.type}: ${item.data.createdAt}`}</Text>
             );
           })}
           <Text>{`| membros:`}</Text>

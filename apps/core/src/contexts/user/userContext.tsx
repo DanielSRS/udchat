@@ -23,6 +23,8 @@ const placeholderUser = {
   member: {
     name: '',
     username: '',
+    ip: '',
+    publicKey: '',
   },
 };
 

@@ -99,52 +99,53 @@ const networkContextData = (): NetworkContextProps => {
     ip: string;
     port: number;
   }) => new Promise<SendMessageResponseEvent>((resolve) => {
-    {
-      const { ip, message, port } = params;
-  
-      /** Identifica o envento de resposta de envio de mensage */
-      const messageId = `${ip}${port}${(new Date()).getTime().toString(36)}${message.length}`;
+    const { ip, message, port } = params;
 
-      /** Registra o evento de timeout */
-      const timeoutResponse: SendMessageResponseEvent['data'] = {
-        bytesSent: 0,
-        error: new Error('message timedout'),
-        logs: ['callback was not fired'],
-        messageId,
-        sucess: false,
-      }
-      const timeout = setTimeout(() => {
-        resolve({
-          type: 'sendMessageResponse',
-          data: timeoutResponse,
-        });
-      }, 10000);
+    /** Identifica o envento de resposta de envio de mensage */
+    const messageId = `${ip}${port}${(new Date()).getTime().toString(36)}${message.length}`;
 
-      /** Registra o callback */
-      sentMessagesCallbacks.current[messageId] = (r) => { 
-        clearTimeout(timeout);
-        resolve(r);
-      }
-  
-      /** Dispara evento de envio de mensagem */
-      nodejs.channel.post('network', {
-        type: 'sendMessage',
-        data: {
-          ip,
-          message: { message, encoding: 'utf8' },
-          messageId,
-          port,
-        },
-      } satisfies SendMessageEvent);
+    /** Registra o evento de timeout */
+    const timeoutResponse: SendMessageResponseEvent['data'] = {
+      bytesSent: 0,
+      error: new Error('message timedout'),
+      logs: ['callback was not fired'],
+      messageId,
+      sucess: false,
     }
+    const timeout = setTimeout(() => {
+      resolve({
+        type: 'sendMessageResponse',
+        data: timeoutResponse,
+      });
+    }, 10000);
+
+    /** Registra o callback */
+    sentMessagesCallbacks.current[messageId] = (r) => { 
+      clearTimeout(timeout);
+      resolve(r);
+    }
+
+    const commit: SendMessageEvent = {
+      type: 'sendMessage',
+      data: {
+        ip,
+        message: { message, encoding: 'utf8' },
+        messageId,
+        port,
+      },
+    };
+
+    /** Dispara evento de envio de mensagem */
+    nodejs.channel.post('network', commit);
   });
 
   const updateETCPcredentials = (data: UPDATE_CRYPTO_KEYS['data']) => {
     // UPDATE_CRYPTO_KEYS_RESPONSE
-    nodejs.channel.post('network', {
+    const commit: UPDATE_CRYPTO_KEYS = {
       type: 'UPDATE_CRYPTO_KEYS',
       data,
-    } satisfies UPDATE_CRYPTO_KEYS);
+    };
+    nodejs.channel.post('network', commit);
   }
 
   const _listenForMessagesWith = (params: { commitId: string, callback: (msg: unknown) => void }) => {

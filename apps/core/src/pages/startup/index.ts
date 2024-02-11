@@ -1,1 +1,1 @@
-export { startup } from './startupPage';
+export { StartupPage } from './startupPage';

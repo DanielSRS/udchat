@@ -4085,7 +4085,7 @@ export const Startup = () => {
           <View>
             <Text>{`|--------------- Organization ----------------`}</Text>
             <Text>{`| Data de criação: ${state.context.organization.creationDate}`}</Text>
-            <Text>{`| Commits:        \n\t${state.context.organization.commits.map(v => v.type + ': ' + v.createdAt).join('\n\t')}`}</Text>
+            <Text>{`| Commits:        \n\t${state.context.organization.commits.map(v => v.type + ': ' + v.data.createdAt).join('\n\t')}`}</Text>
             <Text>{`| membros:        \n\t ${state.context.organization.members.map(m => m.username + ' aka ' + m.name).join('\n\t')}`}</Text>
             <Text>{`|---------------------------------------------\n`}</Text>
           </View>

@@ -6,7 +6,7 @@ import { View } from "../../libs/view/view";
 import { Group } from "../../contexts/groups/groupsTypes";
 import { useFocus, useInput } from "ink";
 import { OrgContext } from "../../contexts/organization/orgContext";
-import SelectInput from "ink-select-input";
+// import SelectInput from "ink-select-input";
 
 /**
  * Exibe a lista de grupos do usuário.
@@ -14,7 +14,7 @@ import SelectInput from "ink-select-input";
  * Opção de navegar para um grupo
  */
 export const GroupsPage = () => {
-  const groups = useContextSelector(GroupsContext, data => data.groups).toReversed();
+  const groups = useContextSelector(GroupsContext, data => data.groups).reverse();
   const createGroup = useContextSelector(GroupsContext, data => data.createGroup);
   const loadedGroupsIdle = useContextSelector(GroupsContext, data => data.loadedGroupsIdle);
   // const addingMembers = useContextSelector(GroupsContext, data => data.addingMembers);

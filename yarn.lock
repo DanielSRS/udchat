@@ -3476,12 +3476,11 @@ __metadata:
     react-native-mmkv-storage: 0.9.1
     react-native-svg: 14.0.0
     scheduler: 0.23.0
+    typescript: 4.8.4
     use-context-selector: 1.4.1
     xstate: 4.38.2
     zod: 3.22.4
     zod-validation-error: 1.5.0
-  peerDependencies:
-    typescript: 4.8.4
   languageName: unknown
   linkType: soft
 
