@@ -3457,10 +3457,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@udchat/core@workspace:apps/core"
   dependencies:
+    "@react-native/eslint-config": ^0.72.2
     "@tsconfig/react-native": ^3.0.0
     "@types/react": ^18.0.24
     "@xstate/react": 3.2.2
     bun-types: latest
+    eslint: ^8.19.0
     fp-ts: 2.16.1
     ink: 4.4.1
     ink-select-input: 5.0.0
@@ -3469,6 +3471,7 @@ __metadata:
     jest: ^29.2.1
     lottie-react-native: 6.4.1
     nodejs-mobile-react-native: 18.17.3
+    prettier: ^2.4.1
     react: 18.2.0
     react-dom: ^18.2.0
     react-native: 0.72.6

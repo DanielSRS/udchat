@@ -178,3 +178,7 @@ dist
 # Native lib
 src/lib/Socket/socket.o
 src/lib/Socket/socket.so
+nodejs-assets/nodejs-project/sample-main.js
+nodejs-assets/nodejs-project/sample-package.json
+apps/mobile/nodejs-assets/nodejs-project/sample-main.js
+apps/mobile/nodejs-assets/nodejs-project/sample-package.json
