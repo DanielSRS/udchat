@@ -1,0 +1,110 @@
+import { expect, it, jest } from '@jest/globals';
+import { CommitPool } from '.';
+
+const voters = ['sdf', 'xcv', 'wer', 'lkj', 'lkf'];
+const doNothing = () => {};
+const initialCommit = 'first';
+
+it('Criar um novo CommitPool sem new retorna uma instancia', () => {
+  const newPool = CommitPool(doNothing, voters, initialCommit);
+  expect(newPool).toBeInstanceOf(CommitPool);
+});
+
+it('Criar um novo commit com new retorna uma instancia', () => {
+  const newPool = CommitPool(doNothing, voters, initialCommit);
+  expect(newPool).toBeInstanceOf(CommitPool);
+});
+
+it('A propriedade addToPool existe', () => {
+  const newPool = CommitPool(doNothing, voters, initialCommit);
+  expect(newPool).toHaveProperty('addToPool');
+});
+
+it('addToPool é uma função', () => {
+  const newPool = CommitPool(doNothing, voters, initialCommit);
+  expect(typeof newPool.addToPool).toBe('function');
+});
+
+it('A propriedade addVote existe', () => {
+  const newPool = CommitPool(doNothing, voters, initialCommit);
+  expect(newPool).toHaveProperty('addVote');
+});
+
+it('addVote é uma função', () => {
+  const newPool = CommitPool(doNothing, voters, initialCommit);
+  expect(typeof newPool.addToPool).toBe('function');
+});
+
+it('onAccepted é chamado quando um commit é aceito', () => {
+  const onAccepted = jest.fn(() => {});
+  const newPool = CommitPool(onAccepted, voters, initialCommit);
+  newPool.addToPool({
+    type: 'a commit',
+    data: {
+      id: 'second',
+      previous: 'first',
+    },
+  });
+  newPool.addVote({
+    from: 'sdf',
+    in: {
+      id: 'second',
+      previous: 'first',
+    },
+    vote: 'accepted',
+  });
+  newPool.addVote({
+    from: 'xcv',
+    in: {
+      id: 'second',
+      previous: 'first',
+    },
+    vote: 'accepted',
+  });
+  newPool.addVote({
+    from: 'lkj',
+    in: {
+      id: 'second',
+      previous: 'first',
+    },
+    vote: 'accepted',
+  });
+  expect(onAccepted).toBeCalledTimes(1);
+});
+
+it('um commit só é aceito se referencial o commit atual no previous, mesmo tendo os votos', () => {
+  const onAccepted = jest.fn(() => {});
+  const newPool = CommitPool(onAccepted, voters, initialCommit);
+  newPool.addToPool({
+    type: 'a commit',
+    data: {
+      id: 'second',
+      previous: 'notTheCurrent',
+    },
+  });
+  newPool.addVote({
+    from: 'sdf',
+    in: {
+      id: 'second',
+      previous: 'notTheCurrent',
+    },
+    vote: 'accepted',
+  });
+  newPool.addVote({
+    from: 'xcv',
+    in: {
+      id: 'second',
+      previous: 'notTheCurrent',
+    },
+    vote: 'accepted',
+  });
+  newPool.addVote({
+    from: 'lkj',
+    in: {
+      id: 'second',
+      previous: 'notTheCurrent',
+    },
+    vote: 'accepted',
+  });
+  expect(onAccepted).not.toBeCalled();
+});
