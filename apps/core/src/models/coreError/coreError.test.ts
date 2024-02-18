@@ -1,6 +1,6 @@
-import { describe, expect, it } from "@jest/globals";
-import { CoreError } from "./coreError";
-import { ErrorCode } from "./errorCode";
+import { describe, expect, it } from '@jest/globals';
+import { CoreError } from './coreError';
+import { ErrorCode } from './errorCode';
 
 const message = 'Err msg';
 const errorCode: ErrorCode = 'CUFWNIER';
@@ -16,7 +16,7 @@ describe('Instanciando CoreError', () => {
     });
     expect(error).toBeInstanceOf(CoreError);
   });
-  
+
   it('Se CoreError pode ser instanciado com a keyword new', () => {
     const error = new CoreError({
       code: errorCode,
@@ -39,7 +39,7 @@ it('toString retorna o codigo de erro e a mensagem', () => {
 });
 
 it('Os valores passados ao construtor são retornados corretamente', () => {
-  const extrainfo = { extrainfo: {} }
+  const extrainfo = { extrainfo: {} };
   const error = new CoreError({
     code: errorCode,
     erros: errors,

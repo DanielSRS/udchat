@@ -1,27 +1,29 @@
-import { expect, it } from "@jest/globals";
-import { Organization } from ".";
-import { match as EitherMatch } from "fp-ts/Either";
-import { pipe } from "fp-ts/lib/function";
-import { CoreError, ErrorCodes } from "../coreError";
+import { expect, it } from '@jest/globals';
+import { Organization } from '.';
+import { match as EitherMatch } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/lib/function';
+import { CoreError, ErrorCodes } from '../coreError';
 
 const VALID_ORGANIZATION: Organization = {
-  creationDate: (new Date()).toISOString(),
+  creationDate: new Date().toISOString(),
   firstCommit: 'sldkfj',
   members: [],
-  commits: [{
-    data: {
-      createdAt: '',
-      commitId: 'asdf',
-      createdBy: {
-        name: 'name',
-        username: 'username',
-        ip: 'lsjdf',
-        publicKey: 'aslçdkfjl',
+  commits: [
+    {
+      data: {
+        createdAt: '',
+        commitId: 'asdf',
+        createdBy: {
+          name: 'name',
+          username: 'username',
+          ip: 'lsjdf',
+          publicKey: 'aslçdkfjl',
+        },
+        previousCommit: 'none',
       },
-      previousCommit: 'none',
+      type: 'orgCreation',
     },
-    type: 'orgCreation',
-  }],
+  ],
 };
 
 it('Retorna um "Organization" quando os dados são válidos', () => {
@@ -29,8 +31,13 @@ it('Retorna um "Organization" quando os dados são válidos', () => {
   pipe(
     res,
     EitherMatch(
-      (e) => { expect(e).toBe({}); throw 'This organization should be correct. this should not fail' },
-      (organization) => { expect(organization).toStrictEqual(VALID_ORGANIZATION) }
+      e => {
+        expect(e).toBe({});
+        throw 'This organization should be correct. this should not fail';
+      },
+      organization => {
+        expect(organization).toStrictEqual(VALID_ORGANIZATION);
+      },
     ),
   );
 });
@@ -40,8 +47,12 @@ it('Retorna uma instancia de CoreError quando os dados são invalidos', () => {
   pipe(
     res,
     EitherMatch(
-      (error) => { expect(error).toBeInstanceOf(CoreError) },
-      () => { throw 'Invalid data. this should never pass' }
+      error => {
+        expect(error).toBeInstanceOf(CoreError);
+      },
+      () => {
+        throw 'Invalid data. this should never pass';
+      },
     ),
   );
 });
@@ -51,12 +62,14 @@ it('Falha se args de Organization forem undefined', () => {
   pipe(
     res,
     EitherMatch(
-      (error) => { 
+      error => {
         expect(error.code).toBe('OCWIDOMC');
         expect(error.erros).toEqual(['Required']);
         expect(error.message).toBe(ErrorCodes['OCWIDOMC']);
-       },
-      () => { throw 'Invalid data. this should never pass' }
+      },
+      () => {
+        throw 'Invalid data. this should never pass';
+      },
     ),
   );
 });
