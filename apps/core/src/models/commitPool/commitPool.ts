@@ -8,7 +8,9 @@ export interface CommitPool {
   /**
    * Adiciona um novo commit
    */
-  addToPool: (commit: Commit<string, { id: string; previous: string }>) => void;
+  addToPool: (
+    commit: Commit<string, { id: string; previous: string; from: string }>,
+  ) => void;
   /**
    * Adiciona o voto de um dos membros
    */
@@ -29,20 +31,24 @@ interface PrivateCommitPool {
   /** Id do commit mais recente */
   currentCommit: string;
   onAcceptCallback: OnAcceptedCallback;
+  OnBlockedCallback: OnBlockedCallback;
   voters: string[];
   commitsInVoting: Record<string, PoolEntry>;
   majorityCount: number;
   removeCommitEntry: (noMoreValidCommitId: string) => void;
+  checkIfItsStale: () => void;
 }
 
 interface CommitPoolFunction {
   new (
     onAccepted: OnAcceptedCallback,
+    // onBlocked: OnBlockedCallback,
     voters: Voters,
     currentCommitId: string,
   ): CommitPool;
   (
     onAccepted: OnAcceptedCallback,
+    // onBlocked: OnBlockedCallback,
     voters: Voters,
     currentCommitId: string,
   ): CommitPool;
@@ -56,6 +62,16 @@ interface OnAcceptedResponse {
     rejected: string[];
   };
 }
+interface OnBlockedResponse {
+  commit: Commit<string, { id: string; previous: string }>;
+  votes: {
+    accepted: string[];
+    rejected: string[];
+  };
+}
+interface OnBlockedCallback {
+  (res: OnBlockedResponse): void;
+}
 /**
  * Commit aceito para ser inserido no histórico
  */
@@ -64,18 +80,28 @@ interface OnAcceptedCallback {
 }
 
 interface PoolEntry {
-  commit: Commit<string, { id: string; previous: string }>;
+  commit: Commit<string, { id: string; previous: string; from: string }>;
   votes: {
     accepted: string[];
     rejected: string[];
   };
 }
 
-const _CommitPool = function CommitPool(onAccepted, voters, currentCommitId) {
+const _CommitPool = function CommitPool(
+  onAccepted,
+  // onBlocked,
+  voters,
+  currentCommitId,
+) {
   // Called as normal function (without new)
   if (!new.target) {
     const CommitPoolWithNew = CommitPool as CommitPoolFunction;
-    return new CommitPoolWithNew(onAccepted, voters, currentCommitId);
+    return new CommitPoolWithNew(
+      onAccepted,
+      // onBlocked,
+      voters,
+      currentCommitId,
+    );
   }
 
   // Called as a constructor (with new)
@@ -87,6 +113,75 @@ const _CommitPool = function CommitPool(onAccepted, voters, currentCommitId) {
   self.voters = voters;
   self.commitsInVoting = {};
   self.majorityCount = calcMinimumVotesToAccept(voters.length);
+  // self.OnBlockedCallback = onBlocked;
+
+  /**
+   * This do not work
+   */
+  self.checkIfItsStale = function () {
+    const withSameVoteCount: Record<string, string[]> = {};
+
+    // agrupa commits com mesma contagem de votos
+    // e que referenciam o commit atual
+    Object.entries(self.commitsInVoting).map(en => {
+      const key = en[0];
+      const value = en[1];
+      const voteCount = value.votes.accepted.length.toString();
+      const toCurrentCommit = self.currentCommit === value.commit.data.previous;
+      if (!toCurrentCommit) {
+        return;
+      }
+
+      const group = withSameVoteCount[voteCount];
+      if (group) {
+        group.push(key);
+      } else {
+        withSameVoteCount[voteCount] = [key];
+      }
+    });
+
+    // remove contagens que não tem mais de um commit
+    Object.entries(withSameVoteCount).map(en => {
+      const key = en[0];
+      const value = en[1];
+      const isOnlyOne = value.length > 1;
+
+      if (isOnlyOne) {
+        delete withSameVoteCount[key];
+      }
+    });
+
+    // Verifica se não tem faltando votar
+    Object.entries(withSameVoteCount).map(en => {
+      // const key = en[0];
+      const value = en[1];
+      const numberOfMissingVotes = value.length;
+      const commits = value
+        .map(c => self.commitsInVoting[c])
+        .filter(v => !!v) as PoolEntry[];
+      const missingVoters = value
+        .map(c => self.commitsInVoting[c]?.commit.data.from)
+        .filter(v => !!v) as string[];
+
+      const found = (targetArray: string[]) =>
+        targetArray.some(elem => missingVoters.includes(elem));
+
+      const noMissingVoters = commits
+        .map(c => {
+          const allVoters = [...c.votes.accepted, ...c.votes.rejected];
+          const missingVotersCount = self.voters.length - allVoters.length;
+          if (numberOfMissingVotes !== missingVotersCount) {
+            return false;
+          }
+          return !found(allVoters);
+        })
+        .reduce((p, c) => p && c, true);
+
+      if (noMissingVoters) {
+        commits.map(self.OnBlockedCallback);
+      }
+    });
+  };
 
   self.removeCommitEntry = function (noMoreValidCommitId) {
     // removo todo mundo que referenciava o commit antigo

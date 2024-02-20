@@ -108,3 +108,53 @@ it('um commit só é aceito se referencial o commit atual no previous, mesmo ten
   });
   expect(onAccepted).not.toBeCalled();
 });
+
+// it('A propriedade onBlocked existe', () => {
+//   const newPool = CommitPool(doNothing, voters, initialCommit);
+//   expect(newPool).toHaveProperty('onBlocked');
+// });
+
+// it('onBlocked é uma função', () => {
+//   const newPool = CommitPool(doNothing, voters, initialCommit);
+//   expect(typeof newPool.onBlocked).toBe('function');
+// });
+
+// it('onBlocked é chamado quando há um empate na votação', () => {
+//   const onBlocked = jest.fn(() => {});
+//   const newPool = CommitPool(
+//     doNothing,
+//     ['sdf', 'xcv', 'wer', 'lkj'],
+//     initialCommit,
+//   );
+//   newPool.addToPool({
+//     type: 'a commit',
+//     data: {
+//       id: 'second',
+//       previous: 'first',
+//     },
+//   });
+//   newPool.addToPool({
+//     type: 'a commit',
+//     data: {
+//       id: 'stalle',
+//       previous: 'first',
+//     },
+//   });
+//   newPool.addVote({
+//     from: 'sdf',
+//     in: {
+//       id: 'second',
+//       previous: 'first',
+//     },
+//     vote: 'accepted',
+//   });
+//   newPool.addVote({
+//     from: 'xcv',
+//     in: {
+//       id: 'stalle',
+//       previous: 'first',
+//     },
+//     vote: 'accepted',
+//   });
+//   expect(onBlocked).toBeCalledTimes(1);
+// });
