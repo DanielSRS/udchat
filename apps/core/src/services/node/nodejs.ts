@@ -44,5 +44,5 @@ export default {
     send: sendMessageToDefaultChannel,
     removeListener: removeChannelListner,
   },
-  start: () => {},
+  start: (_p: string) => {},
 };

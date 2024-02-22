@@ -10,7 +10,7 @@ import { initServer } from './server';
 import { ipHandler } from './ip';
 import { rn_bridge } from './libs';
 
-function dispatchMessage(message: unknown) {
+function dispatchMessage(message: any) {
   console.log('dispatchMessage');
   const data = (() => {
     if (message === null || typeof message !== 'object') {

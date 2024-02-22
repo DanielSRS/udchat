@@ -1,5 +1,5 @@
 import { expect, it } from '@jest/globals';
-import { Commit } from './commit';
+import { Commit } from './';
 
 const type = '12';
 const data = { some: 'value' };

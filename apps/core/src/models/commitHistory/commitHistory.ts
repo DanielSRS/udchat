@@ -43,7 +43,8 @@ interface CommitHistoryFunction {
   (): CommitHistory;
 }
 
-const _CommitHistory = function CommitHistory() {
+// eslint-disable-next-line @typescript-eslint/no-shadow
+export const CommitHistory = function CommitHistory() {
   // Called as normal function (without new)
   if (!new.target) {
     const CommmitWithNew = CommitHistory as CommitHistoryFunction;
@@ -85,5 +86,3 @@ const _CommitHistory = function CommitHistory() {
     return true;
   };
 } as CommitHistoryFunction;
-
-export { _CommitHistory as CommitHistory };

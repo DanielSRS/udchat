@@ -8,5 +8,6 @@
       "react-native"
     ],
     "allowSyntheticDefaultImports": true,
-  }
+  },
+  "exclude": ["**/**.typegen.ts"]
 }

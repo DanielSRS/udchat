@@ -23,7 +23,7 @@ const myCredentials = {
 // const createLogger = (logBuffer: Array<string>) => ({ log: (msg: string) => logBuffer.push(msg) });
 
 /** Processa as mensagens recebidas */
-const handleOnMessageEvent = async (event: unknown) => {
+const handleOnMessageEvent = async (event: any) => {
   if (
     event &&
     typeof event === 'object' &&
