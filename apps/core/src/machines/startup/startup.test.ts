@@ -7,16 +7,18 @@ import { User } from '../../models/user/user';
 describe('Startup machine transita entre os estados como esperado', () => {
   it('Inicia no estado esperado', async () => {
     const startupActor = interpret(
-      startupMachine.withConfig({
-        services: {
-          getUser: () => new Promise((_, reject) => reject()),
-          createOrg: () => new Promise((_, reject) => reject()),
-          createUser: () => new Promise((_, reject) => reject()),
-          getOrg: () => new Promise((_, reject) => reject()),
-          saveOrgToStorage: () => new Promise((_, reject) => reject()),
-          saveUserToStorage: () => new Promise((_, reject) => reject()),
-        },
-      }),
+      startupMachine
+        .withConfig({
+          services: {
+            getUser: () => new Promise((_, reject) => reject()),
+            createOrg: () => new Promise((_, reject) => reject()),
+            createUser: () => new Promise((_, reject) => reject()),
+            getOrg: () => new Promise((_, reject) => reject()),
+            saveOrgToStorage: () => new Promise((_, reject) => reject()),
+            saveUserToStorage: () => new Promise((_, reject) => reject()),
+          },
+        })
+        .withContext({} as any),
     );
     const initialState = startupActor.start().getSnapshot();
     expect(initialState.value).toBe('findingUser');
@@ -31,16 +33,18 @@ describe('Startup machine transita entre os estados como esperado', () => {
     ) as () => Promise<{ user: User }>;
 
     const startupActor = interpret(
-      startupMachine.withConfig({
-        services: {
-          getUser,
-          createOrg: () => new Promise((_, reject) => reject()),
-          createUser: () => new Promise((_, reject) => reject()),
-          getOrg: () => new Promise((_, reject) => reject()),
-          saveOrgToStorage: () => new Promise((_, reject) => reject()),
-          saveUserToStorage: () => new Promise((_, reject) => reject()),
-        },
-      }),
+      startupMachine
+        .withConfig({
+          services: {
+            getUser,
+            createOrg: () => new Promise((_, reject) => reject()),
+            createUser: () => new Promise((_, reject) => reject()),
+            getOrg: () => new Promise((_, reject) => reject()),
+            saveOrgToStorage: () => new Promise((_, reject) => reject()),
+            saveUserToStorage: () => new Promise((_, reject) => reject()),
+          },
+        })
+        .withContext({} as any),
     );
     startupActor.start();
     expect(getUser).toHaveBeenCalledTimes(1);
@@ -48,16 +52,18 @@ describe('Startup machine transita entre os estados como esperado', () => {
 
   it('Transita para o estado noUserFound se não foi possível encontrar o usuáario', async () => {
     const startupActor = interpret(
-      startupMachine.withConfig({
-        services: {
-          getUser: () => new Promise((_, reject) => reject()),
-          createOrg: () => new Promise((_, reject) => reject()),
-          createUser: () => new Promise((_, reject) => reject()),
-          getOrg: () => new Promise((_, reject) => reject()),
-          saveOrgToStorage: () => new Promise((_, reject) => reject()),
-          saveUserToStorage: () => new Promise((_, reject) => reject()),
-        },
-      }),
+      startupMachine
+        .withConfig({
+          services: {
+            getUser: () => new Promise((_, reject) => reject()),
+            createOrg: () => new Promise((_, reject) => reject()),
+            createUser: () => new Promise((_, reject) => reject()),
+            getOrg: () => new Promise((_, reject) => reject()),
+            saveOrgToStorage: () => new Promise((_, reject) => reject()),
+            saveUserToStorage: () => new Promise((_, reject) => reject()),
+          },
+        })
+        .withContext({} as any),
     );
     startupActor.start();
     const newState = await waitFor(startupActor, state =>
@@ -68,16 +74,19 @@ describe('Startup machine transita entre os estados como esperado', () => {
 
   it('Transita para o estado findingOrg se o usuáario foi encontrado', async () => {
     const startupActor = interpret(
-      startupMachine.withConfig({
-        services: {
-          getUser: () => new Promise(resolve => resolve({} as { user: User })),
-          createOrg: () => new Promise((_, reject) => reject()),
-          createUser: () => new Promise((_, reject) => reject()),
-          getOrg: () => new Promise((_, reject) => reject()),
-          saveOrgToStorage: () => new Promise((_, reject) => reject()),
-          saveUserToStorage: () => new Promise((_, reject) => reject()),
-        },
-      }),
+      startupMachine
+        .withConfig({
+          services: {
+            getUser: () =>
+              new Promise(resolve => resolve({} as { user: User })),
+            createOrg: () => new Promise((_, reject) => reject()),
+            createUser: () => new Promise((_, reject) => reject()),
+            getOrg: () => new Promise((_, reject) => reject()),
+            saveOrgToStorage: () => new Promise((_, reject) => reject()),
+            saveUserToStorage: () => new Promise((_, reject) => reject()),
+          },
+        })
+        .withContext({} as any),
     );
     startupActor.start();
     const newState = await waitFor(startupActor, state =>
@@ -88,16 +97,18 @@ describe('Startup machine transita entre os estados como esperado', () => {
 
   it('Transita para o estado creatingUser se em noUserFound e um novo usuário é criado', async () => {
     const startupActor = interpret(
-      startupMachine.withConfig({
-        services: {
-          getUser: () => new Promise((_, reject) => reject()),
-          createOrg: () => new Promise((_, reject) => reject()),
-          createUser: () => new Promise(() => {}),
-          getOrg: () => new Promise((_, reject) => reject()),
-          saveOrgToStorage: () => new Promise((_, reject) => reject()),
-          saveUserToStorage: () => new Promise((_, reject) => reject()),
-        },
-      }),
+      startupMachine
+        .withConfig({
+          services: {
+            getUser: () => new Promise((_, reject) => reject()),
+            createOrg: () => new Promise((_, reject) => reject()),
+            createUser: () => new Promise(() => {}),
+            getOrg: () => new Promise((_, reject) => reject()),
+            saveOrgToStorage: () => new Promise((_, reject) => reject()),
+            saveUserToStorage: () => new Promise((_, reject) => reject()),
+          },
+        })
+        .withContext({} as any),
     );
     startupActor.start();
     await waitFor(startupActor, state => state.matches('noUserFound'));
