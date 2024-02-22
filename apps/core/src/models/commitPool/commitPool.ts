@@ -32,6 +32,7 @@ interface PrivateCommitPool {
   currentCommit: string;
   onAcceptCallback: OnAcceptedCallback;
   OnBlockedCallback: OnBlockedCallback;
+  OnRejectedallback: OnRejectedCallback;
   voters: string[];
   commitsInVoting: Record<string, PoolEntry>;
   majorityCount: number;
@@ -42,12 +43,14 @@ interface PrivateCommitPool {
 interface CommitPoolFunction {
   new (
     onAccepted: OnAcceptedCallback,
+    onRejected: OnRejectedCallback,
     // onBlocked: OnBlockedCallback,
     voters: Voters,
     currentCommitId: string,
   ): CommitPool;
   (
     onAccepted: OnAcceptedCallback,
+    onRejected: OnRejectedCallback,
     // onBlocked: OnBlockedCallback,
     voters: Voters,
     currentCommitId: string,
@@ -69,6 +72,16 @@ interface OnBlockedResponse {
     rejected: string[];
   };
 }
+interface OnRejectedResponse {
+  commit: Commit<string, { id: string; previous: string }>;
+  votes: {
+    accepted: string[];
+    rejected: string[];
+  };
+}
+interface OnRejectedCallback {
+  (res: OnRejectedResponse): void;
+}
 interface OnBlockedCallback {
   (res: OnBlockedResponse): void;
 }
@@ -89,6 +102,7 @@ interface PoolEntry {
 
 const _CommitPool = function CommitPool(
   onAccepted,
+  onRejected,
   // onBlocked,
   voters,
   currentCommitId,
@@ -98,6 +112,7 @@ const _CommitPool = function CommitPool(
     const CommitPoolWithNew = CommitPool as CommitPoolFunction;
     return new CommitPoolWithNew(
       onAccepted,
+      onRejected,
       // onBlocked,
       voters,
       currentCommitId,
@@ -113,6 +128,7 @@ const _CommitPool = function CommitPool(
   self.voters = voters;
   self.commitsInVoting = {};
   self.majorityCount = calcMinimumVotesToAccept(voters.length);
+  self.OnRejectedallback = onRejected;
   // self.OnBlockedCallback = onBlocked;
 
   /**
@@ -259,7 +275,9 @@ const _CommitPool = function CommitPool(
 
     // checa se tem votos suficientes
     const acceptedCount = commitTV.votes.accepted.length;
+    const rejectedCount = commitTV.votes.rejected.length;
     const accepted = acceptedCount >= this.majorityCount;
+    const rejected = rejectedCount >= this.majorityCount;
 
     // se aceito
     if (accepted && commitTV.commit.data.previous === this.currentCommit) {
@@ -274,6 +292,14 @@ const _CommitPool = function CommitPool(
 
       // atualiza o commit atual
       self.currentCommit = commitTV.commit.data.id;
+    }
+
+    // se rejeitado
+    if (rejected) {
+      // dispara o alerta
+      this.OnRejectedallback(commitTV);
+      // deleta o commit e todo mundo que passou depende dele
+      self.removeCommitEntry(self.currentCommit);
     }
   };
 } as CommitPoolFunction;
