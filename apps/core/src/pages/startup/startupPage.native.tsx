@@ -1,4 +1,11 @@
-import { ActivityIndicator, Button, StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import {
+  ActivityIndicator,
+  Button,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useMachine } from '@xstate/react';
 import { startupMachine } from '../../machines';
 import { storageService } from '../../services/storage';
@@ -8,13 +15,20 @@ import {
   getOrgService,
   getUserService,
   saveOrgToStorageService,
-  saveUserToStorageService
+  saveUserToStorageService,
 } from './startupHelper';
 import Lottie from 'lottie-react-native';
 import badge from '../../assets/animations/verified_badge.json';
-import { initNodeService, sendEventToNode, sendEventToServer } from '../../services/node/nodeService';
+import {
+  // initNodeService,
+  sendEventToNode,
+  sendEventToServer,
+} from '../../services/node/nodeService';
 
-const userStorage = storageService.withInstanceID('user').withEncryption().initialize();
+const userStorage = storageService
+  .withInstanceID('user')
+  .withEncryption()
+  .initialize();
 
 const superLonog = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Pretium nibh ipsum consequat nisl vel pretium lectus. Ultrices in iaculis nunc sed augue lacus. Ullamcorper eget nulla facilisi etiam dignissim. Dignissim convallis aenean et tortor at risus viverra adipiscing at. In tellus integer feugiat scelerisque varius morbi enim nunc. Semper viverra nam libero justo. Senectus et netus et malesuada. Vitae proin sagittis nisl rhoncus mattis rhoncus urna neque. Consequat id porta nibh venenatis cras. At in tellus integer feugiat.
 
@@ -4022,7 +4036,7 @@ export const Startup = () => {
       saveUserToStorage: saveUserToStorageService,
       createOrg: createOrgService,
       saveOrgToStorage: saveOrgToStorageService,
-    }
+    },
   });
 
   const initialState = state.matches('findingUser');
@@ -4033,7 +4047,9 @@ export const Startup = () => {
   const started = state.matches('started');
   const savingFailure = state.matches('savingFailure');
 
-  const creatingOrg = state.matches('creatingOrganization') || state.matches('savingOrgToStorage');
+  const creatingOrg =
+    state.matches('creatingOrganization') ||
+    state.matches('savingOrgToStorage');
   const savingOrgFailure = state.matches('savingOrgFailure');
 
   return (
@@ -4043,9 +4059,7 @@ export const Startup = () => {
         <Text>Contexto:</Text>
         <Text>{Object.keys(state.context).join('\n')}</Text>
       </View>
-      {!initialState ? null : (
-        <Text>Initial state</Text>
-        )}
+      {!initialState ? null : <Text>Initial state</Text>}
       {!loading ? null : (
         <View>
           <Text>Criando usuário</Text>
@@ -4061,129 +4075,223 @@ export const Startup = () => {
       {!noUSer ? null : (
         <>
           <Text>no user</Text>
-          <Button title={'Create user'} onPress={() => send({ type: 'CREATE_USER' })} />
+          <Button
+            title={'Create user'}
+            onPress={() => send({ type: 'CREATE_USER' })}
+          />
         </>
       )}
       {!(savingFailure || savingOrgFailure) ? null : (
         <>
           <Text>Falha ao salvar no storage</Text>
-          <Button title={'tentar novamente'} onPress={() => send({ type: 'RETRY' })} />
-          <Button title={'Valtar ao inicio'} onPress={() => send({ type: 'START_OVER' })} />
+          <Button
+            title={'tentar novamente'}
+            onPress={() => send({ type: 'RETRY' })}
+          />
+          <Button
+            title={'Valtar ao inicio'}
+            onPress={() => send({ type: 'START_OVER' })}
+          />
         </>
       )}
-      {!findingOrg ? null : (
-        <Text>findingOrg</Text>
-      )}
+      {!findingOrg ? null : <Text>findingOrg</Text>}
       {!noOrgFound ? null : (
         <>
           <Text>noOrgFound</Text>
-          <Button title={'Create organization'} onPress={() => send({ type: 'CREATE_ORG' })} />
+          <Button
+            title={'Create organization'}
+            onPress={() => send({ type: 'CREATE_ORG' })}
+          />
         </>
       )}
       {!started ? null : (
         <View style={{ flex: 1, justifyContent: 'space-between' }}>
           <View>
-            <Text>{`|--------------- Organization ----------------`}</Text>
+            <Text>{'|--------------- Organization ----------------'}</Text>
             <Text>{`| Data de criação: ${state.context.organization.creationDate}`}</Text>
-            <Text>{`| Commits:        \n\t${state.context.organization.commits.map(v => v.type + ': ' + v.data.createdAt).join('\n\t')}`}</Text>
-            <Text>{`| membros:        \n\t ${state.context.organization.members.map(m => m.username + ' aka ' + m.name).join('\n\t')}`}</Text>
-            <Text>{`|---------------------------------------------\n`}</Text>
+            <Text>{`| Commits:        \n\t${state.context.organization.commits
+              .map(v => v.type + ': ' + v.data.createdAt)
+              .join('\n\t')}`}</Text>
+            <Text>{`| membros:        \n\t ${state.context.organization.members
+              .map(m => m.username + ' aka ' + m.name)
+              .join('\n\t')}`}</Text>
+            <Text>{'|---------------------------------------------\n'}</Text>
           </View>
-          <Lottie style={{ minHeight: 200 }} source={badge} autoPlay loop={false} />
-          <Button title={'Delete user'} onPress={() => userStorage.removeItem('user')} />
-          <Button title={'Delete org'} onPress={() => userStorage.removeItem('org')} />
+          <Lottie
+            style={{ minHeight: 200 }}
+            source={badge}
+            autoPlay
+            loop={false}
+          />
+          <Button
+            title={'Delete user'}
+            onPress={() => userStorage.removeItem('user')}
+          />
+          <Button
+            title={'Delete org'}
+            onPress={() => userStorage.removeItem('org')}
+          />
           <View style={{ paddingVertical: 20, gap: 10 }}>
-            <Button title={'server'} onPress={() => {
-                sendEventToServer({ type: 'serverWorker', data: 'eita' })
+            <Button
+              title={'server'}
+              onPress={() => {
+                sendEventToServer({ type: 'serverWorker', data: 'eita' });
               }}
             />
-            <Button title={'Encript data'} onPress={async () => {
-                const i = (new Date()).getTime();
+            <Button
+              title={'Encript data'}
+              onPress={async () => {
+                const i = new Date().getTime();
                 const response = await sendEventToNode({
                   type: 'publicEncrypt',
                   data: {
                     key: state.context.user.encriptionKeys.publicKey,
                     value: 'daniel es la santa rosa',
-                  }
-                })
-                const f = (new Date()).getTime();
-                console.log(JSON.stringify({ a: `O que veio em: ${f - i}ms`, e: response }, null, 2));
-              }} 
-            />
-            <Button title={'Decript data'} onPress={async () => {
-                const i = (new Date()).getTime();
-                const response = await sendEventToNode({
-                    type: 'privateDecrypt',
-                    data: {
-                      key: state.context.user.encriptionKeys.privateKey,
-                      value: 'RxvzptxbdmFc6VBXjzQ2iPP8Ris/bfHnCuzFGgnw/WgSUGpMq9JjoYc+D3kEaqLXJpIvTS9gJjDT7SBL+fsLCQsPDrJgkGPyj5CB+YC25arL9SwQU0Ea52U/0YaQLuqNEYAsytNC3aoKZXel/TRBJObA+xS/VaZPX6i39mtOKH18cUnW3GxX3mHX17eB3A4o2nLip/qJuJ+xAkqgXibdCswBvl3X3HMlZFXRPiRmgU78VNI5fS8h3wy1dJytrklbyh0DPCSCz3MbUANfLRqfNR+CUuVNXlTxkGFbw64QQxv7lWGOhgGrPxZh7tpOPFzyoWq5n0UebBte/zHEfd1CZQ==',
-                    }
-                  }
+                  },
+                });
+                const f = new Date().getTime();
+                console.log(
+                  JSON.stringify(
+                    { a: `O que veio em: ${f - i}ms`, e: response },
+                    null,
+                    2,
+                  ),
                 );
-                const f = (new Date()).getTime();
-                console.log(JSON.stringify({ a: `O que veio em: ${f - i}ms`, e: response }, null, 2));
               }}
             />
-            <Button title={'sign'} onPress={async () => {
-                const i = (new Date()).getTime();
+            <Button
+              title={'Decript data'}
+              onPress={async () => {
+                const i = new Date().getTime();
+                const response = await sendEventToNode({
+                  type: 'privateDecrypt',
+                  data: {
+                    key: state.context.user.encriptionKeys.privateKey,
+                    value:
+                      'RxvzptxbdmFc6VBXjzQ2iPP8Ris/bfHnCuzFGgnw/WgSUGpMq9JjoYc+D3kEaqLXJpIvTS9gJjDT7SBL+fsLCQsPDrJgkGPyj5CB+YC25arL9SwQU0Ea52U/0YaQLuqNEYAsytNC3aoKZXel/TRBJObA+xS/VaZPX6i39mtOKH18cUnW3GxX3mHX17eB3A4o2nLip/qJuJ+xAkqgXibdCswBvl3X3HMlZFXRPiRmgU78VNI5fS8h3wy1dJytrklbyh0DPCSCz3MbUANfLRqfNR+CUuVNXlTxkGFbw64QQxv7lWGOhgGrPxZh7tpOPFzyoWq5n0UebBte/zHEfd1CZQ==',
+                  },
+                });
+                const f = new Date().getTime();
+                console.log(
+                  JSON.stringify(
+                    { a: `O que veio em: ${f - i}ms`, e: response },
+                    null,
+                    2,
+                  ),
+                );
+              }}
+            />
+            <Button
+              title={'sign'}
+              onPress={async () => {
+                const i = new Date().getTime();
                 const response = await sendEventToNode({
                   type: 'sign',
                   data: {
                     key: state.context.user.encriptionKeys.privateKey,
                     value: superLonog,
-                  }
-                })
-                const f = (new Date()).getTime();
-                console.log(JSON.stringify({ a: `O que veio em: ${f - i}ms`, e: response }, null, 2));
+                  },
+                });
+                const f = new Date().getTime();
+                console.log(
+                  JSON.stringify(
+                    { a: `O que veio em: ${f - i}ms`, e: response },
+                    null,
+                    2,
+                  ),
+                );
               }}
             />
-            <Button title={'verify'} onPress={async () => {
-                const i = (new Date()).getTime();
+            <Button
+              title={'verify'}
+              onPress={async () => {
+                const i = new Date().getTime();
                 const response = await sendEventToNode({
                   type: 'verify',
                   data: {
                     key: state.context.user.encriptionKeys.publicKey,
                     value: superLonog,
-                    signature: 'qtc2ItQorIoiGgACZjMBB8Y6MAxYSUx7RAlRRWMBUtZro5bUNGogCFX8E1i5sFwN7StnbLttdINBungJvdPtt5O2ts44GBOePU7rA3Q4KSXxIei2Q1brJeBAzPUnHyNB42EnZVDfbrmwjXrrLXyOArItVcHAHvHwYqfo0vZz7zjQqL+ys5rEpCoiy9qwmZB6d0ix27mEfp6OP9YFQXjDG7NJtvCKhptlyC5hi3hg9bQ87hYk7KmcKgnmEWRzdIujxvrjQ2ofzM1EauVHoZhXAFJZNtwcPV6LfSSF9776yzKfOVaIJA1RuAtW0dxmEx2ltK4FWckNf1Z3xgj5MvAS0Q==',
-                  }
-                })
-                const f = (new Date()).getTime();
-                console.log(JSON.stringify({ a: `O que veio em: ${f - i}ms`, e: response }, null, 2));
+                    signature:
+                      'qtc2ItQorIoiGgACZjMBB8Y6MAxYSUx7RAlRRWMBUtZro5bUNGogCFX8E1i5sFwN7StnbLttdINBungJvdPtt5O2ts44GBOePU7rA3Q4KSXxIei2Q1brJeBAzPUnHyNB42EnZVDfbrmwjXrrLXyOArItVcHAHvHwYqfo0vZz7zjQqL+ys5rEpCoiy9qwmZB6d0ix27mEfp6OP9YFQXjDG7NJtvCKhptlyC5hi3hg9bQ87hYk7KmcKgnmEWRzdIujxvrjQ2ofzM1EauVHoZhXAFJZNtwcPV6LfSSF9776yzKfOVaIJA1RuAtW0dxmEx2ltK4FWckNf1Z3xgj5MvAS0Q==',
+                  },
+                });
+                const f = new Date().getTime();
+                console.log(
+                  JSON.stringify(
+                    { a: `O que veio em: ${f - i}ms`, e: response },
+                    null,
+                    2,
+                  ),
+                );
               }}
             />
-            <Button title={'symetric encryption'} onPress={async () => {
-                const dataToEncrypt = 'Me nom é julia e eu dei duas facadas do meu namorado pq ele não dividiu o lanche';
-                const i = (new Date()).getTime();
+            <Button
+              title={'symetric encryption'}
+              onPress={async () => {
+                // const dataToEncrypt =
+                //   'Me nom é julia e eu dei duas facadas do meu namorado pq ele não dividiu o lanche';
+                const i = new Date().getTime();
                 console.log('text length: ', superLonog.length.toString());
                 const response = await sendEventToNode({
                   type: 'symetricEncryption',
                   data: {
                     // key: state.context.user.encriptionKeys.publicKey,
                     value: superLonog,
-                  }
-                })
-                const f = (new Date()).getTime();
-                console.log(JSON.stringify({ a: `O que veio em: ${f - i}ms`, e: {...response, response: {...response?.response, encryptedText: (response?.response?.encryptedText || '' as string).length + ' in lenght'} } }, null, 2));
+                  },
+                });
+                const f = new Date().getTime();
+                console.log(
+                  JSON.stringify(
+                    {
+                      a: `O que veio em: ${f - i}ms`,
+                      e: {
+                        ...response,
+                        response: {
+                          ...response?.response,
+                          encryptedText:
+                            (
+                              response?.response?.encryptedText ||
+                              ('' as string)
+                            ).length + ' in lenght',
+                        },
+                      },
+                    },
+                    null,
+                    2,
+                  ),
+                );
               }}
             />
-            <Button title={'symetric decryption'} onPress={async () => {
-                const dataToDecrypt = 'aMtaK+ORZEy+2jn9/biTyQ==:DJIN9Q6ip8AIhb5nAG2W3E+AaWARYeLniFUPFS6T7T0wkc16gdMgJ5B9LCkPYaN95k+Mg8dH9FLO3bpPZYiQ8vK9G/HGNNVdBAO9DFToWseXZg==';
-                const i = (new Date()).getTime();
+            <Button
+              title={'symetric decryption'}
+              onPress={async () => {
+                const dataToDecrypt =
+                  'aMtaK+ORZEy+2jn9/biTyQ==:DJIN9Q6ip8AIhb5nAG2W3E+AaWARYeLniFUPFS6T7T0wkc16gdMgJ5B9LCkPYaN95k+Mg8dH9FLO3bpPZYiQ8vK9G/HGNNVdBAO9DFToWseXZg==';
+                const i = new Date().getTime();
                 const response = await sendEventToNode({
                   type: 'symetricDecryption',
                   data: {
                     key: 'dWun/7LcQemayvG8VbFAOXH7SBEyjYa2DPYFg1klETQ=',
                     value: dataToDecrypt,
-                  }
-                })
-                const f = (new Date()).getTime();
-                console.log(JSON.stringify({ a: `O que veio em: ${f - i}ms`, e: response }, null, 2));
+                  },
+                });
+                const f = new Date().getTime();
+                console.log(
+                  JSON.stringify(
+                    { a: `O que veio em: ${f - i}ms`, e: response },
+                    null,
+                    2,
+                  ),
+                );
               }}
             />
-            <Button title={'keys'} onPress={() => {
-              console.log(state.context.user.encriptionKeys.publicKey);
-              console.log(state.context.user.encriptionKeys.privateKey);
-            }} />
+            <Button
+              title={'keys'}
+              onPress={() => {
+                console.log(state.context.user.encriptionKeys.publicKey);
+                console.log(state.context.user.encriptionKeys.privateKey);
+              }}
+            />
           </View>
         </View>
       )}

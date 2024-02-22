@@ -1,9 +1,9 @@
-import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
-import { useContextSelector } from "use-context-selector";
-import { GroupsContext } from "../../contexts/groups/groupsContext";
-import { OrgContext } from "../../contexts/organization/orgContext";
-import { Group } from "../../contexts/groups/groupsTypes";
+import React from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { useContextSelector } from 'use-context-selector';
+import { GroupsContext } from '../../contexts/groups/groupsContext';
+// import { OrgContext } from '../../contexts/organization/orgContext';
+import { Group } from '../../contexts/groups/groupsTypes';
 
 /**
  * Exibe a lista de grupos do usuário.
@@ -12,13 +12,19 @@ import { Group } from "../../contexts/groups/groupsTypes";
  */
 export const GroupsPage = () => {
   const groups = useContextSelector(GroupsContext, data => data.groups);
-  const createGroup = useContextSelector(GroupsContext, data => data.createGroup);
-  const loadedGroupsIdle = useContextSelector(GroupsContext, data => data.loadedGroupsIdle);
+  const createGroup = useContextSelector(
+    GroupsContext,
+    data => data.createGroup,
+  );
+  const loadedGroupsIdle = useContextSelector(
+    GroupsContext,
+    data => data.loadedGroupsIdle,
+  );
   // const addingMembers = useContextSelector(GroupsContext, data => data.addingMembers);
   const stateValue = useContextSelector(GroupsContext, data => data.stateValue);
 
-  const org = useContextSelector(OrgContext, data => data.org);
-  const members = org.members;
+  // const org = useContextSelector(OrgContext, data => data.org);
+  // const members = org.members;
 
   return (
     <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0 }}>
@@ -27,18 +33,28 @@ export const GroupsPage = () => {
         <>
           {/* Titulo */}
           <View style={{ paddingTop: 20, paddingLeft: 20, paddingBottom: 20 }}>
-          <Text style={{ fontSize: 30, fontWeight: 'bold', color: 'black' }}>{`Grupos: ${stateValue}`}</Text>
+            <Text
+              style={{
+                fontSize: 30,
+                fontWeight: 'bold',
+                color: 'black',
+              }}>{`Grupos: ${stateValue}`}</Text>
           </View>
           {/* Lista de grupos */}
-          <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, height: 300 }}>
+          <View
+            style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, height: 300 }}>
             {}
             <Text>{`Number of groups: ${groups.length}`}</Text>
             {/* Grupos */}
-            <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, borderWidth: 1 }}>
+            <View
+              style={{
+                flexGrow: 1,
+                flexShrink: 1,
+                flexBasis: 0,
+                borderWidth: 1,
+              }}>
               {groups.map((group, index) => {
-                return (
-                  <GroupPreview key={index + ''} group={group} />
-                );
+                return <GroupPreview key={index + ''} group={group} />;
               })}
             </View>
             <TouchableOpacity
@@ -46,7 +62,9 @@ export const GroupsPage = () => {
                 borderWidth: 1,
                 padding: 20,
               }}
-              onPress={() => createGroup(`group ${new Date().getTime().toString(36)}`)}>
+              onPress={() =>
+                createGroup(`group ${new Date().getTime().toString(36)}`)
+              }>
               <Text>Criar grupo</Text>
             </TouchableOpacity>
           </View>
@@ -64,10 +82,9 @@ export const GroupsPage = () => {
       )} */}
     </View>
   );
-}
+};
 
-
-const GroupPreview = ({ group }: {group: Group;}) => {
+const GroupPreview = ({ group }: { group: Group }) => {
   return (
     <View
       style={{
@@ -77,8 +94,8 @@ const GroupPreview = ({ group }: {group: Group;}) => {
         flexDirection: 'row',
       }}>
       {/* Iniciais do grupo */}
-      <View style={{ borderWidth: 1  }}>
-        <Text>{`GR`}</Text>
+      <View style={{ borderWidth: 1 }}>
+        <Text>{'GR'}</Text>
       </View>
       {/* Nome e status do grupo */}
       <View>
@@ -87,5 +104,4 @@ const GroupPreview = ({ group }: {group: Group;}) => {
       </View>
     </View>
   );
-}
-
+};

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { TextInput, View } from "react-native";
-import { MessageTextContent } from "../../components/messageTextContent/messageTextContent";
+import React, { useState } from 'react';
+import { TextInput, View } from 'react-native';
+import { MessageTextContent } from '../../components/messageTextContent/messageTextContent';
 
 export const ChatPage = () => {
   const [query, setQuery] = useState('');
@@ -21,8 +21,13 @@ export const ChatPage = () => {
         />
       </View>
       <View style={{ padding: 10 }}>
-        <TextInput style={{ borderWidth: 1, borderRadius: 8 }} value={query} onChangeText={setQuery} onSubmitEditing={() => setQuery('')} />
+        <TextInput
+          style={{ borderWidth: 1, borderRadius: 8 }}
+          value={query}
+          onChangeText={setQuery}
+          onSubmitEditing={() => setQuery('')}
+        />
       </View>
     </View>
   );
-}
+};

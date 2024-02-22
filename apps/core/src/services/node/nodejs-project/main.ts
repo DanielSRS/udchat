@@ -1,3 +1,3 @@
-import { initDispatcher } from "./dispatcher";
+import { initDispatcher } from './dispatcher';
 
 initDispatcher();

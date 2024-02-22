@@ -1,12 +1,10 @@
 /** Resultado de envio de uma mensagem pela rede */
 export interface SendMessageResponseEvent {
   type: 'sendMessageResponse';
-  data:
-    { logs: string[]; messageId: string }
-    & (
-      | { sucess: true; bytesSent: number; error: undefined }
-      | { sucess: false; bytesSent: 0; error: Error }
-    )
+  data: { logs: string[]; messageId: string } & (
+    | { sucess: true; bytesSent: number; error: undefined }
+    | { sucess: false; bytesSent: 0; error: Error }
+  );
 }
 
 /** Mensagem recebida pela rede */
@@ -18,7 +16,7 @@ export interface NewMessageEvent {
       /** conteúdo da mensagem em formato de string */
       data: string;
       /** indica em que encoding esta o conteúdo da mensagem. no geral em base64 */
-      enconding: BufferEncoding
+      enconding: BufferEncoding;
     };
     info: {
       /** Endereço ip de quem enviou a mensage */
@@ -31,7 +29,7 @@ export interface NewMessageEvent {
       size: number;
     };
     /** Logs da função de recebeu a mensagem */
-    logs: string[],
+    logs: string[];
   };
 }
 
@@ -52,7 +50,7 @@ export interface NetworkStats {
 }
 
 export interface SendMessageEvent {
-  type: 'sendMessage',
+  type: 'sendMessage';
   data: {
     message: {
       /** Mensagem que de fato vai ser enviada */
@@ -62,7 +60,7 @@ export interface SendMessageEvent {
        * Importante pq essa mensagem vai ser convertia num Buffer,
        * então passar o encodig correto garente que o dado naõ vai ser distorcido?
        */
-      encoding: BufferEncoding
+      encoding: BufferEncoding;
     };
     /** endereço ip de quem vai receber a mensage */
     ip: string;
@@ -75,22 +73,22 @@ export interface SendMessageEvent {
      * com uma mensagem enviada
      */
     messageId: string;
-  },
+  };
 }
 
 export interface UPDATE_CRYPTO_KEYS_RESPONSE {
-  type: 'UPDATE_CRYPTO_KEYS_RESPONSE',
+  type: 'UPDATE_CRYPTO_KEYS_RESPONSE';
   data: {
     publicKey: string;
     privateKey: string;
-  },
+  };
 }
 
 export interface UPDATE_CRYPTO_KEYS {
-  type: 'UPDATE_CRYPTO_KEYS',
+  type: 'UPDATE_CRYPTO_KEYS';
   data: {
     publicKey: string;
     privateKey: string;
     username: string;
-  },
+  };
 }

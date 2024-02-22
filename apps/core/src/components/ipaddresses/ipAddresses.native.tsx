@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react"
-import { NET, getNetworkInterfaces } from "../../services/node/nodeService";
-import { Text, View } from "react-native";
+import React, { useEffect, useState } from 'react';
+import { NET, getNetworkInterfaces } from '../../services/node/nodeService';
+import { Text, View } from 'react-native';
 
 export const IpAddresses = () => {
   const [interfaces, setInterfaces] = useState<NET['interfaces']>();
@@ -9,12 +9,14 @@ export const IpAddresses = () => {
     const loadInterfaces = async () => {
       const ips = await getNetworkInterfaces();
       setInterfaces(ips.interfaces);
-    }
+    };
 
     loadInterfaces();
   }, []);
 
-  if (!interfaces) return null;
+  if (!interfaces) {
+    return null;
+  }
 
   const names = Object.keys(interfaces);
 
@@ -24,14 +26,12 @@ export const IpAddresses = () => {
         return (
           <View key={index + ''}>
             <Text>{`${int}`}</Text>
-            {interfaces[int]?.map((ip, index) => {
-              return (
-                <Text key={index + ''}>{`    ${ip}`}</Text>
-              );
+            {interfaces[int]?.map((ip, i) => {
+              return <Text key={i + ''}>{`    ${ip}`}</Text>;
             })}
           </View>
         );
       })}
     </View>
   );
-}
+};

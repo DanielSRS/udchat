@@ -65,7 +65,7 @@ it('Falha se args de Organization forem undefined', () => {
       error => {
         expect(error.code).toBe('OCWIDOMC');
         expect(error.erros).toEqual(['Required']);
-        expect(error.message).toBe(ErrorCodes['OCWIDOMC']);
+        expect(error.message).toBe(ErrorCodes.OCWIDOMC);
       },
       () => {
         throw 'Invalid data. this should never pass';

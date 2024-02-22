@@ -1,9 +1,9 @@
-import { ZodError, ZodIssue, z } from "zod";
-import { KeyPair, KeyPairSchema } from "../keyPair/keyPair";
-import { Member, MemberSchema } from "../member";
-import { CoreError, ErrorCodes } from "../coreError";
-import { fromZodError } from "zod-validation-error";
-import { Either, tryCatch as EitherTryCatch } from "fp-ts/lib/Either";
+import { ZodError, ZodIssue, z } from 'zod';
+import { KeyPair, KeyPairSchema } from '../keyPair/keyPair';
+import { Member, MemberSchema } from '../member';
+import { CoreError, ErrorCodes } from '../coreError';
+import { fromZodError } from 'zod-validation-error';
+import { Either, tryCatch as EitherTryCatch } from 'fp-ts/lib/Either';
 
 /** Usuário do app. Só existe um unico */
 export interface User {
@@ -20,19 +20,16 @@ export const UserSchema = z.object({
 
 type UserError = CoreError<ZodIssue[]>;
 
-const createUserError= (e: unknown) => {
+const createUserError = (e: unknown) => {
   const error = fromZodError(e as ZodError, { prefix: null });
   return CoreError({
     code: 'UCWIDOMC',
     details: error.details,
     erros: error.message.split(';'),
-    message: ErrorCodes['UCWIDOMC'],
+    message: ErrorCodes.UCWIDOMC,
   });
-}
+};
 
 export const User = (user: User): Either<UserError, User> => {
-  return EitherTryCatch(
-    () => UserSchema.parse(user),
-    createUserError,
-  );
+  return EitherTryCatch(() => UserSchema.parse(user), createUserError);
 };

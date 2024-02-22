@@ -1,48 +1,65 @@
-import { Either, left, right } from "fp-ts/lib/Either";
-import { GROUP_CREATION, Group } from "../../contexts/groups/groupsTypes";
-import { Member } from "../../models/member";
-import { StorageInstance, storageService } from "../../services/storage";
-import { generateCommitId } from "../../utils/commitId";
-import { generateRandomInteger } from "../../utils/randomInteger";
+import { Either, left, right } from 'fp-ts/lib/Either';
+import { GROUP_CREATION, Group } from '../../contexts/groups/groupsTypes';
+import { Member } from '../../models/member';
+import { StorageInstance, storageService } from '../../services/storage';
+import { generateCommitId } from '../../utils/commitId';
+import { generateRandomInteger } from '../../utils/randomInteger';
 
-const groupsStorage = storageService.withInstanceID('groups').withEncryption().initialize();
+const groupsStorage = storageService
+  .withInstanceID('groups')
+  .withEncryption()
+  .initialize();
 
 /** Salva organization no storage */
-export const saveGroup = (group: Group, storage: StorageInstance = groupsStorage) => {
+export const saveGroup = (
+  group: Group,
+  storage: StorageInstance = groupsStorage,
+) => {
   return storage.setMap(group.id, group);
-}
+};
 
 /**
  * Recupera grupo do armazenamento
  */
-export const getGroup = (params: { storage?: StorageInstance; groupId: string }) => {
+export const getGroup = (params: {
+  storage?: StorageInstance;
+  groupId: string;
+}) => {
   const { storage = groupsStorage, groupId } = params;
   return storage.getMap<Group>(groupId);
-}
+};
 
 /**
  * Recupera o indice de grupos no armazenamento
  */
-export const getGroupsIndex = (params: { storage?: StorageInstance; }) => {
+export const getGroupsIndex = (params: { storage?: StorageInstance }) => {
   const { storage = groupsStorage } = params;
   return storage.getArray<string>('index');
-}
+};
 
 /**
  * Salva o indice de grupos no armazenamento
  */
-export const saveGroupsIndex = (groupsIds: string[], storage: StorageInstance = groupsStorage) => {
+export const saveGroupsIndex = (
+  groupsIds: string[],
+  storage: StorageInstance = groupsStorage,
+) => {
   return storage.setArray('index', groupsIds);
-}
+};
 
 /**
- * Recupera os grupos do armazenamento 
+ * Recupera os grupos do armazenamento
  */
-export const getGroups = async (params: { storage?: StorageInstance; }) => {
-  return new Promise<Either<unknown, {
-    groupsIndex: string[];
-    groups: { [key: string]: Group };
-  }>>(async (resolve, reject) => {
+export const getGroups = async (params: { storage?: StorageInstance }) => {
+  return new Promise<
+    Either<
+      unknown,
+      {
+        groupsIndex: string[];
+        groups: { [key: string]: Group };
+      }
+    >
+  >(async (resolve, _reject) => {
     const { storage = groupsStorage } = params;
     let groupIndex = await getGroupsIndex(params);
     let groupIds: string[] = [];
@@ -63,37 +80,51 @@ export const getGroups = async (params: { storage?: StorageInstance; }) => {
     }
     const numberOfGroups = groupIds.length;
     const groups: { [key: string]: Group } = {};
-    for(let index = 0; index < numberOfGroups; index++) {
-      const groupId = groupIds[index]
-      if (!groupId) continue;
+    for (let index = 0; index < numberOfGroups; index++) {
+      const groupId = groupIds[index];
+      if (!groupId) {
+        continue;
+      }
       const group = await storage.getMap<Group>(groupId);
 
-      if (group._tag === 'Left') { return resolve(group) };
+      if (group._tag === 'Left') {
+        return resolve(group);
+      }
 
       groups[groupId] = group.right;
     }
-    return resolve(right({
-      groupsIndex: groupIds,
-      groups,
-    }));
+    return resolve(
+      right({
+        groupsIndex: groupIds,
+        groups,
+      }),
+    );
   });
-}
+};
 
 /**
  * Salva os grupos no armazenamento
  */
-export const saveGroups = (params: { storage?: StorageInstance; groupsIds: string[]; groups: { [key: string]: Group } }) => {
+export const saveGroups = (params: {
+  storage?: StorageInstance;
+  groupsIds: string[];
+  groups: { [key: string]: Group };
+}) => {
   const { storage = groupsStorage } = params;
-  return new Promise<Either<unknown[], true>>(async (resolve, reject) => {
+  return new Promise<Either<unknown[], true>>(async (resolve, _reject) => {
     const numberOfGroups = params.groupsIds.length;
     const errors: unknown[] = [];
     const groupsIndex: string[] = [];
     for (let index = 0; index < numberOfGroups; index++) {
       const groupId = params.groupsIds[index];
-      if (!groupId) continue;
+      if (!groupId) {
+        continue;
+      }
 
       const group = params.groups[groupId];
-      if (!group) continue;
+      if (!group) {
+        continue;
+      }
 
       const res = await saveGroup(group, storage);
       if (res._tag === 'Left') {
@@ -112,7 +143,7 @@ export const saveGroups = (params: { storage?: StorageInstance; groupsIds: strin
     }
     return resolve(right(true));
   });
-}
+};
 
 export const createGroup = (params: {
   /** Nome do grupo */
@@ -131,7 +162,10 @@ export const createGroup = (params: {
     },
   };
   const newGroup: Group = {
-    id: generateGroupId({ creatorUsername: params.creatorMmemberInfo.username, groupCreationDate: creationCommit.data.createdAt }),
+    id: generateGroupId({
+      creatorUsername: params.creatorMmemberInfo.username,
+      groupCreationDate: creationCommit.data.createdAt,
+    }),
     name: params.groupName,
     createdAt: creationCommit.data.createdAt,
     commits: [creationCommit],
@@ -139,13 +173,15 @@ export const createGroup = (params: {
   };
   console.log(`createGroup (manager): ${JSON.stringify(newGroup, null, 2)}`);
   return newGroup;
-}
+};
 
-const generateGroupId = (params: { 
+const generateGroupId = (params: {
   /** username do usuário que criou o grupo */
   creatorUsername: string;
   /** data de criação do grupo */
   groupCreationDate: string;
- }) => {
-  return `${params.creatorUsername}_${params.groupCreationDate}${generateRandomInteger(123456789, 987654321).toString(36)}`;
-}
+}) => {
+  return `${params.creatorUsername}_${
+    params.groupCreationDate
+  }${generateRandomInteger(123456789, 987654321).toString(36)}`;
+};

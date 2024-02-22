@@ -1,7 +1,7 @@
 import { dgram, parentPort } from './libs';
-import { symetricDecryption } from './encryption';
+// import { symetricDecryption } from './encryption';
 import { sendMessage } from './network';
-import { getInterfaces } from './ip';
+// import { getInterfaces } from './ip';
 
 // const SEPARATOR = Buffer.from('\r\n');
 // const temporary: { [key: string]: {
@@ -18,20 +18,36 @@ const myCredentials = {
   publicKey: '',
   privateKey: '',
   username: '',
-}
+};
 
 // const createLogger = (logBuffer: Array<string>) => ({ log: (msg: string) => logBuffer.push(msg) });
 
 /** Processa as mensagens recebidas */
 const handleOnMessageEvent = async (event: unknown) => {
-  if (event && typeof event === 'object' && 'type' in event && event.type === 'sendMessage' && 'data' in event) {
+  if (
+    event &&
+    typeof event === 'object' &&
+    'type' in event &&
+    event.type === 'sendMessage' &&
+    'data' in event
+  ) {
     const res = await sendMessage(event.data as any);
     parentPort?.postMessage(res);
     return;
   }
   // atualiza as credenciais
-  if (event && typeof event === 'object' && 'type' in event && event.type === 'UPDATE_CRYPTO_KEYS' && 'data' in event) {
-    const credentials = event.data as { publicKey: string; privateKey: string; username: string };
+  if (
+    event &&
+    typeof event === 'object' &&
+    'type' in event &&
+    event.type === 'UPDATE_CRYPTO_KEYS' &&
+    'data' in event
+  ) {
+    const credentials = event.data as {
+      publicKey: string;
+      privateKey: string;
+      username: string;
+    };
     myCredentials.publicKey = credentials.publicKey;
     myCredentials.privateKey = credentials.privateKey;
     myCredentials.username = credentials.username;
@@ -51,11 +67,9 @@ parentPort?.on('message', handleOnMessageEvent);
 // const socket = dgram.createSocket('udp4');
 // socket.bind(4321);
 
-
 /** Encontra, se houver, a area ocupada pela header na mensagem */
 // const findHeaderEndIndex = (msg: Buffer, separator: Buffer) => msg.indexOf(separator) + separator.length;
 // const findHeaderEndAreaIndex = (message: Buffer) => findHeaderEndIndex(message, SEPARATOR);
-
 
 /** Faz o parse do cabeçalho da mensagem */
 // const parseMessageHeader = (msg: Buffer, headerLength: number, info: dgram.RemoteInfo) => {
@@ -170,7 +184,6 @@ parentPort?.on('message', handleOnMessageEvent);
 //     logger.log('part of a known group');
 //     logger.log(`part number: ${partNumber}`);
 
-
 //     group.acumulatedParts[partNumber] === null                        // Se recebendo uma das partes que ainda não tinha recebido
 //       ? group.missingParts -= 1                                       // Decrementa o numero de partes faltantes
 //       : undefined;                                                    // do contrario não faz nada
@@ -243,10 +256,15 @@ const actCode = Buffer.from([10]);
 const nonEncriptedServer = dgram.createSocket('udp4');
 nonEncriptedServer.bind(4322);
 
-
 nonEncriptedServer.on('message', (msg, rinfo) => {
   // send act
-  nonEncriptedServer.send(actCode, 0, actCode.length, rinfo.port, rinfo.address);
+  nonEncriptedServer.send(
+    actCode,
+    0,
+    actCode.length,
+    rinfo.port,
+    rinfo.address,
+  );
   const logs = [] as Array<string>;
   // const logger = createLogger(logs);
 
@@ -259,8 +277,8 @@ nonEncriptedServer.on('message', (msg, rinfo) => {
         ip: rinfo.address,
         info: rinfo,
         logs,
-      }
-    }
+      },
+    };
     // console.log(`my username: `, myCredentials.username);
     // console.log(`message type: ${JSON.stringify(response, null, 2)}`)
 
@@ -270,28 +288,30 @@ nonEncriptedServer.on('message', (msg, rinfo) => {
   const response = {
     type: 'newMessage',
     data: {
-      message: { data: msg.subarray(headerBytes).toString('base64'), enconding: 'base64' },
+      message: {
+        data: msg.subarray(headerBytes).toString('base64'),
+        enconding: 'base64',
+      },
       info: rinfo,
       logs,
-    }
-  }
+    },
+  };
 
   parentPort?.postMessage(response);
 });
 
-
 /**
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
  * Broadcast server
- * 
- * 
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
+ *
+ *
  */
 
 /**
@@ -332,15 +352,13 @@ nonEncriptedServer.on('message', (msg, rinfo) => {
 // const sk = dgram.createSocket('udp4');
 // sk.bind();
 
-
 // const notifyMyIp = (broadcastIp: string) => {
 //   // const { broadcastIp, port } = params;
 //   const userId = Buffer.from(myCredentials.username);
 //   const data = Buffer.concat([amOnlineAt, userId]);
-  
+
 //   sk.send(data, 0, data.length, 4323, broadcastIp);
 // }
-
 
 // sk.on('listening', () => {
 //   sk.setBroadcast(true);

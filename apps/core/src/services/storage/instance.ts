@@ -1,5 +1,5 @@
-import { Either } from "fp-ts/lib/Either";
-import { CoreError } from "../../models/coreError";
+import { Either } from 'fp-ts/lib/Either';
+import { CoreError } from '../../models/coreError';
 
 /** Storage reading error info */
 interface SREInfo {
@@ -10,7 +10,6 @@ interface SREInfo {
 export interface StorageWritingError extends CoreError<SREInfo> {}
 export interface StorageReadingError extends CoreError<SREInfo> {}
 
-
 export interface StorageInstance {
   /**
    * Set an Object to storage for the given key.
@@ -18,7 +17,10 @@ export interface StorageInstance {
    * Note that this function does **not** work with the Map data type.
    *
    */
-  setMap(key: string, value: object): Promise<Either<StorageWritingError, true>>;
+  setMap(
+    key: string,
+    value: object,
+  ): Promise<Either<StorageWritingError, true>>;
   /**
    * Set a string value to storage for the given key.
    */
@@ -37,7 +39,10 @@ export interface StorageInstance {
   /**
    * Set an array to storage for the given key.
    */
-  setArray(key: string, value: any[]): Promise<Either<StorageWritingError, true>>;
+  setArray(
+    key: string,
+    value: any[],
+  ): Promise<Either<StorageWritingError, true>>;
   /**
    * Remove an item from storage for a given key.
    *

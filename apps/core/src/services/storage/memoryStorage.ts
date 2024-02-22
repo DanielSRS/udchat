@@ -1,19 +1,26 @@
-import { StorageInstance, StorageReadingError, StorageWritingError } from './instance';
+import {
+  StorageInstance,
+  StorageReadingError,
+  StorageWritingError,
+} from './instance';
 import { StorageLoader } from './loader';
 import { Either, left, right } from 'fp-ts/lib/Either';
 import { CoreError, ErrorCodes } from '../../models/coreError';
 
 /** Cria uma função que cria erros de leitura do storage */
-function readingErr<T>(code: CoreError<any>['code'], expected: string) {
-  return (val: unknown) => left(CoreError({
-    code: code,
-    details: {
-      expectedValue: expected,
-      valueReceived: val,
-    } as StorageWritingError['details'] ,
-    erros: [],
-    message: ErrorCodes[code],
-  }))
+function readingErr<T>(code: CoreError<T>['code'], expected: string) {
+  return (val: unknown) =>
+    left(
+      CoreError({
+        code: code,
+        details: {
+          expectedValue: expected,
+          valueReceived: val,
+        } as StorageWritingError['details'],
+        erros: [],
+        message: ErrorCodes[code],
+      }),
+    );
 }
 
 /** Erro de leitura de string no storage */
@@ -27,7 +34,6 @@ const arrayReadingError = readingErr('NFPLAKVS', 'array');
 
 const database: { [key: string]: { [key: string]: any } } = {};
 
-
 interface MMKVStorageProps {
   mmkvInstance: { [key: string]: any };
 }
@@ -39,46 +45,37 @@ class MMKVStorage implements StorageInstance {
   }
 
   setMap(key: string, value: object) {
-    return new Promise<Either<StorageWritingError, true>>((resolve) => {
+    return new Promise<Either<StorageWritingError, true>>(resolve => {
       this.mmkvInstance[key] = value;
       resolve(right(true));
     });
   }
-  setString(
-    key: string,
-    value: string,
-  ) {
-    return new Promise<Either<StorageWritingError, true>>((resolve) => {
+  setString(key: string, value: string) {
+    return new Promise<Either<StorageWritingError, true>>(resolve => {
       this.mmkvInstance[key] = value;
       resolve(right(true));
     });
   }
-  setBoolean(
-    key: string,
-    value: boolean,
-  ) {
-    return new Promise<Either<StorageWritingError, true>>((resolve) => {
+  setBoolean(key: string, value: boolean) {
+    return new Promise<Either<StorageWritingError, true>>(resolve => {
       this.mmkvInstance[key] = value;
       resolve(right(true));
     });
   }
-  setArray(
-    key: string,
-    value: any[],
-  ) {
-    return new Promise<Either<StorageWritingError, true>>((resolve) => {
+  setArray(key: string, value: any[]) {
+    return new Promise<Either<StorageWritingError, true>>(resolve => {
       this.mmkvInstance[key] = value;
       resolve(right(true));
     });
   }
   removeItem(key: string) {
-    return new Promise<Either<false, true>>((resolve) => {
+    return new Promise<Either<false, true>>(resolve => {
       this.mmkvInstance[key] = undefined;
       resolve(right(true));
     });
   }
   getString(key: string) {
-    return new Promise<Either<StorageReadingError, string>>((resolve) => {
+    return new Promise<Either<StorageReadingError, string>>(resolve => {
       const val = this.mmkvInstance[key];
       typeof val === 'string'
         ? resolve(right(val))
@@ -86,31 +83,24 @@ class MMKVStorage implements StorageInstance {
     });
   }
   getMap<T>(key: string) {
-    return new Promise<Either<StorageReadingError, NonNullable<T>>>((resolve) => {
+    return new Promise<Either<StorageReadingError, NonNullable<T>>>(resolve => {
       const val = this.mmkvInstance[key];
-      val
-        ? resolve(right(val))
-        : resolve(mapReadingError(val));
+      val ? resolve(right(val)) : resolve(mapReadingError(val));
     });
   }
   getBoolean(key: string) {
-    return new Promise<Either<StorageReadingError, boolean>>((resolve) => {
+    return new Promise<Either<StorageReadingError, boolean>>(resolve => {
       const val = this.mmkvInstance[key];
-      val
-        ? resolve(right(val))
-        : resolve(booleanReadingError(val));
+      val ? resolve(right(val)) : resolve(booleanReadingError(val));
     });
   }
   getArray<T>(key: string) {
-    return new Promise<Either<StorageReadingError, Array<T>>>((resolve) => {
+    return new Promise<Either<StorageReadingError, Array<T>>>(resolve => {
       const val = this.mmkvInstance[key];
-      val
-        ? resolve(right(val))
-        : resolve(arrayReadingError(val));
+      val ? resolve(right(val)) : resolve(arrayReadingError(val));
     });
   }
 }
-
 
 class MMKVStorageLoader implements StorageLoader {
   private instanceId: string;

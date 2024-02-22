@@ -12,7 +12,7 @@ export interface GROUP_CREATION {
   };
 }
 
-type GroupCommits = GROUP_CREATION; 
+type GroupCommits = GROUP_CREATION;
 
 export interface Group {
   /** Identificador do grupo */
@@ -23,7 +23,7 @@ export interface Group {
   createdAt: string;
   /**
    * Membros do grupo
-   * 
+   *
    * Todos os membros do grupo são membros da organização.
    * a lista de membros do grupo é uma lista de IDs/usernames
    * dos membros da organização que estão no grupo
@@ -32,5 +32,5 @@ export interface Group {
   /**
    * todos os eventos que acontecem no grupo
    */
-  commits: [GroupCommits],
+  commits: [GroupCommits];
 }

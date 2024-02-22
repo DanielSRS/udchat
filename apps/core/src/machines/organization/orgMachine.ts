@@ -68,14 +68,14 @@ As informações básicas são:
 
     states: {
       findingOrg: {
-        description: `Verifica se o usuário já participa de uma organização`,
+        description: 'Verifica se o usuário já participa de uma organização',
 
         invoke: {
           src: 'getOrg',
 
           onDone: {
             target: 'orgLoaded',
-            description: `Organização encontrada`,
+            description: 'Organização encontrada',
             actions: 'saveOrgToContext',
           },
 
@@ -100,14 +100,16 @@ As informações básicas são:
               onError: 'invitationNotSent',
             },
 
-            description: `No convite de ingresso na organização, envio o meu nome de usuário e minha chave publica`,
+            description:
+              'No convite de ingresso na organização, envio o meu nome de usuário e minha chave publica',
           },
 
           waitingResponse: {
             on: {
               INVITE_ACEPTED: {
                 target: 'sendingOrgInfo',
-                description: `O aceite de um confvite tem o codigo do convite, o membro e sua chave publica`,
+                description:
+                  'O aceite de um confvite tem o codigo do convite, o membro e sua chave publica',
               },
             },
           },
@@ -115,7 +117,7 @@ As informações básicas são:
           invitationNotSent: {},
 
           sendingOrgInfo: {
-            description: `Envia as informações da organização`,
+            description: 'Envia as informações da organização',
 
             invoke: {
               src: 'sendOrg',
@@ -205,20 +207,23 @@ O convite tem o nome de quem convidou e sua chave publica`,
               },
             },
 
-            description: `Aguardando o recebimento de um convite para entrar numa organização`,
+            description:
+              'Aguardando o recebimento de um convite para entrar numa organização',
           },
 
           ReceivedInviteToJoinOrg: {
             on: {
               ACCEPT_INVITE: {
                 target: 'SendingAceptance',
-                description: `Aqui deve ser fornecido o codigo de acite ao grupo`,
+                description:
+                  'Aqui deve ser fornecido o codigo de acite ao grupo',
               },
             },
           },
 
           SendingAceptance: {
-            description: `Envia para quem convidou, a resposta de aceite do convite`,
+            description:
+              'Envia para quem convidou, a resposta de aceite do convite',
 
             invoke: {
               src: 'sendInviteAcceptance',
@@ -228,12 +233,13 @@ O convite tem o nome de quem convidou e sua chave publica`,
           },
 
           WaitingOrgData: {
-            description: `Aguarda o envio das informações da organização`,
+            description: 'Aguarda o envio das informações da organização',
 
             on: {
               JOINED_ORG_INFO: {
                 target: 'StoringNewOrg',
-                description: `Aqui recebo as informações da organização que acabei de entrar`,
+                description:
+                  'Aqui recebo as informações da organização que acabei de entrar',
                 actions: 'saveNewOrgToContext',
               },
             },
@@ -253,7 +259,7 @@ O convite tem o nome de quem convidou e sua chave publica`,
         },
 
         initial: 'waitingForInvite',
-        description: `Entra em uma organização criada por outro usuário`,
+        description: 'Entra em uma organização criada por outro usuário',
 
         on: {
           CANCELL_ORG_JOIN: 'noOrgFound',

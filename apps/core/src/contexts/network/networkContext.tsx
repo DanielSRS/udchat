@@ -2,7 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createContext } from 'use-context-selector';
 // import { logger } from '../../services/log/logService';
 import nodejs from '../../services/node/nodejs';
-import { NetworkStats, NewMessageEvent, SendMessageEvent, SendMessageResponseEvent, UPDATE_CRYPTO_KEYS, UPDATE_CRYPTO_KEYS_RESPONSE } from './networkEventTypes';
+import {
+  NetworkStats,
+  NewMessageEvent,
+  SendMessageEvent,
+  SendMessageResponseEvent,
+  UPDATE_CRYPTO_KEYS,
+  UPDATE_CRYPTO_KEYS_RESPONSE,
+} from './networkEventTypes';
 import { BufferLib } from '../../libs/buffer/bufferLib';
 
 const NETWORK_CHANNEL_NAME = 'network';
@@ -23,7 +30,7 @@ interface NetworkContextProps {
 
 export const NetworkContext = createContext({} as NetworkContextProps);
 
-const networkContextData = (): NetworkContextProps => {
+const useNetworkContextData = (): NetworkContextProps => {
   const [networkStats, setNetworkStats] = useState<NetworkStats>({
     totalBytesReceived: 0,
     totalBytesSent: 0,
@@ -40,27 +47,34 @@ const networkContextData = (): NetworkContextProps => {
 
   useEffect(() => {
     const unknownMessagesHandler = (msg: unknown) => {
-      console.log(`unknownMessagesHandler: ${JSON.stringify(msg, null, 2)}`)
+      console.log(`unknownMessagesHandler: ${JSON.stringify(msg, null, 2)}`);
     };
-    messageListners.current['unknown'] = [unknownMessagesHandler];
-    const propagateNetworkEvent = (event: NewMessageEvent | SendMessageResponseEvent | UPDATE_CRYPTO_KEYS_RESPONSE) => {
+    messageListners.current.unknown = [unknownMessagesHandler];
+    const propagateNetworkEvent = (
+      event:
+        | NewMessageEvent
+        | SendMessageResponseEvent
+        | UPDATE_CRYPTO_KEYS_RESPONSE,
+    ) => {
       if (event.type === 'newMessage') {
         setNetworkStats(s => {
           return {
             ...s,
             totalBytesReceived: s.totalBytesReceived + event.data.info.size,
             totalPacketsReceived: s.totalPacketsReceived + 1,
-          }
+          };
         });
 
         const msg = processNewMessage(event);
 
-        // dispatch to listners // 
+        // dispatch to listners //
         const listners = messageListners.current[msg.header.commitId];
         if (listners) {
-          listners.map((listner) => listner(msg.body));
+          listners.map(listner => listner(msg.body));
         } else {
-          console.log(`defaultMessagesHandler: ${JSON.stringify(msg, null, 2)}`);
+          console.log(
+            `defaultMessagesHandler: ${JSON.stringify(msg, null, 2)}`,
+          );
         }
       }
       if (event.type === 'sendMessageResponse') {
@@ -73,71 +87,80 @@ const networkContextData = (): NetworkContextProps => {
               ...s,
               totalBytesSent: s.totalBytesSent + event.data.bytesSent,
               totalPacketsSent: s.totalPacketsSent + 1,
-            }
+            };
           });
         } else {
-          setNetworkStats(s => ({...s, failedMessages: s.failedMessages + 1}));
+          setNetworkStats(s => ({
+            ...s,
+            failedMessages: s.failedMessages + 1,
+          }));
         }
       }
       if (event.type === 'UPDATE_CRYPTO_KEYS_RESPONSE') {
         // console.log(`Atualizado keys do server para: ${JSON.stringify(event.data, null, 2)}`);
       }
       // console.log(JSON.stringify({ event: event }, null, 2));
-    }
+    };
 
-    nodejs.channel.addListener(NETWORK_CHANNEL_NAME, propagateNetworkEvent as (msg: unknown) => void);
+    nodejs.channel.addListener(
+      NETWORK_CHANNEL_NAME,
+      propagateNetworkEvent as (msg: unknown) => void,
+    );
 
     return () => {
       // nodejs?.channel?.removeListener(NETWORK_CHANNEL_NAME, propagateNetworkEvent);
       console.log('listner removido??');
       // clearInterval(interval);
-    }
+    };
   }, []);
 
   const sendMessage = async (params: {
     message: string;
     ip: string;
     port: number;
-  }) => new Promise<SendMessageResponseEvent>((resolve) => {
-    const { ip, message, port } = params;
+  }) =>
+    new Promise<SendMessageResponseEvent>(resolve => {
+      const { ip, message, port } = params;
 
-    /** Identifica o envento de resposta de envio de mensage */
-    const messageId = `${ip}${port}${(new Date()).getTime().toString(36)}${message.length}`;
+      /** Identifica o envento de resposta de envio de mensage */
+      const messageId = `${ip}${port}${new Date().getTime().toString(36)}${
+        message.length
+      }`;
 
-    /** Registra o evento de timeout */
-    const timeoutResponse: SendMessageResponseEvent['data'] = {
-      bytesSent: 0,
-      error: new Error('message timedout'),
-      logs: ['callback was not fired'],
-      messageId,
-      sucess: false,
-    }
-    const timeout = setTimeout(() => {
-      resolve({
-        type: 'sendMessageResponse',
-        data: timeoutResponse,
-      });
-    }, 10000);
-
-    /** Registra o callback */
-    sentMessagesCallbacks.current[messageId] = (r) => { 
-      clearTimeout(timeout);
-      resolve(r);
-    }
-
-    const commit: SendMessageEvent = {
-      type: 'sendMessage',
-      data: {
-        ip,
-        message: { message, encoding: 'utf8' },
+      /** Registra o evento de timeout */
+      const timeoutResponse: SendMessageResponseEvent['data'] = {
+        bytesSent: 0,
+        error: new Error('message timedout'),
+        logs: ['callback was not fired'],
         messageId,
-        port,
-      },
-    };
+        sucess: false,
+      };
+      const timeout = setTimeout(() => {
+        resolve({
+          type: 'sendMessageResponse',
+          data: timeoutResponse,
+        });
+      }, 10000);
 
-    /** Dispara evento de envio de mensagem */
-    nodejs.channel.post('network', commit);
-  });
+      /** Registra o callback */
+      sentMessagesCallbacks.current[messageId] = r => {
+        clearTimeout(timeout);
+        resolve(r);
+      };
+
+      const commit: SendMessageEvent = {
+        type: 'sendMessage',
+        data: {
+          ip,
+          message: { message, encoding: 'utf8' },
+          messageId,
+          port,
+        },
+      };
+
+      /** Dispara evento de envio de mensagem */
+      nodejs.channel.post('network', commit);
+    });
 
   const updateETCPcredentials = (data: UPDATE_CRYPTO_KEYS['data']) => {
     // UPDATE_CRYPTO_KEYS_RESPONSE
@@ -146,23 +169,34 @@ const networkContextData = (): NetworkContextProps => {
       data,
     };
     nodejs.channel.post('network', commit);
-  }
+  };
 
-  const _listenForMessagesWith = (params: { commitId: string, callback: (msg: unknown) => void }) => {
+  const _listenForMessagesWith = (params: {
+    commitId: string;
+    callback: (msg: unknown) => void;
+  }) => {
     const commitGroup = messageListners.current[params.commitId];
     if (commitGroup) {
-      if (commitGroup.includes(params.callback)) return;
+      if (commitGroup.includes(params.callback)) {
+        return;
+      }
       commitGroup.push(params.callback);
       return;
     }
     messageListners.current[params.commitId] = [params.callback];
   };
 
-  const listenForMessagesWith = ({ callback, commitId }: { commitId: string | string[], callback: (msg: unknown) => void }) => {
+  const listenForMessagesWith = ({
+    callback,
+    commitId,
+  }: {
+    commitId: string | string[];
+    callback: (msg: unknown) => void;
+  }) => {
     if (Array.isArray(commitId)) {
-      commitId.map((id) => _listenForMessagesWith({ commitId: id, callback }));
+      commitId.map(id => _listenForMessagesWith({ commitId: id, callback }));
       return;
-    } 
+    }
     _listenForMessagesWith({ commitId, callback });
   };
 
@@ -172,24 +206,33 @@ const networkContextData = (): NetworkContextProps => {
     listenForMessagesWith,
     updateETCPcredentials,
   };
-}
+};
 
-export const NetworkProvider = ({ children }: { children: React.ReactElement }) => {
-  const contextData = networkContextData();
+export const NetworkProvider = ({
+  children,
+}: {
+  children: React.ReactElement;
+}) => {
+  const contextData = useNetworkContextData();
 
   return (
     <NetworkContext.Provider value={contextData}>
       {children}
     </NetworkContext.Provider>
   );
-}
+};
 
 const processNewMessage = (event: NewMessageEvent) => {
-  const msg = BufferLib.from(event.data.message.data, event.data.message.enconding).toString().split('\r\n');
+  const msg = BufferLib.from(
+    event.data.message.data,
+    event.data.message.enconding,
+  )
+    .toString()
+    .split('\r\n');
 
   const errorMessage = {
     header: {
-      commitId: 'unknown'
+      commitId: 'unknown',
     },
     body: {},
   };
@@ -226,14 +269,14 @@ const processNewMessage = (event: NewMessageEvent) => {
           ...body.data,
           ip: event.data.info.address,
           port: event.data.info.port,
-        }
+        },
       },
     };
     console.log(JSON.stringify(p, null, 2));
-  } catch(e) {
+  } catch (e) {
     p = errorMessage;
     console.log('processNewMessage error', JSON.stringify(p, null, 2));
   }
 
   return p;
-}
+};

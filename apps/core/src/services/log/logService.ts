@@ -1,9 +1,13 @@
-import { configLoggerType, consoleTransport, transportFunctionType } from "react-native-logs";
-import { createLogger } from "./logger";
+import {
+  configLoggerType,
+  // consoleTransport,
+  transportFunctionType,
+} from 'react-native-logs';
+import { createLogger } from './logger';
 
-const inkConsoleTransporter: transportFunctionType = (item) => {
+const inkConsoleTransporter: transportFunctionType = item => {
   console.log(item.msg);
-}
+};
 
 const defaultLoggerConfig: configLoggerType = {
   // levels: {

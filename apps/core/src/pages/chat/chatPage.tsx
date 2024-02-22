@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Box } from "ink";
-import { MessageTextContent } from "../../components/messageTextContent/messageTextContent";
+import React, { useState } from 'react';
+import { Box } from 'ink';
+import { MessageTextContent } from '../../components/messageTextContent/messageTextContent';
 import TextInput from 'ink-text-input';
 
 export const ChatPage = () => {
@@ -31,12 +31,13 @@ export const ChatPage = () => {
           sentAt="10:20"
         />
       </Box>
-      <Box
-        flexDirection="column"
-        borderStyle={'round'}
-      >
-        <TextInput value={query} onChange={setQuery} onSubmit={() => setQuery('')} />
+      <Box flexDirection="column" borderStyle={'round'}>
+        <TextInput
+          value={query}
+          onChange={setQuery}
+          onSubmit={() => setQuery('')}
+        />
       </Box>
     </Box>
   );
-}
+};

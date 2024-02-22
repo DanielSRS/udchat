@@ -1,21 +1,21 @@
 import { dgram } from './libs';
 
 type BroadcastResponse = Promise<
-  | { success: true; bytesSent: number; }
+  | { success: true; bytesSent: number }
   | { success: false; bytesSent: 0; error: unknown }
->
-
+>;
 
 export const broadcastMessage = (params: {
   port: number;
   broadcastIp: string;
 }): BroadcastResponse => {
   const { broadcastIp, port } = params;
-  const data = Buffer.from(JSON.stringify({ event: 'broadcast', myIp: 'none' }));
-  
+  const data = Buffer.from(
+    JSON.stringify({ event: 'broadcast', myIp: 'none' }),
+  );
   // socket.setBroadcast(true);
   const sk = dgram.createSocket('udp4');
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     sk.send(data, 0, data.length, port, broadcastIp, (err, bytes) => {
       // Check for errors
       if (err) {
@@ -37,8 +37,7 @@ export const broadcastMessage = (params: {
       }
     });
   });
-}
-
+};
 
 export const sendPackets = async (params: {
   packets: Array<Buffer>;
@@ -58,10 +57,12 @@ export const sendPackets = async (params: {
   for (let a = 0; a < packets.length; a++) {
     await wait(300);
     const data = packets[a];
-    if (!data) continue;
-  
+    if (!data) {
+      continue;
+    }
+
     const length = data.length;
-    const b = await new Promise((resolve, reject) => {
+    await new Promise((resolve, _reject) => {
       // logs.push(`sending packet Nº ${a}: length ${packets[a].length}`);
       socket.send(data, 0, length, port, ip, (err, bytes) => {
         // Check for errors
@@ -74,7 +75,7 @@ export const sendPackets = async (params: {
           return resolve(bytes);
         }
       });
-    })
+    });
   }
 
   const end = new Date().getTime();
@@ -83,7 +84,7 @@ export const sendPackets = async (params: {
   socket.close();
 
   return logs;
-}
+};
 
 export const sendLeadingPacket = async (params: {
   id: string;
@@ -93,10 +94,17 @@ export const sendLeadingPacket = async (params: {
   totalNumberOfPackets: number;
   base64EncryptionKey: string;
 }) => {
-  const { ip, port, dataTotalLength, totalNumberOfPackets, id, base64EncryptionKey } = params;
+  const {
+    ip,
+    port,
+    dataTotalLength,
+    totalNumberOfPackets,
+    id,
+    base64EncryptionKey,
+  } = params;
   const socket = dgram.createSocket('udp4');
 
-  const /** @type {Array<string>} */ logs = [];
+  // const /** @type {Array<string>} */ logs = [];
   // logs.push(`preparing to send: ${packets.length} packets`);
 
   /** To measure execution tme */
@@ -109,33 +117,42 @@ export const sendLeadingPacket = async (params: {
     dataTotalLength,
     totalNumberOfPackets,
     base64EncryptionKey,
-  }
+  };
 
   const leadingHeader = Buffer.from(JSON.stringify(header) + separator);
 
   /** Enviando todos os pacotes */
   // logs.push(`sending packet Nº ${a}: length ${packets[a].length}`);
-  console.log(`sending leading with length ${leadingHeader.length}`)
-  socket.send(leadingHeader, 0, leadingHeader.length, port, ip, (err, bytes) => {
-    // Check for errors
-    if (err) {
-      // logs.push(`Socket error: ${err.stack}`);
-    } else {
-      // Print the number of bytes sent
-      // logs.push(`Socket sent ${bytes} bytes`);
-      console.log(`Socket sent ${bytes} bytes`);
-    }
-  });
+  console.log(`sending leading with length ${leadingHeader.length}`);
+  socket.send(
+    leadingHeader,
+    0,
+    leadingHeader.length,
+    port,
+    ip,
+    (err, bytes) => {
+      // Check for errors
+      if (err) {
+        // logs.push(`Socket error: ${err.stack}`);
+      } else {
+        // Print the number of bytes sent
+        // logs.push(`Socket sent ${bytes} bytes`);
+        console.log(`Socket sent ${bytes} bytes`);
+      }
+    },
+  );
   await wait(300);
 
   // const end = new Date().getTime();
   // logs.push(`Done sending packets in ${end - start}ms`);
   // Close the socket
   socket.close();
-}
+};
 
 async function wait(millisseconds: number) {
-  await new Promise((resolve) => setTimeout(() => resolve(undefined), millisseconds));
+  await new Promise(resolve =>
+    setTimeout(() => resolve(undefined), millisseconds),
+  );
 }
 
 export const sendMessageOld = async (params: {
@@ -145,7 +162,9 @@ export const sendMessageOld = async (params: {
   messageId: string;
 }) => {
   const { message, ip, port, messageId } = params;
-  const data = Buffer.isBuffer(message) ? message : Buffer.from(message.message, message.encoding);
+  const data = Buffer.isBuffer(message)
+    ? message
+    : Buffer.from(message.message, message.encoding);
   const socket = dgram.createSocket('udp4');
 
   const logs: Array<string> = [];
@@ -154,7 +173,10 @@ export const sendMessageOld = async (params: {
   /** To measure execution tme */
   const start = new Date().getTime();
 
-  const res = await new Promise<{ success: true; bytesSent: number; error: undefined } | { success: false; bytesSent: 0; error: Error } >((resolve, reject) => {
+  const res = await new Promise<
+    | { success: true; bytesSent: number; error: undefined }
+    | { success: false; bytesSent: 0; error: Error }
+  >((resolve, _reject) => {
     // logs.push(`sending packet Nº ${a}: length ${packets[a].length}`);
     socket.send(data, 0, data.length, port, ip, (err, bytes) => {
       // Check for errors
@@ -175,7 +197,7 @@ export const sendMessageOld = async (params: {
         });
       }
     });
-  })
+  });
   const end = new Date().getTime();
   logs.push(`Done sending packets in ${end - start}ms`);
   // Close the socket
@@ -189,9 +211,9 @@ export const sendMessageOld = async (params: {
       sucess: res.success,
       error: res.error,
       messageId,
-    }
+    },
   };
-}
+};
 
 const actCode = Buffer.from([10]);
 
@@ -201,21 +223,22 @@ export const sendMessage = (params: {
   port: number;
   messageId: string;
 }) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     const { message, ip, port, messageId } = params;
     const clientSocket = dgram.createSocket('udp4');
     const data = Buffer.concat([
       actCode,
-      Buffer.isBuffer(message) ? message : Buffer.from(message.message, message.encoding)
+      Buffer.isBuffer(message)
+        ? message
+        : Buffer.from(message.message, message.encoding),
     ]);
     const logs: Array<string> = [];
     logs.push(`preparing to send: ${data.length} bytes`);
 
-
     const start = new Date().getTime();
     clientSocket.send(data, 0, data.length, port, ip, (err, bytes) => {
       // se erro, encerra
-      if(err) {
+      if (err) {
         logs.push(`Socket error: ${err.stack}`);
         return resolve({
           type: 'sendMessageResponse',
@@ -225,13 +248,13 @@ export const sendMessage = (params: {
             sucess: false,
             error: err,
             messageId,
-          }
+          },
         });
       }
 
       // encerra a conexão se ficar 5 segundos sem resposta
       const timeout = setTimeout(() => {
-        logs.push(`Timeout error: no act received`);
+        logs.push('Timeout error: no act received');
         resolve({
           type: 'sendMessageResponse',
           data: {
@@ -240,13 +263,12 @@ export const sendMessage = (params: {
             sucess: false,
             error: new Error('timedout'),
             messageId,
-          }
+          },
         });
       }, 5000);
 
-
-      const receivedAct = (msg: Buffer, rinfo: dgram.RemoteInfo) => {
-        if(!actCode.equals(msg.subarray(0, 1))) {
+      const receivedAct = (msg: Buffer, _rinfo: dgram.RemoteInfo) => {
+        if (!actCode.equals(msg.subarray(0, 1))) {
           // console.log('não act');
           return;
         }
@@ -255,7 +277,7 @@ export const sendMessage = (params: {
         logs.push(`Socket sent ${bytes} bytes`);
         logs.push(`Done sending packets in ${elapsed}ms`);
         // console.log(rinfo);
-        clearTimeout(timeout);        /// não há timeout. houve resposta
+        clearTimeout(timeout); /// não há timeout. houve resposta
         resolve({
           type: 'sendMessageResponse',
           data: {
@@ -265,16 +287,16 @@ export const sendMessage = (params: {
             error: undefined,
             elapsed,
             messageId,
-          }
+          },
         });
-        clientSocket.close()          // conexão encerrou
-      }
+        clientSocket.close(); // conexão encerrou
+      };
 
       // aguarda recebimento do act
       clientSocket.on('message', receivedAct);
     });
   });
-}
+};
 
 // module.exports = {
 //   broadcastMessage,

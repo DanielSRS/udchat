@@ -1,10 +1,13 @@
-import React from "react";
-import { Box, Text } from "ink";
-import { useContextSelector } from "use-context-selector";
-import { NetworkContext } from "../../contexts/network/networkContext";
+import React from 'react';
+import { Box, Text } from 'ink';
+import { useContextSelector } from 'use-context-selector';
+import { NetworkContext } from '../../contexts/network/networkContext';
 
 export const NetworkInfo = () => {
-  const networkStats = useContextSelector(NetworkContext, data => data.networkStats);
+  const networkStats = useContextSelector(
+    NetworkContext,
+    data => data.networkStats,
+  );
   return (
     <Box borderColor={'white'} borderStyle={'round'} flexDirection="column">
       <Text>{`totalBytesReceived:       ${networkStats.totalBytesReceived}`}</Text>

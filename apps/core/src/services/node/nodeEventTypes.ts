@@ -2,127 +2,144 @@
 
 export type nodeRequestEvent =
   | {
-      type: 'publicEncrypt',
+      type: 'publicEncrypt';
       data: {
         /** Chave publica */
-        key: string,
-        value: string,
-      }
+        key: string;
+        value: string;
+      };
     }
   | {
-      type: 'privateDecrypt',
+      type: 'privateDecrypt';
       data: {
         /** Chave privada */
-        key: string,
-        value: string,
-      }
+        key: string;
+        value: string;
+      };
     }
   | {
-      type: 'sign',
+      type: 'sign';
       data: {
         /** Chave privada */
-        key: string,
-        value: string,
-      }
+        key: string;
+        value: string;
+      };
     }
   | {
-      type: 'verify',
+      type: 'verify';
       data: {
         /** Chave publica */
-        key: string,
+        key: string;
         /** Dado para verificar */
-        value: string,
+        value: string;
         /** Assinatura do dado em base64 */
-        signature: string,
-      }
+        signature: string;
+      };
     }
   | {
-      type: 'symetricEncryption',
+      type: 'symetricEncryption';
       data: {
-        value: string,
-      }
+        value: string;
+      };
     }
   | {
-      type: 'symetricDecryption',
+      type: 'symetricDecryption';
       data: {
         /** Chave em base64 */
-        key: string,
+        key: string;
         /** Dado em base64 */
-        value: string,
-      }
+        value: string;
+      };
     };
 
-export type nodeResponseEventType = 'unkown' | 'publicEncrypt' | 'privateDecrypt' | 'sign' | 'symetricDecryption' | 'symetricEncryption' | 'verify';
+export type nodeResponseEventType =
+  | 'unkown'
+  | 'publicEncrypt'
+  | 'privateDecrypt'
+  | 'sign'
+  | 'symetricDecryption'
+  | 'symetricEncryption'
+  | 'verify';
 
 export interface nodeResponseEventMap {
-  'unkown': {
+  unkown: {
     eventType: 'unkown';
     response: {
       logs: Array<string>;
     };
   };
-  'publicEncrypt': {
-    eventType: 'publicEncrypt'
-    response: {
-        success: true;
-        logs: string[];
-        encryptedDataInBase64: string;
-    } | {
-        success: false;
-        logs: string[];
-        error: unknown;
-    };
+  publicEncrypt: {
+    eventType: 'publicEncrypt';
+    response:
+      | {
+          success: true;
+          logs: string[];
+          encryptedDataInBase64: string;
+        }
+      | {
+          success: false;
+          logs: string[];
+          error: unknown;
+        };
   };
-  'privateDecrypt': {
-    eventType: 'privateDecrypt'
-    response: {
-      success: true;
-      decryptedData: string;
-    } | {
-        success: false;
-        error: unknown;
-    };
+  privateDecrypt: {
+    eventType: 'privateDecrypt';
+    response:
+      | {
+          success: true;
+          decryptedData: string;
+        }
+      | {
+          success: false;
+          error: unknown;
+        };
   };
-  'sign': {
-    eventType: 'sign'
-    response: {
-      sucess: true;
-      signature: string;
-      logs: string[];
-    } | {
-        sucess: false;
-        error: unknown;
-    };
+  sign: {
+    eventType: 'sign';
+    response:
+      | {
+          sucess: true;
+          signature: string;
+          logs: string[];
+        }
+      | {
+          sucess: false;
+          error: unknown;
+        };
   };
-  'symetricDecryption': {
-    eventType: 'symetricDecryption'
-    response: {
-      success: boolean;
-      logs: string[];
-    } | {
-        decryptedData: string;
-        success: boolean;
-        logs: string[];
-    };
+  symetricDecryption: {
+    eventType: 'symetricDecryption';
+    response:
+      | {
+          success: boolean;
+          logs: string[];
+        }
+      | {
+          decryptedData: string;
+          success: boolean;
+          logs: string[];
+        };
   };
-  'symetricEncryption': {
-    eventType: 'symetricEncryption'
+  symetricEncryption: {
+    eventType: 'symetricEncryption';
     response: {
       encryptedText: string;
       base64EncryptionKey: string;
       encryptionAlgorithm: string;
     };
   };
-  'verify': {
-    eventType: 'verify'
-    response: {
-      success: true;
-      valid: boolean;
-      logs: string[];
-    } | {
-        success: false;
-        error: unknown;
-    };
+  verify: {
+    eventType: 'verify';
+    response:
+      | {
+          success: true;
+          valid: boolean;
+          logs: string[];
+        }
+      | {
+          success: false;
+          error: unknown;
+        };
   };
 }
 
@@ -134,51 +151,59 @@ export type nodeResponseEvent =
       };
     }
   | {
-      eventType: 'publicEncrypt'
-      response: {
-          success: true;
-          logs: string[];
-          encryptedDataInBase64: string;
-      } | {
-          success: false;
-          logs: string[];
-          error: unknown;
-      };
+      eventType: 'publicEncrypt';
+      response:
+        | {
+            success: true;
+            logs: string[];
+            encryptedDataInBase64: string;
+          }
+        | {
+            success: false;
+            logs: string[];
+            error: unknown;
+          };
     }
   | {
-      eventType: 'privateDecrypt'
-      response: {
-        success: true;
-        decryptedData: string;
-      } | {
-          success: false;
-          error: unknown;
-      };
+      eventType: 'privateDecrypt';
+      response:
+        | {
+            success: true;
+            decryptedData: string;
+          }
+        | {
+            success: false;
+            error: unknown;
+          };
     }
   | {
-      eventType: 'sign'
-      response: {
-        sucess: true;
-        signature: string;
-        logs: string[];
-      } | {
-          sucess: false;
-          error: unknown;
-      };
+      eventType: 'sign';
+      response:
+        | {
+            sucess: true;
+            signature: string;
+            logs: string[];
+          }
+        | {
+            sucess: false;
+            error: unknown;
+          };
     }
   | {
-      eventType: 'symetricDecryption'
-      response: {
-        success: boolean;
-        logs: string[];
-      } | {
-          decryptedData: string;
-          success: boolean;
-          logs: string[];
-      };
+      eventType: 'symetricDecryption';
+      response:
+        | {
+            success: boolean;
+            logs: string[];
+          }
+        | {
+            decryptedData: string;
+            success: boolean;
+            logs: string[];
+          };
     }
   | {
-      eventType: 'symetricEncryption'
+      eventType: 'symetricEncryption';
       response: {
         encryptedText: string;
         base64EncryptionKey: string;
@@ -186,13 +211,15 @@ export type nodeResponseEvent =
       };
     }
   | {
-      eventType: 'verify'
-      response: {
-        success: true;
-        valid: boolean;
-        logs: string[];
-      } | {
-          success: false;
-          error: unknown;
-      };
-    }
+      eventType: 'verify';
+      response:
+        | {
+            success: true;
+            valid: boolean;
+            logs: string[];
+          }
+        | {
+            success: false;
+            error: unknown;
+          };
+    };

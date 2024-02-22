@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, Text } from "ink";
+import React from 'react';
+import { Box, Text } from 'ink';
 
 interface MessageTextContentProps {
   text: string;
@@ -17,13 +17,14 @@ export const MessageTextContent = (params: MessageTextContentProps) => {
   return (
     // container
     <Box width={'100%'} flexDirection="column">
-      {self ? null : <Text backgroundColor={'greenBright'}>{` ${senderName} `}</Text>}
+      {self ? null : (
+        <Text backgroundColor={'greenBright'}>{` ${senderName} `}</Text>
+      )}
       <Box
         width={'70%'}
         borderStyle={'round'}
         borderColor={'black'}
-        alignSelf={self ? 'flex-end' : 'flex-start'}
-      >
+        alignSelf={self ? 'flex-end' : 'flex-start'}>
         {textLines.map((line, index) => (
           <Text key={index + ''}>{line}</Text>
         ))}
@@ -33,4 +34,4 @@ export const MessageTextContent = (params: MessageTextContentProps) => {
       </Box>
     </Box>
   );
-}
+};

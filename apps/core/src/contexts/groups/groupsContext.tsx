@@ -1,8 +1,8 @@
-import React from "react";
-import { createContext } from "use-context-selector";
-import { useGroupsMachine } from "./useGroupsMachine";
-import { Group } from "./groupsTypes";
-import { useUser } from "../../hooks";
+import React from 'react';
+import { createContext } from 'use-context-selector';
+import { useGroupsMachine } from './useGroupsMachine';
+import { Group } from './groupsTypes';
+import { useUser } from '../../hooks';
 
 interface GroupsContextProps {
   loadingGroups: boolean;
@@ -21,24 +21,31 @@ interface GroupsContextProps {
 
 export const GroupsContext = createContext({} as GroupsContextProps);
 
-const groupsContextData = () => {
+const useGroupsContextData = () => {
   const user = useUser();
   const { send, state } = useGroupsMachine(user);
 
   const loadingGroups = state?.matches('LoadingGroups') || false;
-  const failedToLoadFromStorage = state?.matches('FailedToLoadFromStorage') || false;
+  const failedToLoadFromStorage =
+    state?.matches('FailedToLoadFromStorage') || false;
   const loadedGroups = state?.matches('LoadedGroups') || false;
-  const creatingGroup = state?.matches('LoadedGroups.Groups.CreatingGroup') || false;
-  const groupNotCreated = state?.matches('LoadedGroups.Groups.GroupNotCreated') || false;
-  const storeCreatedGroup = state?.matches('LoadedGroups.Groups.StoreCreatedGroup') || false;
-  const storeCreatedGroupFailed = state?.matches('LoadedGroups.Groups.StoreCreatedGroupFailed') || false;
+  const creatingGroup =
+    state?.matches('LoadedGroups.Groups.CreatingGroup') || false;
+  const groupNotCreated =
+    state?.matches('LoadedGroups.Groups.GroupNotCreated') || false;
+  const storeCreatedGroup =
+    state?.matches('LoadedGroups.Groups.StoreCreatedGroup') || false;
+  const storeCreatedGroupFailed =
+    state?.matches('LoadedGroups.Groups.StoreCreatedGroupFailed') || false;
   const loadedGroupsIdle = state?.matches('LoadedGroups.Groups.idle') || false;
 
   // const addingMembers = state?.matches('LoadedGroups.Groups.AddingMembers') || false;
 
   const groups = (() => {
-    if (!state) return [];
-    return Object.values(state.context.groups)
+    if (!state) {
+      return [];
+    }
+    return Object.values(state.context.groups);
   })();
 
   const createGroup = (groupName: string) => {
@@ -60,15 +67,17 @@ const groupsContextData = () => {
     createGroup,
     stateValue,
     // addingMembers,
-  }
-}
+  };
+};
 
-export const GroupsProvider = ({ children }: { children: React.ReactElement }) => {
-  const data = groupsContextData();
+export const GroupsProvider = ({
+  children,
+}: {
+  children: React.ReactElement;
+}) => {
+  const data = useGroupsContextData();
 
   return (
-    <GroupsContext.Provider value={data}>
-      {children}
-    </GroupsContext.Provider>
+    <GroupsContext.Provider value={data}>{children}</GroupsContext.Provider>
   );
-}
+};

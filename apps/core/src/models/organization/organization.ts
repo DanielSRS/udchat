@@ -1,10 +1,10 @@
-import { ZodError, ZodIssue, z } from "zod";
-import { Member, MemberSchema } from "../member";
-import { Either, tryCatch as EitherTryCatch } from "fp-ts/lib/Either";
-import { CoreError, ErrorCodes } from "../coreError";
-import { fromZodError } from "zod-validation-error";
+import { ZodError, ZodIssue, z } from 'zod';
+import { Member, MemberSchema } from '../member';
+import { Either, tryCatch as EitherTryCatch } from 'fp-ts/lib/Either';
+import { CoreError, ErrorCodes } from '../coreError';
+import { fromZodError } from 'zod-validation-error';
 
-type OrgCommitType = 'orgCreation' | 'addMemberToOrg';
+// type OrgCommitType = 'orgCreation' | 'addMemberToOrg';
 
 export interface OrgCreationCommit {
   type: 'orgCreation';
@@ -23,7 +23,7 @@ export interface ADD_MEMBER_TO_ORG_COMMIT {
     createdAt: string;
     previousCommit: string;
     commitId: string;
-  }
+  };
 }
 
 const OrgCreationCommitSchema = z.object({
@@ -33,7 +33,7 @@ const OrgCreationCommitSchema = z.object({
     createdAt: z.string(),
     commitId: z.string(),
     previousCommit: z.literal('none'),
-  })
+  }),
 });
 
 type OrgCommit = OrgCreationCommit | ADD_MEMBER_TO_ORG_COMMIT;
@@ -44,10 +44,10 @@ export interface Organization {
   /** Data de criação da organização */
   creationDate: string;
   /** Membros da organização */
-  members: Array<Member>
+  members: Array<Member>;
   commits: OrgCommit[];
   firstCommit: string;
-};
+}
 
 const OrganizationSchema = z.object({
   creationDate: z.string(),
@@ -58,17 +58,19 @@ const OrganizationSchema = z.object({
 
 type OrganizationError = ReturnType<typeof CoreError<ZodIssue[]>>;
 
-const createOrganizationError= (e: unknown) => {
+const createOrganizationError = (e: unknown) => {
   const error = fromZodError(e as ZodError, { prefix: null });
   return CoreError({
     code: 'OCWIDOMC',
     details: error.details,
     erros: error.message.split(';'),
-    message: ErrorCodes['OCWIDOMC'],
+    message: ErrorCodes.OCWIDOMC,
   });
-}
+};
 
-export const Organization = (organization: Organization): Either<OrganizationError, Organization> => {
+export const Organization = (
+  organization: Organization,
+): Either<OrganizationError, Organization> => {
   return EitherTryCatch(
     () => OrganizationSchema.parse(organization),
     createOrganizationError,

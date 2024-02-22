@@ -3,35 +3,33 @@ const HEADER_MAX_SIZE = 300;
 const MAX_DATA_SIZE = MAX_MTU_DATA_SIZE - HEADER_MAX_SIZE;
 const SEPARATOR_STRING = '\r\n';
 
-
 /**
  * Separe dados grandes em blocos menores
- * 
+ *
  * tamanho maximo da mensagem: 64k https://nodejs.org/api/dgram.html#note-about-udp-datagram-size
  * 65,535 bytes no total;
  * 8 bytes UDP header
  * 20 bytes IP header
  * 65_507 bytes DADOS!!!!!
  * 65,507 bytes = 65,535 − 8 bytes UDP header − 20 bytes IP header
- * @param {object} params 
+ * @param {object} params
  * @param {Buffer} params.data
  * @param {string=} params.id Id do grupo de pacotes. o receptor usa o id para remontar os dados
- * @returns 
+ * @returns
  */
-export const preparePackets = (params: {
-  data: Buffer;
-  id?: string;
-}) => {
+export const preparePackets = (params: { data: Buffer; id?: string }) => {
   const {
     data,
-    id = `${((new Date()).getTime()).toString(36).toUpperCase()}_${data.length}_${4321}`,
+    id = `${new Date().getTime().toString(36).toUpperCase()}_${
+      data.length
+    }_${4321}`,
   } = params;
   /**
-   * Calcula quantos pacotes vão ser criados de acordo com o 
-   * tamanho total dos dados a serem enviados 
+   * Calcula quantos pacotes vão ser criados de acordo com o
+   * tamanho total dos dados a serem enviados
    */
-  const dataSize = data.length;                                         // console.log('message total size: ', dataSize);
-  const numberOfPacketsToSend = Math.ceil(dataSize / MAX_DATA_SIZE);    // console.log('numberOfPacketsToSend: ', numberOfPacketsToSend);
+  const dataSize = data.length; // console.log('message total size: ', dataSize);
+  const numberOfPacketsToSend = Math.ceil(dataSize / MAX_DATA_SIZE); // console.log('numberOfPacketsToSend: ', numberOfPacketsToSend);
 
   /** @type {Array<Buffer>}  */
   const packets = [];
@@ -56,17 +54,17 @@ export const preparePackets = (params: {
        * reconstruídos na ordem correta.
        */
       partNumber: i,
-    }
+    };
 
     const HEADER = Buffer.from(JSON.stringify(header) + SEPARATOR_STRING);
-    const body = data.subarray(dataOffset, dataOffset + dataLength)                             //data.substring(offset, offset + length);
+    const body = data.subarray(dataOffset, dataOffset + dataLength); //data.substring(offset, offset + length);
     const msg = Buffer.concat([HEADER, body]);
 
     packets.push(msg);
   }
 
   return packets;
-}
+};
 
 // module.exports = {
 //   preparePackets,

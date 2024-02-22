@@ -1,9 +1,12 @@
-import { nodejsListners, sendMessageToBridge } from "./nodeSharedState";
-import { initDispatcher } from "./nodejs-project/dispatcher";
+import { nodejsListners, sendMessageToBridge } from './nodeSharedState';
+import { initDispatcher } from './nodejs-project/dispatcher';
 
 initDispatcher();
 
-const addChannelListner = (channelName: string, callbackFunction: (msg: unknown) => void) => {
+const addChannelListner = (
+  channelName: string,
+  callbackFunction: (msg: unknown) => void,
+) => {
   // console.log('nodejs addChannelListner');
   const channel = nodejsListners[channelName];
   if (channel) {
@@ -12,19 +15,27 @@ const addChannelListner = (channelName: string, callbackFunction: (msg: unknown)
   }
 
   nodejsListners[channelName] = [callbackFunction];
-}
+};
 
-const removeChannelListner = (channelName: string, callbackFunction: (msg: unknown) => void) => {
-  const channel = nodejsListners[channelName];                  // Canal com os listners
-  if (!channel) return;                                         // Se não tem listners no canal
+const removeChannelListner = (
+  channelName: string,
+  callbackFunction: (msg: unknown) => void,
+) => {
+  const channel = nodejsListners[channelName]; // Canal com os listners
+  if (!channel) {
+    return;
+  } // Se não tem listners no canal
 
-  let index = channel.findIndex((v) => v === callbackFunction); // Encontra o indice do listner pra remover
-  if (index === -1) return;                                     // Se listner não esta registrado no canal
+  let index = channel.findIndex(v => v === callbackFunction); // Encontra o indice do listner pra remover
+  if (index === -1) {
+    return;
+  } // Se listner não esta registrado no canal
 
-  channel.splice(index, 1);                                     // Remove o registro
-}
+  channel.splice(index, 1); // Remove o registro
+};
 
-const sendMessageToDefaultChannel = (message: unknown) => sendMessageToBridge('message', message);
+const sendMessageToDefaultChannel = (message: unknown) =>
+  sendMessageToBridge('message', message);
 
 export default {
   channel: {
@@ -33,5 +44,5 @@ export default {
     send: sendMessageToDefaultChannel,
     removeListener: removeChannelListner,
   },
-  start: (file: string) => {},
-}
+  start: () => {},
+};

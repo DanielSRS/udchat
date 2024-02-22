@@ -1,11 +1,11 @@
-import React, { useRef, useState } from "react";
-import { useContextSelector } from "use-context-selector";
-import { GroupsContext } from "../../contexts/groups/groupsContext";
-import { Text } from "../../libs/text/text";
-import { View } from "../../libs/view/view";
-import { Group } from "../../contexts/groups/groupsTypes";
-import { useFocus, useInput } from "ink";
-import { OrgContext } from "../../contexts/organization/orgContext";
+import React, { useRef, useState } from 'react';
+import { useContextSelector } from 'use-context-selector';
+import { GroupsContext } from '../../contexts/groups/groupsContext';
+import { Text } from '../../libs/text/text';
+import { View } from '../../libs/view/view';
+import { Group } from '../../contexts/groups/groupsTypes';
+import { useFocus, useInput } from 'ink';
+// import { OrgContext } from '../../contexts/organization/orgContext';
 // import SelectInput from "ink-select-input";
 
 /**
@@ -14,15 +14,24 @@ import { OrgContext } from "../../contexts/organization/orgContext";
  * Opção de navegar para um grupo
  */
 export const GroupsPage = () => {
-  const groups = useContextSelector(GroupsContext, data => data.groups).reverse();
-  const createGroup = useContextSelector(GroupsContext, data => data.createGroup);
-  const loadedGroupsIdle = useContextSelector(GroupsContext, data => data.loadedGroupsIdle);
+  const groups = useContextSelector(
+    GroupsContext,
+    data => data.groups,
+  ).reverse();
+  const createGroup = useContextSelector(
+    GroupsContext,
+    data => data.createGroup,
+  );
+  const loadedGroupsIdle = useContextSelector(
+    GroupsContext,
+    data => data.loadedGroupsIdle,
+  );
   // const addingMembers = useContextSelector(GroupsContext, data => data.addingMembers);
-  const stateValue = useContextSelector(GroupsContext, data => data.stateValue);
-  const focusedGroup = useRef<Group>()
+  // const stateValue = useContextSelector(GroupsContext, data => data.stateValue);
+  const focusedGroup = useRef<Group>();
 
-  const org = useContextSelector(OrgContext, data => data.org);
-  const members = org.members;
+  // const org = useContextSelector(OrgContext, data => data.org);
+  // const members = org.members;
 
   const [scroll, setScroll] = useState(0);
 
@@ -37,7 +46,9 @@ export const GroupsPage = () => {
 
     /** Abre o chat do grupo selecionado */
     if (key.return) {
-      if (!focusedGroup.current) return;
+      if (!focusedGroup.current) {
+        return;
+      }
       console.log('open: ', focusedGroup.current.name);
     }
 
@@ -54,19 +65,30 @@ export const GroupsPage = () => {
         <>
           {/* Titulo */}
           <View style={{ paddingTop: 1, paddingLeft: 2, paddingBottom: 1 }}>
-            <Text style={{ fontWeight: 'bold', textTransform: 'uppercase' }}>{`Grupos: `}</Text>
+            <Text
+              style={{
+                fontWeight: 'bold',
+                textTransform: 'uppercase',
+              }}>
+              {'Grupos: '}
+            </Text>
           </View>
           {/* Lista de grupos */}
-          <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, height: 300 }}>
+          <View
+            style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, height: 300 }}>
             {}
             {/* <Text>{`Number of groups: ${groups.length}`}</Text> */}
             {/* Grupos */}
             <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0 }}>
               {groups.slice(scroll, scroll + 5).map((group, index) => {
                 return (
-                  <GroupPreview key={index + ''} group={group} onFocus={g => {
-                    focusedGroup.current = g;
-                  }} />
+                  <GroupPreview
+                    key={index + ''}
+                    group={group}
+                    onFocus={g => {
+                      focusedGroup.current = g;
+                    }}
+                  />
                 );
               })}
             </View>
@@ -86,9 +108,15 @@ export const GroupsPage = () => {
       )} */}
     </View>
   );
-}
+};
 
-const GroupPreview = ({ group, onFocus }: {group: Group; onFocus?: (g: Group) => void }) => {
+const GroupPreview = ({
+  group,
+  onFocus,
+}: {
+  group: Group;
+  onFocus?: (g: Group) => void;
+}) => {
   const { isFocused } = useFocus();
   if (isFocused) {
     onFocus?.(group);
@@ -103,8 +131,8 @@ const GroupPreview = ({ group, onFocus }: {group: Group; onFocus?: (g: Group) =>
         flexShrink: 0,
       }}>
       {/* Iniciais do grupo */}
-      <View style={{ borderStyle: 'round'  }}>
-        <Text>{` GR `}</Text>
+      <View style={{ borderStyle: 'round' }}>
+        <Text>{' GR '}</Text>
       </View>
       {/* Nome e status do grupo */}
       <View style={{ paddingLeft: 1 }}>
@@ -113,4 +141,4 @@ const GroupPreview = ({ group, onFocus }: {group: Group; onFocus?: (g: Group) =>
       </View>
     </View>
   );
-}
+};

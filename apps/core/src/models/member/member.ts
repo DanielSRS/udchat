@@ -1,7 +1,7 @@
-import { Either, tryCatch as EitherTryCatch } from "fp-ts/lib/Either";
-import { fromZodError } from "zod-validation-error";
-import { ZodError, ZodIssue, z } from "zod";
-import { CoreError, ErrorCodes } from "../coreError";
+import { Either, tryCatch as EitherTryCatch } from 'fp-ts/lib/Either';
+import { fromZodError } from 'zod-validation-error';
+import { ZodError, ZodIssue, z } from 'zod';
+import { CoreError, ErrorCodes } from '../coreError';
 
 /**
  * Membro de uma organização.
@@ -13,7 +13,7 @@ export interface Member {
   readonly username: string;
   readonly ip: string;
   readonly publicKey: string;
-};
+}
 
 export const MemberSchema = z.object({
   name: z.string(),
@@ -30,13 +30,10 @@ const createMemberError = (e: unknown) => {
     code: 'MCWIDOMC',
     details: error.details,
     erros: error.message.split(';'),
-    message: ErrorCodes['MCWIDOMC'],
+    message: ErrorCodes.MCWIDOMC,
   });
-}
+};
 
 export const Member = (member: Member): Either<MemberError, Member> => {
-  return EitherTryCatch(
-    () => MemberSchema.parse(member),
-    createMemberError,
-  );
+  return EitherTryCatch(() => MemberSchema.parse(member), createMemberError);
 };

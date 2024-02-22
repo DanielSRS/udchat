@@ -49,7 +49,7 @@ it('Falha se args de Member forem undefined', () => {
       error => {
         expect(error.code).toBe('MCWIDOMC');
         expect(error.erros).toEqual(['Required']);
-        expect(error.message).toBe(ErrorCodes['MCWIDOMC']);
+        expect(error.message).toBe(ErrorCodes.MCWIDOMC);
       },
       () => {
         throw 'Invalid data. this should never pass';

@@ -1,10 +1,10 @@
-import React from "react";
-import { Box } from "ink";
+import React from 'react';
+import { Box } from 'ink';
 
 interface ViewProps {
   children: React.ReactNode;
   style?: {
-    flexDirection?: "row" | "column" | "row-reverse" | "column-reverse";
+    flexDirection?: 'row' | 'column' | 'row-reverse' | 'column-reverse';
     flexBasis?: string | number | undefined;
     flexGrow?: number | undefined;
     flexShrink?: number | undefined;
@@ -15,16 +15,46 @@ interface ViewProps {
     paddingRight?: number | undefined;
     paddingHorizontal?: number | undefined;
     paddingVertical?: number | undefined;
-    borderStyle?: 'arrow' | 'bold' | 'classic' | 'double' | 'doubleSingle' | 'single' | 'round' | 'singleDouble';
-    borderColor?: 'black' | 'blue' | 'cyan' | 'gray' | 'green' | 'grey' | 'magenta' | 'red' |'white' | 'yellow'
-    |'blackBright' | 'blueBright' | 'cyanBright' | 'greenBright' | 'magentaBright' | 'redBright' |'whiteBright' | 'yellowBright';
+    borderStyle?:
+      | 'arrow'
+      | 'bold'
+      | 'classic'
+      | 'double'
+      | 'doubleSingle'
+      | 'single'
+      | 'round'
+      | 'singleDouble';
+    borderColor?:
+      | 'black'
+      | 'blue'
+      | 'cyan'
+      | 'gray'
+      | 'green'
+      | 'grey'
+      | 'magenta'
+      | 'red'
+      | 'white'
+      | 'yellow'
+      | 'blackBright'
+      | 'blueBright'
+      | 'cyanBright'
+      | 'greenBright'
+      | 'magentaBright'
+      | 'redBright'
+      | 'whiteBright'
+      | 'yellowBright';
     height?: string | number | undefined;
     width?: string | number | undefined;
-    overflow?: "visible" | "hidden" | undefined;
-    justifyContent?: "center" | "flex-start" | "flex-end" | "space-between" | "space-around";
-    alignItems?: "center" | "flex-start" | "flex-end" | "stretch";
-    alignSelf?: "center" | "flex-start" | "flex-end" | "auto";
-  }
+    overflow?: 'visible' | 'hidden' | undefined;
+    justifyContent?:
+      | 'center'
+      | 'flex-start'
+      | 'flex-end'
+      | 'space-between'
+      | 'space-around';
+    alignItems?: 'center' | 'flex-start' | 'flex-end' | 'stretch';
+    alignSelf?: 'center' | 'flex-start' | 'flex-end' | 'auto';
+  };
 }
 
 export const View = (props: ViewProps) => {
@@ -35,9 +65,8 @@ export const View = (props: ViewProps) => {
       {...style}
       paddingX={style?.paddingHorizontal}
       paddingY={style?.paddingVertical}
-      overflow={style?.overflow || 'hidden'}
-    >
+      overflow={style?.overflow || 'hidden'}>
       {children}
     </Box>
   );
-}
+};

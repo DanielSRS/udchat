@@ -1,3 +1,3 @@
 export { storageService } from './service';
-export type { StorageLoader } from './loader'
-export type { StorageInstance } from './instance'
+export type { StorageLoader } from './loader';
+export type { StorageInstance } from './instance';

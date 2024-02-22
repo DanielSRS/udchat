@@ -16,5 +16,5 @@ export const App = () => {
         </UserProvider>
       </NetworkProvider>
     </ConfigProvider>
-	);
-}
+  );
+};

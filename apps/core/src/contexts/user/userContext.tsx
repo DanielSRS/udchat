@@ -1,7 +1,7 @@
-import React from "react";
-import { createContext } from "use-context-selector";
-import { useUserMachine } from "./userUserMachine";
-import { User } from "../../models/user/user";
+import React from 'react';
+import { createContext } from 'use-context-selector';
+import { useUserMachine } from './userUserMachine';
+import { User } from '../../models/user/user';
 
 interface UserContextProps {
   findingUser: boolean;
@@ -37,11 +37,11 @@ const userContextData = (): UserContextProps => {
   const userLoaded = state?.matches('userLoaded') || false;
   const savingFailure = state?.matches('savingFailure') || false;
 
-  const user = state?.context.user || placeholderUser
+  const user = state?.context.user || placeholderUser;
 
   const createUser = () => {
     send({ type: 'CREATE_USER' });
-  }
+  };
 
   // console.log(JSON.stringify({
   //   findingUser,
@@ -61,14 +61,10 @@ const userContextData = (): UserContextProps => {
     savingFailure,
     user: user?.encriptionKeys ? user : placeholderUser,
     createUser,
-  }
-}
+  };
+};
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const data = userContextData();
-  return (
-    <UserContext.Provider value={data}>
-      {children}
-    </UserContext.Provider>
-  );
-}
+  return <UserContext.Provider value={data}>{children}</UserContext.Provider>;
+};

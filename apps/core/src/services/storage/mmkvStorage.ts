@@ -1,20 +1,27 @@
 import { MMKVInstance, MMKVLoader } from 'react-native-mmkv-storage';
-import { StorageInstance, StorageReadingError, StorageWritingError } from './instance';
+import {
+  StorageInstance,
+  StorageReadingError,
+  StorageWritingError,
+} from './instance';
 import { StorageLoader } from './loader';
 import { Either, left, right } from 'fp-ts/lib/Either';
 import { CoreError, ErrorCodes } from '../../models/coreError';
 
 /** Cria uma função que cria erros de leitura do storage */
-function readingErr<T>(code: CoreError<any>['code'], expected: string) {
-  return (val: unknown) => left(CoreError({
-    code: code,
-    details: {
-      expectedValue: expected,
-      valueReceived: val,
-    } as StorageWritingError['details'] ,
-    erros: [],
-    message: ErrorCodes[code],
-  }))
+function readingErr<T>(code: CoreError<T>['code'], expected: string) {
+  return (val: unknown) =>
+    left(
+      CoreError({
+        code: code,
+        details: {
+          expectedValue: expected,
+          valueReceived: val,
+        } as StorageWritingError['details'],
+        erros: [],
+        message: ErrorCodes[code],
+      }),
+    );
 }
 
 /** Erro de escrita do map no storage */
@@ -34,7 +41,6 @@ const booleanReadingError = readingErr('NFPLBKVS', 'boolean');
 /** Erro de leitura de array no storage */
 const arrayReadingError = readingErr('NFPLAKVS', 'array');
 
-
 interface MMKVStorageProps {
   mmkvInstance: MMKVInstance;
 }
@@ -46,89 +52,92 @@ class MMKVStorage implements StorageInstance {
   }
 
   setMap(key: string, value: object) {
-    return new Promise<Either<StorageWritingError, true>>((resolve) => {
-      this.mmkvInstance.setMapAsync(key, value)
-        .then(val => val
-            ? resolve(right(true))
-            : resolve(mapWritingError(val)))
+    return new Promise<Either<StorageWritingError, true>>(resolve => {
+      this.mmkvInstance
+        .setMapAsync(key, value)
+        .then(val =>
+          val ? resolve(right(true)) : resolve(mapWritingError(val)),
+        )
         .catch(e => resolve(mapWritingError(e)));
     });
   }
-  setString(
-    key: string,
-    value: string,
-  ) {
-    return new Promise<Either<StorageWritingError, true>>((resolve) => {
-      this.mmkvInstance.setStringAsync(key, value)
-        .then(val => val
-            ? resolve(right(true))
-            : resolve(stringWritingError(val)))
+  setString(key: string, value: string) {
+    return new Promise<Either<StorageWritingError, true>>(resolve => {
+      this.mmkvInstance
+        .setStringAsync(key, value)
+        .then(val =>
+          val ? resolve(right(true)) : resolve(stringWritingError(val)),
+        )
         .catch(e => resolve(stringWritingError(e)));
     });
   }
-  setBoolean(
-    key: string,
-    value: boolean,
-  ) {
-    return new Promise<Either<StorageWritingError, true>>((resolve) => {
-      this.mmkvInstance.setBoolAsync(key, value)
-        .then(val => val
-            ? resolve(right(true))
-            : resolve(booleanWritingError(val)))
+  setBoolean(key: string, value: boolean) {
+    return new Promise<Either<StorageWritingError, true>>(resolve => {
+      this.mmkvInstance
+        .setBoolAsync(key, value)
+        .then(val =>
+          val ? resolve(right(true)) : resolve(booleanWritingError(val)),
+        )
         .catch(e => resolve(booleanWritingError(e)));
     });
   }
-  setArray(
-    key: string,
-    value: any[],
-  ) {
-    return new Promise<Either<StorageWritingError, true>>((resolve) => {
-      this.mmkvInstance.setArrayAsync(key, value)
-        .then(val => val
-            ? resolve(right(true))
-            : resolve(arrayWritingError(val)))
+  setArray(key: string, value: any[]) {
+    return new Promise<Either<StorageWritingError, true>>(resolve => {
+      this.mmkvInstance
+        .setArrayAsync(key, value)
+        .then(val =>
+          val ? resolve(right(true)) : resolve(arrayWritingError(val)),
+        )
         .catch(e => resolve(arrayWritingError(e)));
     });
   }
   removeItem(key: string) {
-    return new Promise<Either<false, true>>((resolve) => {
+    return new Promise<Either<false, true>>(resolve => {
       const res = this.mmkvInstance.removeItem(key);
       res ? resolve(right(res)) : resolve(left(res));
     });
   }
   getString(key: string) {
-    return new Promise<Either<StorageReadingError, string>>((resolve) => {
-      this.mmkvInstance.getStringAsync(key)
-        .then(val => typeof val === 'string'
+    return new Promise<Either<StorageReadingError, string>>(resolve => {
+      this.mmkvInstance
+        .getStringAsync(key)
+        .then(val =>
+          typeof val === 'string'
             ? resolve(right(val))
-            : resolve(stringReadingError(val)))
+            : resolve(stringReadingError(val)),
+        )
         .catch(e => resolve(stringReadingError(e)));
     });
   }
   getMap<T>(key: string) {
-    return new Promise<Either<StorageReadingError, NonNullable<T>>>((resolve) => {
-      this.mmkvInstance.getMapAsync<NonNullable<T>>(key)
-        .then(val => val
-            ? resolve(right(val))
-            : resolve(mapReadingError(val)))
+    return new Promise<Either<StorageReadingError, NonNullable<T>>>(resolve => {
+      this.mmkvInstance
+        .getMapAsync<NonNullable<T>>(key)
+        .then(val =>
+          val ? resolve(right(val)) : resolve(mapReadingError(val)),
+        )
         .catch(e => resolve(mapReadingError(e)));
     });
   }
   getBoolean(key: string) {
-    return new Promise<Either<StorageReadingError, boolean>>((resolve) => {
-      this.mmkvInstance.getBoolAsync(key)
-        .then(val => typeof val === 'boolean'
+    return new Promise<Either<StorageReadingError, boolean>>(resolve => {
+      this.mmkvInstance
+        .getBoolAsync(key)
+        .then(val =>
+          typeof val === 'boolean'
             ? resolve(right(val))
-            : resolve(booleanReadingError(val)))
+            : resolve(booleanReadingError(val)),
+        )
         .catch(e => resolve(booleanReadingError(e)));
     });
   }
   getArray<T>(key: string) {
-    return new Promise<Either<StorageReadingError, Array<T>>>((resolve) => {
-      this.mmkvInstance.getArrayAsync<T>(key)
-        .then(val => val
-            ? resolve(right(val))
-            : resolve(arrayReadingError(val)))
+    return new Promise<Either<StorageReadingError, Array<T>>>(resolve => {
+      this.mmkvInstance
+        .getArrayAsync<T>(key)
+        .then(val =>
+          val ? resolve(right(val)) : resolve(arrayReadingError(val)),
+        )
         .catch(e => resolve(arrayReadingError(e)));
     });
   }

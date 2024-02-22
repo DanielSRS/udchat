@@ -1,4 +1,4 @@
-import { Organization } from "../../models/organization";
+import { Organization } from '../../models/organization';
 
 export interface JOIN_ORG_INVITE {
   type: 'JOIN_ORG_INVITE';
@@ -11,7 +11,7 @@ export interface JOIN_ORG_INVITE {
     ip: string;
     port: number;
   };
-};
+}
 
 export interface INVITE_ACEPTED_EVENT {
   type: 'INVITE_ACEPTED';
@@ -23,14 +23,14 @@ export interface INVITE_ACEPTED_EVENT {
     };
     code: number;
   };
-};
+}
 
 export interface ACCEPT_INVITE {
   type: 'ACCEPT_INVITE';
   data: {
     code: number;
   };
-};
+}
 
 export interface JOINED_ORG_INFO {
   type: 'JOINED_ORG_INFO';
@@ -46,4 +46,3 @@ export interface JOINED_ORG_INFO {
     org: Organization;
   };
 }
-
