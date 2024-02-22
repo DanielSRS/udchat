@@ -1,3 +1,3 @@
 export * from './startup';
 export { userMachine } from './user/userMachine';
-export { orgMachine } from './organization/orgMachine';
+export { newOrgMachine as orgMachine } from './organization/newOrgMachine';

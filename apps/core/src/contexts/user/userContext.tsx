@@ -28,7 +28,7 @@ const placeholderUser = {
   },
 };
 
-const userContextData = (): UserContextProps => {
+const useUserContextData = (): UserContextProps => {
   const { send, state } = useUserMachine();
 
   const findingUser = state?.matches('findingUser') || false;
@@ -65,6 +65,6 @@ const userContextData = (): UserContextProps => {
 };
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const data = userContextData();
+  const data = useUserContextData();
   return <UserContext.Provider value={data}>{children}</UserContext.Provider>;
 };
