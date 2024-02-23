@@ -1,4 +1,4 @@
-import { Commit } from '../commit';
+import { BaseCommitData, Commit } from '../commit';
 
 /**
  * Commits aguardam a votação para decidir qual deles vai ser inserido no historico
@@ -8,9 +8,7 @@ export interface CommitPool {
   /**
    * Adiciona um novo commit
    */
-  addToPool: (
-    commit: Commit<string, { id: string; previous: string; from: string }>,
-  ) => void;
+  addToPool: (commit: Commit<string, BaseCommitData>) => void;
   /**
    * Adiciona o voto de um dos membros
    */
@@ -21,8 +19,8 @@ export interface CommitPool {
     vote: 'accepted' | 'rejected';
     /** Commit para adicionar o voto */
     in: {
-      id: string;
-      previous: string;
+      commitId: string;
+      previousCommit: string;
     };
   }) => void;
 }
@@ -59,21 +57,21 @@ interface CommitPoolFunction {
 
 interface Voters extends Array<string> {}
 interface OnAcceptedResponse {
-  commit: Commit<string, { id: string; previous: string }>;
+  commit: Commit<string, BaseCommitData>;
   votes: {
     accepted: string[];
     rejected: string[];
   };
 }
 interface OnBlockedResponse {
-  commit: Commit<string, { id: string; previous: string }>;
+  commit: Commit<string, BaseCommitData>;
   votes: {
     accepted: string[];
     rejected: string[];
   };
 }
 interface OnRejectedResponse {
-  commit: Commit<string, { id: string; previous: string }>;
+  commit: Commit<string, BaseCommitData>;
   votes: {
     accepted: string[];
     rejected: string[];
@@ -93,7 +91,7 @@ interface OnAcceptedCallback {
 }
 
 interface PoolEntry {
-  commit: Commit<string, { id: string; previous: string; from: string }>;
+  commit: Commit<string, BaseCommitData>;
   votes: {
     accepted: string[];
     rejected: string[];
@@ -146,7 +144,7 @@ export const CommitPool = (() => {
         const value = en[1];
         const voteCount = value.votes.accepted.length.toString();
         const toCurrentCommit =
-          self.currentCommit === value.commit.data.previous;
+          self.currentCommit === value.commit.data.previousCommit;
         if (!toCurrentCommit) {
           return;
         }
@@ -210,7 +208,8 @@ export const CommitPool = (() => {
           const entry = en[1];
 
           // se for um commit invali/ultrapassado
-          const isToRemove = entry.commit.data.previous === noMoreValidCommitId;
+          const isToRemove =
+            entry.commit.data.previousCommit === noMoreValidCommitId;
 
           // add pra lista de remoção
           if (isToRemove) {
@@ -228,12 +227,12 @@ export const CommitPool = (() => {
 
     self.addToPool = function (commit) {
       // alread in, do nothing
-      if (this.commitsInVoting[commit.data.id]) {
+      if (this.commitsInVoting[commit.data.commitId]) {
         return;
       }
       // if follows current commit
-      if (commit.data.previous === this.currentCommit) {
-        this.commitsInVoting[commit.data.id] = {
+      if (commit.data.previousCommit === this.currentCommit) {
+        this.commitsInVoting[commit.data.commitId] = {
           commit,
           votes: {
             accepted: [],
@@ -243,8 +242,8 @@ export const CommitPool = (() => {
         return;
       }
       // if follows another pending commit
-      if (this.commitsInVoting[commit.data.previous]) {
-        this.commitsInVoting[commit.data.id] = {
+      if (this.commitsInVoting[commit.data.previousCommit]) {
+        this.commitsInVoting[commit.data.commitId] = {
           commit,
           votes: {
             accepted: [],
@@ -257,7 +256,7 @@ export const CommitPool = (() => {
     };
 
     self.addVote = function (vote) {
-      const commitTV = self.commitsInVoting[vote.in.id];
+      const commitTV = self.commitsInVoting[vote.in.commitId];
       // Se não exite um commit a ser votado
       if (!commitTV) {
         return;
@@ -287,18 +286,21 @@ export const CommitPool = (() => {
       const rejected = rejectedCount >= this.majorityCount;
 
       // se aceito
-      if (accepted && commitTV.commit.data.previous === this.currentCommit) {
+      if (
+        accepted &&
+        commitTV.commit.data.previousCommit === this.currentCommit
+      ) {
         // dispara o alerta
         this.onAcceptCallback(commitTV);
         // deleta o aceito para não causar problemas pq outros commits
         // que referenciam ele ainda poder estar sendo votados
-        delete self.commitsInVoting[commitTV.commit.data.id];
+        delete self.commitsInVoting[commitTV.commit.data.commitId];
 
         // deleta todo mundo que passou a ser invalido
         self.removeCommitEntry(self.currentCommit);
 
         // atualiza o commit atual
-        self.currentCommit = commitTV.commit.data.id;
+        self.currentCommit = commitTV.commit.data.commitId;
       }
 
       // se rejeitado

@@ -41,32 +41,32 @@ it('onAccepted é chamado quando um commit é aceito', () => {
   newPool.addToPool({
     type: 'a commit',
     data: {
-      id: 'second',
-      previous: 'first',
+      commitId: 'second',
+      previousCommit: 'first',
       from: 'sdf',
     },
   });
   newPool.addVote({
     from: 'sdf',
     in: {
-      id: 'second',
-      previous: 'first',
+      commitId: 'second',
+      previousCommit: 'first',
     },
     vote: 'accepted',
   });
   newPool.addVote({
     from: 'xcv',
     in: {
-      id: 'second',
-      previous: 'first',
+      commitId: 'second',
+      previousCommit: 'first',
     },
     vote: 'accepted',
   });
   newPool.addVote({
     from: 'lkj',
     in: {
-      id: 'second',
-      previous: 'first',
+      commitId: 'second',
+      previousCommit: 'first',
     },
     vote: 'accepted',
   });
@@ -79,32 +79,32 @@ it('um commit só é aceito se referencial o commit atual no previous, mesmo ten
   newPool.addToPool({
     type: 'a commit',
     data: {
-      id: 'second',
-      previous: 'notTheCurrent',
+      commitId: 'second',
+      previousCommit: 'notTheCurrent',
       from: 'sdf',
     },
   });
   newPool.addVote({
     from: 'sdf',
     in: {
-      id: 'second',
-      previous: 'notTheCurrent',
+      commitId: 'second',
+      previousCommit: 'notTheCurrent',
     },
     vote: 'accepted',
   });
   newPool.addVote({
     from: 'xcv',
     in: {
-      id: 'second',
-      previous: 'notTheCurrent',
+      commitId: 'second',
+      previousCommit: 'notTheCurrent',
     },
     vote: 'accepted',
   });
   newPool.addVote({
     from: 'lkj',
     in: {
-      id: 'second',
-      previous: 'notTheCurrent',
+      commitId: 'second',
+      previousCommit: 'notTheCurrent',
     },
     vote: 'accepted',
   });
@@ -122,32 +122,32 @@ it('onRejected é chamado quando um commit é rejeitado', () => {
   newPool.addToPool({
     type: 'a commit',
     data: {
-      id: 'second',
-      previous: 'first',
+      commitId: 'second',
+      previousCommit: 'first',
       from: 'a',
     },
   });
   newPool.addVote({
     from: 'a',
     in: {
-      id: 'second',
-      previous: 'first',
+      commitId: 'second',
+      previousCommit: 'first',
     },
     vote: 'accepted',
   });
   newPool.addVote({
     from: 'b',
     in: {
-      id: 'second',
-      previous: 'first',
+      commitId: 'second',
+      previousCommit: 'first',
     },
     vote: 'rejected',
   });
   newPool.addVote({
     from: 'c',
     in: {
-      id: 'second',
-      previous: 'first',
+      commitId: 'second',
+      previousCommit: 'first',
     },
     vote: 'rejected',
   });

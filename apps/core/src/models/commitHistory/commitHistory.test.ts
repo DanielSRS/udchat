@@ -42,22 +42,25 @@ it('getOrderedIds retorna o historico na ordem correta', () => {
   novoHostoricoDeCommit.addToHistory({
     type: 'sometime',
     data: {
-      id: 'first',
-      previous: 'none',
+      commitId: 'first',
+      previousCommit: 'none',
+      from: 'dsan',
     },
   });
   novoHostoricoDeCommit.addToHistory({
     type: 'asdlfjkl',
     data: {
-      id: 'second',
-      previous: 'first',
+      commitId: 'second',
+      previousCommit: 'first',
+      from: 'dsan',
     },
   });
   novoHostoricoDeCommit.addToHistory({
     type: 'oirfnsdl',
     data: {
-      id: 'third',
-      previous: 'second',
+      commitId: 'third',
+      previousCommit: 'second',
+      from: 'dsan',
     },
   });
   const hist = novoHostoricoDeCommit.getOrderedIds();
@@ -69,15 +72,17 @@ it('commit com mesmo id não pode ser inserido no historico', () => {
   const sucess = novoHostoricoDeCommit.addToHistory({
     type: 'oirfnsdl',
     data: {
-      id: 'third',
-      previous: 'second',
+      commitId: 'third',
+      previousCommit: 'second',
+      from: 'dsan',
     },
   });
   const failure = novoHostoricoDeCommit.addToHistory({
     type: 'oirfnsdl',
     data: {
-      id: 'third',
-      previous: 'second',
+      commitId: 'third',
+      previousCommit: 'second',
+      from: 'dsan',
     },
   });
   expect(sucess).toBe(true);
@@ -89,15 +94,17 @@ it('o id não pode se repetir no historico', () => {
   novoHostoricoDeCommit.addToHistory({
     type: 'oirfnsdl',
     data: {
-      id: 'third',
-      previous: 'second',
+      commitId: 'third',
+      previousCommit: 'second',
+      from: 'dsan',
     },
   });
   novoHostoricoDeCommit.addToHistory({
     type: 'oirfnsdl',
     data: {
-      id: 'third',
-      previous: 'second',
+      commitId: 'third',
+      previousCommit: 'second',
+      from: 'dsan',
     },
   });
   const history = novoHostoricoDeCommit.getOrderedIds();

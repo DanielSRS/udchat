@@ -3,6 +3,7 @@ import { Member, MemberSchema } from '../member';
 import { Either, tryCatch as EitherTryCatch } from 'fp-ts/lib/Either';
 import { CoreError, ErrorCodes } from '../coreError';
 import { fromZodError } from 'zod-validation-error';
+import { CommitHistory } from '../commitHistory';
 
 // type OrgCommitType = 'orgCreation' | 'addMemberToOrg';
 
@@ -23,29 +24,30 @@ export interface ADD_MEMBER_TO_ORG_COMMIT {
     createdAt: string;
     previousCommit: string;
     commitId: string;
+    from: string;
   };
 }
 
-const OrgCreationCommitSchema = z.object({
-  type: z.literal('orgCreation'),
-  data: z.object({
-    createdBy: MemberSchema,
-    createdAt: z.string(),
-    commitId: z.string(),
-    previousCommit: z.literal('none'),
-  }),
-});
+// const OrgCreationCommitSchema = z.object({
+//   type: z.literal('orgCreation'),
+//   data: z.object({
+//     createdBy: MemberSchema,
+//     createdAt: z.string(),
+//     commitId: z.string(),
+//     previousCommit: z.literal('none'),
+//   }),
+// });
 
-type OrgCommit = OrgCreationCommit | ADD_MEMBER_TO_ORG_COMMIT;
+// type OrgCommit = OrgCreationCommit | ADD_MEMBER_TO_ORG_COMMIT;
 
-const OrgCommitSchema = OrgCreationCommitSchema;
+// const OrgCommitSchema = OrgCreationCommitSchema;
 
 export interface Organization {
   /** Data de criação da organização */
   creationDate: string;
   /** Membros da organização */
   members: Array<Member>;
-  commits: OrgCommit[];
+  commits: CommitHistory;
   firstCommit: string;
 }
 
@@ -53,7 +55,7 @@ const OrganizationSchema = z.object({
   creationDate: z.string(),
   firstCommit: z.string(),
   members: z.array(MemberSchema),
-  commits: z.array(OrgCommitSchema).min(1),
+  commits: z.instanceof(CommitHistory),
 });
 
 type OrganizationError = ReturnType<typeof CoreError<ZodIssue[]>>;

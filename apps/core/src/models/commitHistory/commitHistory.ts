@@ -1,4 +1,4 @@
-import { Commit } from '../commit';
+import { BaseCommitData, Commit } from '../commit';
 
 /**
  * Mantém o registro de uma sequencia de commits
@@ -21,9 +21,13 @@ export interface CommitHistory {
    * retorna false quando não referencia o commit atual (previous prop)
    * ou se o primeiro commit, previous não for 'none'
    */
-  addToHistory: <T extends string, K extends { id: string; previous: string }>(
+  addToHistory: <T extends string, K extends BaseCommitData>(
     newCommit: Commit<T, K>,
   ) => boolean;
+  /**
+   * Obtem o commit mais recente
+   */
+  getLatest: () => Commit<string, BaseCommitData> | undefined;
 }
 
 interface PrivateCommitHistory {
@@ -35,7 +39,7 @@ interface PrivateCommitHistory {
   latestCommit: string | undefined;
 
   /** Todos os commits do historico */
-  commits: Record<string, Commit<string, { id: string; previous: string }>>;
+  commits: Record<string, Commit<string, BaseCommitData>>;
 }
 
 interface CommitHistoryFunction {
@@ -65,24 +69,30 @@ export const CommitHistory = function CommitHistory() {
     let ids: string[] = [];
     let current = this.commits[this.latestCommit];
     while (current) {
-      ids.push(current.data.id);
-      current = this.commits[current.data.previous];
+      ids.push(current.data.commitId);
+      current = this.commits[current.data.previousCommit];
     }
     return ids.reverse();
   };
 
   self.addToHistory = function (commit) {
     if (!this.latestCommit) {
-      this.latestCommit = commit.data.id;
-      this.commits[commit.data.id] = commit;
+      this.latestCommit = commit.data.commitId;
+      this.commits[commit.data.commitId] = commit;
       return true;
     }
     /** New commit do not respects order */
-    if (this.latestCommit !== commit.data.previous) {
+    if (this.latestCommit !== commit.data.previousCommit) {
       return false;
     }
-    this.latestCommit = commit.data.id;
-    this.commits[commit.data.id] = commit;
+    this.latestCommit = commit.data.commitId;
+    this.commits[commit.data.commitId] = commit;
     return true;
+  };
+
+  self.getLatest = function () {
+    const latestCommit = self.latestCommit || '';
+    const commit = self.commits[latestCommit];
+    return commit;
   };
 } as CommitHistoryFunction;

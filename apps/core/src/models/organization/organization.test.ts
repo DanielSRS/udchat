@@ -3,28 +3,40 @@ import { Organization } from '.';
 import { match as EitherMatch } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/lib/function';
 import { CoreError, ErrorCodes } from '../coreError';
+import { Commit } from '../commit';
+import { CommitHistory } from '../commitHistory';
+
+// {
+//   data: {
+//     createdAt: '',
+//     commitId: 'asdf',
+//     createdBy: {
+//       name: 'name',
+//       username: 'username',
+//       ip: 'lsjdf',
+//       publicKey: 'aslçdkfjl',
+//     },
+//     previousCommit: 'none',
+//   },
+//   type: 'orgCreation',
+// }
 
 const VALID_ORGANIZATION: Organization = {
   creationDate: new Date().toISOString(),
   firstCommit: 'sldkfj',
   members: [],
-  commits: [
-    {
-      data: {
-        createdAt: '',
-        commitId: 'asdf',
-        createdBy: {
-          name: 'name',
-          username: 'username',
-          ip: 'lsjdf',
-          publicKey: 'aslçdkfjl',
-        },
-        previousCommit: 'none',
-      },
-      type: 'orgCreation',
-    },
-  ],
+  commits: CommitHistory(),
 };
+VALID_ORGANIZATION.commits.addToHistory(
+  Commit({
+    type: '',
+    data: {
+      commitId: 'alskdfj',
+      previousCommit: 'asdlkf',
+      from: 'saniel',
+    },
+  }),
+);
 
 it('Retorna um "Organization" quando os dados são válidos', () => {
   const res = Organization(VALID_ORGANIZATION);
