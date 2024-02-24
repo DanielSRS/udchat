@@ -19,6 +19,7 @@ import { useContextSelector } from 'use-context-selector';
 import { NetworkContext } from '../network/networkContext';
 import { ADD_MEMBER_TO_ORG_COMMIT } from '../../models/organization/organization';
 import { CommitPool } from '../../models/commitPool';
+import { getLatestCommit } from '../../models/commitHistory';
 
 type MachineState = Pick<
   StateFrom<typeof orgMachine>,
@@ -128,6 +129,7 @@ export const useOrgMachine = () => {
             deleteOrg: deleteOrgFromStorageService,
             sendOrg: (context, event) => {
               return new Promise((resolve, reject) => {
+                console.log('sendOrg');
                 const org = context.organization;
                 // @ts-expect-error
                 const newMemberIp = event.data.ip;
@@ -143,8 +145,7 @@ export const useOrgMachine = () => {
                     commitId: generateCommitId(),
                     createdAt: new Date().getTime().toString(36),
                     newMember,
-                    previousCommit:
-                      org.commits.getLatest()?.data.commitId || '',
+                    previousCommit: getLatestCommit(org.commits).data.commitId,
                     from: context.user.member.username,
                   },
                 };
