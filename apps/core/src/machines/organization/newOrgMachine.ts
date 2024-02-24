@@ -12,7 +12,7 @@ import {
 } from '../../contexts/organization/orgEventTypes';
 import { SendMessageResponseEvent } from '../../contexts/network/networkEventTypes';
 import { CommitPool } from '../../models/commitPool';
-import { getLatestCommit } from '../../models/commitHistory';
+import { addCommiToHistory, getLatestCommit } from '../../models/commitHistory';
 
 type Events =
   | { type: 'CREATE_ORG' }
@@ -395,6 +395,7 @@ As informações básicas são:
         context.newOrgPool.addVote(event.data);
       },
       checkIngressVotes: send((context, event) => {
+        const org = context.organization;
         console.log('checkIngressVotes');
         const commitId =
           event.type === 'NEW_INGRESS_VOTE'
@@ -419,8 +420,8 @@ As informações básicas são:
 
         console.log('checkIngressVotes APPROVED_INGRESS');
         // raise('APPROVED_INGRESS');
-        context.organization.commits.addToHistory(res.right.commit);
-        context.organization.members.push(res.right.commit.data.newMember);
+        org.commits = addCommiToHistory(org.commits, res.right.commit);
+        org.members.push(res.right.commit.data.newMember);
         return { type: 'APPROVED_INGRESS' };
         // update commit history
       }),
