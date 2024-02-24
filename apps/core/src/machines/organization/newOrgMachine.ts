@@ -12,7 +12,7 @@ import {
 } from '../../contexts/organization/orgEventTypes';
 import { SendMessageResponseEvent } from '../../contexts/network/networkEventTypes';
 import { CommitPool } from '../../models/commitPool';
-import { CommitHistory } from '../../models/commitHistory';
+import { getLatestCommit } from '../../models/commitHistory';
 
 type Events =
   | { type: 'CREATE_ORG' }
@@ -355,47 +355,23 @@ As informações básicas são:
         organization: event.data.data.commit.data.org,
       })),
       saveNewOrgToContext: assign((_, event) => {
-        const org = event.data.org;
-        console.log('saveNewOrgToContext action', JSON.stringify(org, null, 2));
-        const h = CommitHistory();
-        const firstCommitId = org.commits.firstCommit;
-        console.log('firstCommitId: ', firstCommitId);
-        const commits = org.commits.commits;
-        console.log('commits: ', JSON.stringify(commits, null, 2));
-        const firstCommit = commits[firstCommitId];
-        console.log('firstCommit: ', JSON.stringify(firstCommit, null, 2));
-        h.addToHistory(firstCommit);
-        Object.keys(commits)
-          .filter(v => v !== firstCommitId)
-          .map(k => {
-            h.addToHistory(commits[k]);
-          });
-        const organization = Organization({
-          commits: h,
-          creationDate: event.data.org.creationDate,
-          firstCommit: event.data.org.firstCommit,
-          members: event.data.org.members,
-        });
-        if (organization._tag === 'Left') {
-          return {};
-        }
         return {
-          organization: organization.right,
+          organization: event.data.org,
         };
       }),
       createNewOrgPool: assign((context, event) => {
-        console.log(
-          'createNewOrgPool action: ',
-          JSON.stringify(context.organization, null, 2),
-        );
+        // console.log(
+        //   'createNewOrgPool action: ',
+        //   JSON.stringify(context.organization, null, 2),
+        // );
         const voters = context.organization.members.map(m => m.username);
-        const currentCommit =
-          context.organization.commits.getLatest()?.data.commitId;
+        const currentCommit = getLatestCommit(context.organization.commits).data
+          .commitId;
         const newPool = CommitPool(
           () => console.log('APPROVED_INGRESS'),
           () => console.log('REJECTED_INGRESS'),
           voters,
-          currentCommit || 'erro',
+          currentCommit,
         );
         newPool.addToPool(event.data.addedMemberCommit);
 

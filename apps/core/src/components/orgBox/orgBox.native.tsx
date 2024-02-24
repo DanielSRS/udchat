@@ -1,6 +1,7 @@
 import React from 'react';
 import { useOrg } from '../../hooks';
 import { Text, View } from 'react-native';
+import { getCommitsInOrder } from '../../models/commitHistory';
 
 export const OrgBox = () => {
   const org = useOrg();
@@ -8,12 +9,14 @@ export const OrgBox = () => {
     <View style={{ borderWidth: 1, borderColor: 'magenta' }}>
       <Text>{`| Data de criação: ${org.creationDate}`}</Text>
       <Text>{'| Commits:'}</Text>
-      {org.commits.getInOrderCommits().map(item => {
+      {getCommitsInOrder(org.commits).map(item => {
+        const time = new Date(0);
+        const timeInMs = parseInt(item.data.createdAt, 36);
+        time.setUTCMilliseconds(timeInMs);
         return (
-          <Text
-            key={
-              item.data.createdAt
-            }>{`|     ${item.type}: ${item.data.createdAt}`}</Text>
+          <Text key={item.data.commitId}>{`|     ${
+            item.type
+          }: ${time.toLocaleString()}`}</Text>
         );
       })}
       <Text>{'| membros:'}</Text>

@@ -34,6 +34,10 @@ export interface CommitHistory {
    * Obtem o commit mais recente
    */
   getLatest: () => Commit<string, BaseCommitData> | undefined;
+
+  readonly latestCommit: string;
+  readonly firstCommit: string;
+  readonly commits: Record<string, Commit<string, BaseCommitData>>;
 }
 
 interface PrivateCommitHistory {
@@ -42,15 +46,13 @@ interface PrivateCommitHistory {
    *
    * É undefined se o histórico não tiver nenhum commit
    */
-  latestCommit: string | undefined;
-
+  // latestCommit: string | undefined;
   /** Todos os commits do historico */
-  commits: Record<string, Commit<string, BaseCommitData>>;
-
+  // commits: Record<string, Commit<string, BaseCommitData>>;
   /**
    * primeiro commit
    */
-  firstCommit: string | undefined;
+  // firstCommit: string | undefined;
 }
 
 interface CommitHistoryFunction {
@@ -122,3 +124,71 @@ export const CommitHistory = function CommitHistory() {
     return commit;
   };
 } as CommitHistoryFunction;
+
+interface CH<T extends BaseCommitData> {
+  readonly latestCommit: string;
+  readonly firstCommit: string;
+  readonly commits: Record<string, Commit<string, T>>;
+}
+
+export function getLatestCommit<T extends BaseCommitData>(
+  commitHistory: CH<T>,
+) {
+  const latestCommit = commitHistory.latestCommit;
+  const commit =
+    commitHistory.commits[latestCommit] ||
+    // Fazendo isso pq latestCommit sempre vai existir
+    ({} as Commit<string, T>);
+  return commit;
+}
+
+export function addCommiToHistory(
+  previousCommitHistory: CH<BaseCommitData>,
+  newCommit: Commit<string, BaseCommitData>,
+): Readonly<CH<BaseCommitData>> {
+  const commitHistory = { ...previousCommitHistory };
+  // if (!this.latestCommit) {
+  //   this.latestCommit = commit.data.commitId;
+  //   this.firstCommit = commit.data.commitId;
+  //   this.commits[commit.data.commitId] = commit;
+  //   return true;
+  // }
+  /** New commit do not respects order */
+  if (commitHistory.latestCommit !== newCommit.data.previousCommit) {
+    return previousCommitHistory;
+  }
+
+  // atualiza o commit mais recente
+  commitHistory.latestCommit = newCommit.data.commitId;
+  commitHistory.commits[newCommit.data.commitId] = newCommit;
+  return commitHistory;
+}
+
+export function getCommitById<T extends BaseCommitData>(
+  commitHistory: CH<T>,
+  commitId: string,
+) {
+  return commitHistory.commits[commitId];
+}
+
+export function getCommitsInOrder(commitHistory: CH<BaseCommitData>) {
+  let commits: Commit<string, BaseCommitData>[] = [];
+  let current: Commit<string, BaseCommitData> | undefined =
+    getLatestCommit(commitHistory);
+  while (current) {
+    commits.push(current);
+    current = getCommitById(commitHistory, current.data.previousCommit);
+  }
+  return commits.reverse();
+}
+
+export function getOrderedCommitIds(commitHistory: CH<BaseCommitData>) {
+  let ids: string[] = [];
+  let current: Commit<string, BaseCommitData> | undefined =
+    getLatestCommit(commitHistory);
+  while (current) {
+    ids.push(current.data.commitId);
+    current = getCommitById(commitHistory, current.data.previousCommit);
+  }
+  return ids.reverse();
+}

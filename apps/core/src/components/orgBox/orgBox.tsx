@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { useOrg } from '../../hooks';
+import { getCommitsInOrder } from '../../models/commitHistory';
 
 export const OrgBox = () => {
   const org = useOrg();
@@ -8,7 +9,7 @@ export const OrgBox = () => {
     <Box borderColor={'magenta'} borderStyle={'round'} flexDirection="column">
       <Text>{`| Data de criação: ${org.creationDate}`}</Text>
       <Text>{'| Commits:'}</Text>
-      {org.commits.map(item => {
+      {getCommitsInOrder(org.commits).map(item => {
         return (
           <Text
             key={
