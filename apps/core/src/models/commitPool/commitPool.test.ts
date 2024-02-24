@@ -54,6 +54,7 @@ it('onAccepted é chamado quando um commit é aceito', () => {
     },
     vote: 'accepted',
   });
+  newPool.checkVotes('second');
   newPool.addVote({
     from: 'xcv',
     in: {
@@ -62,6 +63,7 @@ it('onAccepted é chamado quando um commit é aceito', () => {
     },
     vote: 'accepted',
   });
+  newPool.checkVotes('second');
   newPool.addVote({
     from: 'lkj',
     in: {
@@ -70,6 +72,7 @@ it('onAccepted é chamado quando um commit é aceito', () => {
     },
     vote: 'accepted',
   });
+  newPool.checkVotes('second');
   expect(onAccepted).toBeCalledTimes(1);
 });
 
@@ -92,6 +95,7 @@ it('um commit só é aceito se referencial o commit atual no previous, mesmo ten
     },
     vote: 'accepted',
   });
+  newPool.checkVotes('second');
   newPool.addVote({
     from: 'xcv',
     in: {
@@ -100,6 +104,7 @@ it('um commit só é aceito se referencial o commit atual no previous, mesmo ten
     },
     vote: 'accepted',
   });
+  newPool.checkVotes('second');
   newPool.addVote({
     from: 'lkj',
     in: {
@@ -108,6 +113,7 @@ it('um commit só é aceito se referencial o commit atual no previous, mesmo ten
     },
     vote: 'accepted',
   });
+  newPool.checkVotes('second');
   expect(onAccepted).not.toBeCalled();
 });
 
@@ -135,6 +141,7 @@ it('onRejected é chamado quando um commit é rejeitado', () => {
     },
     vote: 'accepted',
   });
+  newPool.checkVotes('second');
   newPool.addVote({
     from: 'b',
     in: {
@@ -143,6 +150,7 @@ it('onRejected é chamado quando um commit é rejeitado', () => {
     },
     vote: 'rejected',
   });
+  newPool.checkVotes('second');
   newPool.addVote({
     from: 'c',
     in: {
@@ -151,6 +159,7 @@ it('onRejected é chamado quando um commit é rejeitado', () => {
     },
     vote: 'rejected',
   });
+  newPool.checkVotes('second');
   expect(onRejected).toBeCalledTimes(1);
 });
 

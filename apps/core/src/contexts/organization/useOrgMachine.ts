@@ -17,6 +17,8 @@ import {
 } from './orgEventTypes';
 import { useContextSelector } from 'use-context-selector';
 import { NetworkContext } from '../network/networkContext';
+import { ADD_MEMBER_TO_ORG_COMMIT } from '../../models/organization/organization';
+import { CommitPool } from '../../models/commitPool';
 
 type MachineState = Pick<
   StateFrom<typeof orgMachine>,
@@ -135,16 +137,17 @@ export const useOrgMachine = () => {
                   publicKey: event.data.joiningMember.publicKey,
                   username: event.data.joiningMember.username,
                 };
-                org.commits.push({
+                const addedMemberCommit: ADD_MEMBER_TO_ORG_COMMIT = {
                   type: 'ADD_MEMBER_TO_ORG_COMMIT',
                   data: {
                     commitId: generateCommitId(),
                     createdAt: new Date().getTime().toString(36),
                     newMember,
                     previousCommit:
-                      org.commits[org.commits.length - 1]?.data.commitId || '',
+                      org.commits.getLatest()?.data.commitId || '',
+                    from: context.user.member.username,
                   },
-                });
+                };
                 org.members.push(newMember);
                 const header = {
                   /** Versão o programa/protocolo */
@@ -156,6 +159,7 @@ export const useOrgMachine = () => {
                   type: 'JOINED_ORG_INFO',
                   data: {
                     org,
+                    addedMemberCommit,
                   },
                 };
                 const message = `${JSON.stringify(header)}\r\n${JSON.stringify(
@@ -188,6 +192,8 @@ export const useOrgMachine = () => {
           user,
           invitingMember: {} as JOIN_ORG_INVITE['data']['invitingMember'],
           ip: '',
+          newOrgPool: {} as CommitPool,
+          ingressOrgStatus: false,
         }),
     ),
   );

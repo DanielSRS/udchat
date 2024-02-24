@@ -1,4 +1,6 @@
+import { Either, right, left } from 'fp-ts/lib/Either';
 import { BaseCommitData, Commit } from '../commit';
+import { NEW_INGRESS_VOTE } from '../../contexts/organization/orgEventTypes';
 
 /**
  * Commits aguardam a votação para decidir qual deles vai ser inserido no historico
@@ -12,17 +14,14 @@ export interface CommitPool {
   /**
    * Adiciona o voto de um dos membros
    */
-  addVote: (vote: {
-    /** username de quem votou */
-    from: string;
-    /** Um votante pode escolher aceitar ou rejeitar um commit */
-    vote: 'accepted' | 'rejected';
-    /** Commit para adicionar o voto */
-    in: {
-      commitId: string;
-      previousCommit: string;
-    };
-  }) => void;
+  addVote: (vote: NEW_INGRESS_VOTE['data']) => void;
+  /**
+   * Undefined se são existe um commit com o id indicado ou não tem votos suficientes
+   *
+   * Left se o commit foi rejeitado
+   * Right se o commit foi aceito
+   */
+  checkVotes: (commitId: string) => Either<PoolEntry, PoolEntry> | undefined;
 }
 
 interface PrivateCommitPool {
@@ -279,7 +278,15 @@ export const CommitPool = (() => {
         commitTV.votes.rejected.push(vote.from);
       }
 
+      // self.checkVotes(commitTV.commit.data.commitId);
+    };
+
+    self.checkVotes = function (commitId) {
       // checa se tem votos suficientes
+      const commitTV = self.commitsInVoting[commitId];
+      if (!commitTV) {
+        return;
+      }
       const acceptedCount = commitTV.votes.accepted.length;
       const rejectedCount = commitTV.votes.rejected.length;
       const accepted = acceptedCount >= this.majorityCount;
@@ -292,6 +299,7 @@ export const CommitPool = (() => {
       ) {
         // dispara o alerta
         this.onAcceptCallback(commitTV);
+
         // deleta o aceito para não causar problemas pq outros commits
         // que referenciam ele ainda poder estar sendo votados
         delete self.commitsInVoting[commitTV.commit.data.commitId];
@@ -301,14 +309,19 @@ export const CommitPool = (() => {
 
         // atualiza o commit atual
         self.currentCommit = commitTV.commit.data.commitId;
+
+        return right(commitTV);
       }
 
       // se rejeitado
       if (rejected) {
         // dispara o alerta
         this.OnRejectedallback(commitTV);
+
         // deleta o commit e todo mundo que passou depende dele
         self.removeCommitEntry(self.currentCommit);
+
+        return left(commitTV);
       }
     };
   } as CommitPoolFunction;
