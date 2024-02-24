@@ -13,6 +13,12 @@ export interface CommitHistory {
    * inclusão
    */
   getOrderedIds: () => string[];
+  /**
+   * Obtem todos os commits em forma
+   * de lista ordenada de acordo com o histórico de
+   * inclusão
+   */
+  getInOrderCommits: () => Commit<string, BaseCommitData>[];
 
   /**
    * Adiciona um commit ao histórico, tornado-o o commit
@@ -40,6 +46,11 @@ interface PrivateCommitHistory {
 
   /** Todos os commits do historico */
   commits: Record<string, Commit<string, BaseCommitData>>;
+
+  /**
+   * primeiro commit
+   */
+  firstCommit: string | undefined;
 }
 
 interface CommitHistoryFunction {
@@ -60,6 +71,7 @@ export const CommitHistory = function CommitHistory() {
   const self = this as CommitHistory & PrivateCommitHistory;
 
   self.latestCommit = undefined;
+  self.firstCommit = undefined;
   self.commits = {};
 
   self.getOrderedIds = function () {
@@ -75,9 +87,23 @@ export const CommitHistory = function CommitHistory() {
     return ids.reverse();
   };
 
+  self.getInOrderCommits = function () {
+    if (!this.latestCommit) {
+      return [];
+    }
+    let commits: Commit<string, BaseCommitData>[] = [];
+    let current = this.commits[this.latestCommit];
+    while (current) {
+      commits.push(current);
+      current = this.commits[current.data.previousCommit];
+    }
+    return commits.reverse();
+  };
+
   self.addToHistory = function (commit) {
     if (!this.latestCommit) {
       this.latestCommit = commit.data.commitId;
+      this.firstCommit = commit.data.commitId;
       this.commits[commit.data.commitId] = commit;
       return true;
     }

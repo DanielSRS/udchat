@@ -1,3 +1,4 @@
+import { CommitHistory } from '../../models/commitHistory';
 import { Member } from '../../models/member';
 import { Organization } from '../../models/organization';
 import { OrgCreationCommit } from '../../models/organization/organization';
@@ -40,23 +41,27 @@ export const createOrg = (params: {
       createdBy: params.createdBy,
       previousCommit: 'none',
       commitId: creationCommitId,
+      from: params.createdBy.username,
     },
   };
+  const history = CommitHistory();
+  history.addToHistory(creationCommit);
   const newOrg = Organization({
-    commits: [creationCommit],
+    commits: history,
     creationDate: creationCommit.data.createdAt,
     members: [params.createdBy],
     firstCommit: creationCommitId,
   });
   if (newOrg._tag === 'Right') {
     const firstMemberCommitId = generateCommitId();
-    newOrg.right.commits.push({
+    newOrg.right.commits.addToHistory({
       type: 'ADD_MEMBER_TO_ORG_COMMIT',
       data: {
         commitId: firstMemberCommitId,
         createdAt: new Date().getTime().toString(36),
         newMember: params.createdBy,
         previousCommit: newOrg.right.firstCommit,
+        from: params.createdBy.username,
       },
     });
   }

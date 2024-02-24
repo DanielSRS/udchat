@@ -148,7 +148,7 @@ export const useOrgMachine = () => {
                     from: context.user.member.username,
                   },
                 };
-                org.members.push(newMember);
+                // org.members.push(newMember);
                 const header = {
                   /** Versão o programa/protocolo */
                   version: '0.0.1',

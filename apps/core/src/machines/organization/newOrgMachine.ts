@@ -1,4 +1,4 @@
-import { assign, createMachine, raise } from 'xstate';
+import { assign, createMachine, send } from 'xstate';
 import { Organization } from '../../models/organization';
 import { User } from '../../models/user/user';
 import {
@@ -12,6 +12,7 @@ import {
 } from '../../contexts/organization/orgEventTypes';
 import { SendMessageResponseEvent } from '../../contexts/network/networkEventTypes';
 import { CommitPool } from '../../models/commitPool';
+import { CommitHistory } from '../../models/commitHistory';
 
 type Events =
   | { type: 'CREATE_ORG' }
@@ -353,12 +354,43 @@ As informações básicas são:
       saveUpdatedOrg: assign((_, event) => ({
         organization: event.data.data.commit.data.org,
       })),
-      saveNewOrgToContext: assign((_, event) => ({
-        organization: event.data.org,
-      })),
-      createNewOrgPool: assign((_, event) => {
-        const voters = event.data.org.members.map(m => m.username);
-        const currentCommit = event.data.org.commits.getOrderedIds()[0];
+      saveNewOrgToContext: assign((_, event) => {
+        const org = event.data.org;
+        console.log('saveNewOrgToContext action', JSON.stringify(org, null, 2));
+        const h = CommitHistory();
+        const firstCommitId = org.commits.firstCommit;
+        console.log('firstCommitId: ', firstCommitId);
+        const commits = org.commits.commits;
+        console.log('commits: ', JSON.stringify(commits, null, 2));
+        const firstCommit = commits[firstCommitId];
+        console.log('firstCommit: ', JSON.stringify(firstCommit, null, 2));
+        h.addToHistory(firstCommit);
+        Object.keys(commits)
+          .filter(v => v !== firstCommitId)
+          .map(k => {
+            h.addToHistory(commits[k]);
+          });
+        const organization = Organization({
+          commits: h,
+          creationDate: event.data.org.creationDate,
+          firstCommit: event.data.org.firstCommit,
+          members: event.data.org.members,
+        });
+        if (organization._tag === 'Left') {
+          return {};
+        }
+        return {
+          organization: organization.right,
+        };
+      }),
+      createNewOrgPool: assign((context, event) => {
+        console.log(
+          'createNewOrgPool action: ',
+          JSON.stringify(context.organization, null, 2),
+        );
+        const voters = context.organization.members.map(m => m.username);
+        const currentCommit =
+          context.organization.commits.getLatest()?.data.commitId;
         const newPool = CommitPool(
           () => console.log('APPROVED_INGRESS'),
           () => console.log('REJECTED_INGRESS'),
@@ -366,6 +398,17 @@ As informações básicas são:
           currentCommit || 'erro',
         );
         newPool.addToPool(event.data.addedMemberCommit);
+
+        // Então eu computo automaticamente o voto de quem criou o commit, dado que este
+        // obviamente sempre será uma aprovação
+        newPool.addVote({
+          from: event.data.addedMemberCommit.data.from,
+          in: {
+            commitId: event.data.addedMemberCommit.data.commitId,
+            previousCommit: event.data.addedMemberCommit.data.previousCommit,
+          },
+          vote: 'accepted',
+        });
         return {
           newOrgPool: newPool,
         };
@@ -375,26 +418,36 @@ As informações básicas são:
         event.data;
         context.newOrgPool.addVote(event.data);
       },
-      checkIngressVotes: (context, event) => {
-        if (event.type === 'NEW_INGRESS_VOTE') {
-          const commitId = event.data.in.commitId;
-          const res = context.newOrgPool.checkVotes(commitId);
+      checkIngressVotes: send((context, event) => {
+        console.log('checkIngressVotes');
+        const commitId =
+          event.type === 'NEW_INGRESS_VOTE'
+            ? event.data.in.commitId
+            : event.data.addedMemberCommit.data.commitId;
 
-          // Not yet approved
-          if (!res) {
-            raise({ type: 'do noghing' });
-            return;
-          }
+        console.log('checkIngressVotes commitId: ', commitId);
+        const res = context.newOrgPool.checkVotes(commitId);
 
-          if (res._tag === 'Left') {
-            raise({ type: 'INGRESS_REJECTED' });
-            return;
-          }
-
-          raise({ type: 'APPROVED_INGRESS' });
+        // Not yet approved
+        if (!res) {
+          console.log('checkIngressVotes do noghing');
+          // raise({ type: 'do noghing' });
+          return { type: 'do noghing' };
         }
-        // const res = context.newOrgPool.checkVotes(event.data.addedMemberCommit)
-      },
+
+        if (res._tag === 'Left') {
+          console.log('checkIngressVotes INGRESS_REJECTED');
+          // raise('INGRESS_REJECTED');
+          return { type: 'INGRESS_REJECTED' };
+        }
+
+        console.log('checkIngressVotes APPROVED_INGRESS');
+        // raise('APPROVED_INGRESS');
+        context.organization.commits.addToHistory(res.right.commit);
+        context.organization.members.push(res.right.commit.data.newMember);
+        return { type: 'APPROVED_INGRESS' };
+        // update commit history
+      }),
     },
   },
 );

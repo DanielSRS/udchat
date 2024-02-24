@@ -14,6 +14,7 @@ export interface OrgCreationCommit {
     createdBy: Member;
     createdAt: string;
     previousCommit: 'none';
+    from: string;
   };
 }
 

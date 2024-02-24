@@ -8,7 +8,7 @@ export const OrgBox = () => {
     <View style={{ borderWidth: 1, borderColor: 'magenta' }}>
       <Text>{`| Data de criação: ${org.creationDate}`}</Text>
       <Text>{'| Commits:'}</Text>
-      {org.commits.map(item => {
+      {org.commits.getInOrderCommits().map(item => {
         return (
           <Text
             key={

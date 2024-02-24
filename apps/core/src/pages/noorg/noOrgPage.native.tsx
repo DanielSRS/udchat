@@ -27,8 +27,8 @@ export const NoOrgPage = () => {
     data => data.orgCreationErr,
   );
   const createOrg = useContextSelector(OrgContext, data => data.createOrg);
-  // const transitions = useContextSelector(OrgContext, data => data.transitions);
-  // const stateValue = useContextSelector(OrgContext, data => data.stateValue);
+  const transitions = useContextSelector(OrgContext, data => data.transitions);
+  const stateValue = useContextSelector(OrgContext, data => data.stateValue);
 
   const addMember = useContextSelector(OrgContext, data => data.addMember);
   const newMember = useContextSelector(OrgContext, data => data.newMember);
@@ -91,10 +91,10 @@ export const NoOrgPage = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* <Text>{stateValue}</Text>
+      <Text>{stateValue}</Text>
       {transitions.map(t => (
         <Text key={t}>{t}</Text>
-      ))} */}
+      ))}
       {!creatingOrg ? null : (
         <View>
           <Text>Criando organization</Text>
