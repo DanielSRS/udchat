@@ -272,7 +272,7 @@ const processNewMessage = (event: NewMessageEvent) => {
         },
       },
     };
-    console.log(JSON.stringify(p, null, 2));
+    console.log('processNewMessage', JSON.stringify(p, null, 2));
   } catch (e) {
     p = errorMessage;
     console.log('processNewMessage error', JSON.stringify(p, null, 2));

@@ -1,3 +1,4 @@
+import { Member } from '../../models/member';
 import { Organization } from '../../models/organization';
 import { ADD_MEMBER_TO_ORG_COMMIT } from '../../models/organization/organization';
 
@@ -70,4 +71,30 @@ export interface INGRESS_REJECTED {
 
 export interface APPROVED_INGRESS {
   type: 'APPROVED_INGRESS';
+}
+
+export interface NEW_ORG_COMMIT {
+  type: 'NEW_ORG_COMMIT';
+  data: ADD_MEMBER_TO_ORG_COMMIT;
+}
+
+export interface NEW_ORG_COMMIT_VOTE {
+  type: 'NEW_ORG_COMMIT_VOTE';
+  data: NEW_INGRESS_VOTE['data'];
+}
+
+export interface SEND_MY_VOTE {
+  type: 'SEND_MY_VOTE';
+  data: NEW_INGRESS_VOTE['data'] & {
+    /**
+     * Quando adicionando um novo membro na organização, este não faz parte
+     * da org (obviamente), logo não participa da votação que altera o historico.
+     * por isso deve ser enviado o voto també para esse novo membro.
+     *
+     * Se informado o membro, um voto vai ser enviado para ele. caso falhe o envio
+     * para esse membro em especifico, vai ser considerado um falha, mesmo que todos
+     * os outros membros tenha sido enviado corretamente.
+     */
+    extraMember?: Member;
+  };
 }

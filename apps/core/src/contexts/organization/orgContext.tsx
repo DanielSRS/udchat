@@ -2,6 +2,8 @@ import React from 'react';
 import { createContext } from 'use-context-selector';
 import { Organization } from '../../models/organization';
 import { useOrgMachine } from './useOrgMachine';
+import { Commit, BaseCommitData } from '../../models/commit';
+import { CommitPool } from '../../models/commitPool';
 
 interface OrgContextProps {
   findingOrg: boolean;
@@ -37,28 +39,32 @@ interface OrgContextProps {
     | undefined;
   invitationCode: number;
   transitions: string[];
+  commitPool?: CommitPool | undefined;
 }
 
 export const OrgContext = createContext({} as OrgContextProps);
 
 const placeholderOrg: Organization = {
   firstCommit: 'laskdjf',
-  commits: [
-    {
-      type: 'orgCreation',
-      data: {
-        createdAt: 'lskdfj',
-        createdBy: {
-          name: 'lskajd',
-          username: 'kasldfj',
-          ip: 'lksdfj',
-          publicKey: 'dkfçj',
-        },
-        commitId: 'aksldjf',
-        previousCommit: 'none',
-      },
+  commits: {
+    firstCommit: 'asjdf',
+    getOrderedIds: function (): string[] {
+      throw new Error('Function not implemented.');
     },
-  ],
+    getInOrderCommits: function (): Commit<string, BaseCommitData>[] {
+      throw new Error('Function not implemented.');
+    },
+    addToHistory: function <T extends string, K extends BaseCommitData>(
+      _newCommit: Commit<T, K>,
+    ): boolean {
+      throw new Error('Function not implemented.');
+    },
+    getLatest: function (): Commit<string, BaseCommitData> | undefined {
+      throw new Error('Function not implemented.');
+    },
+    latestCommit: '',
+    commits: {},
+  },
   creationDate: 'dalkja',
   members: [
     {
@@ -158,6 +164,8 @@ const useOrgContextData = (): OrgContextProps => {
 
   const invitingMember = state?.context.invitingMember;
 
+  const commitPool = state?.context.commitPool;
+
   return {
     findingOrg,
     noOrgFound,
@@ -186,6 +194,7 @@ const useOrgContextData = (): OrgContextProps => {
     invitingMember,
     invitationCode,
     transitions,
+    commitPool,
   };
 };
 

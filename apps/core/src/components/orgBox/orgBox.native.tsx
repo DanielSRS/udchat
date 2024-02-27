@@ -16,7 +16,7 @@ export const OrgBox = () => {
         return (
           <Text key={item.data.commitId}>{`|     ${
             item.type
-          }: ${time.toLocaleString()}`}</Text>
+          }: ${item.data.commitId}`}</Text>
         );
       })}
       <Text>{'| membros:'}</Text>

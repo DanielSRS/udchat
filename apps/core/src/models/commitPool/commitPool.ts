@@ -1,6 +1,7 @@
 import { Either, right, left } from 'fp-ts/lib/Either';
 import { BaseCommitData, Commit } from '../commit';
 import { NEW_INGRESS_VOTE } from '../../contexts/organization/orgEventTypes';
+import { calcMinimumVotesToAccept } from '../../utils/math';
 
 /**
  * Commits aguardam a votação para decidir qual deles vai ser inserido no historico
@@ -22,6 +23,7 @@ export interface CommitPool {
    * Right se o commit foi aceito
    */
   checkVotes: (commitId: string) => Either<PoolEntry, PoolEntry> | undefined;
+  updateVoters: (newVoters: Voters) => void;
 }
 
 interface PrivateCommitPool {
@@ -324,17 +326,10 @@ export const CommitPool = (() => {
         return left(commitTV);
       }
     };
+
+    self.updateVoters = function (volters) {
+      self.voters = volters;
+    };
   } as CommitPoolFunction;
   return res;
 })();
-
-/**
- * Calcula a quantidade de votos minima para aceitar um commit
- * de acordo com a quantidade de votantes
- */
-const calcMinimumVotesToAccept = (votersCount: number) => {
-  const isEven = votersCount % 2 === 0;
-  const halfOfVoters = (isEven ? votersCount : votersCount - 1) / 2;
-  const majority = halfOfVoters + 1;
-  return majority;
-};

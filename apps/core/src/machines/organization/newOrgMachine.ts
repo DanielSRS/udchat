@@ -9,6 +9,9 @@ import {
   JOINED_ORG_INFO,
   JOIN_ORG_INVITE,
   NEW_INGRESS_VOTE,
+  NEW_ORG_COMMIT,
+  NEW_ORG_COMMIT_VOTE,
+  SEND_MY_VOTE,
 } from '../../contexts/organization/orgEventTypes';
 import { SendMessageResponseEvent } from '../../contexts/network/networkEventTypes';
 import { CommitPool } from '../../models/commitPool';
@@ -29,6 +32,10 @@ type Events =
   | NEW_INGRESS_VOTE
   | INGRESS_REJECTED
   | APPROVED_INGRESS
+  | NEW_ORG_COMMIT
+  | NEW_ORG_COMMIT_VOTE
+  | SEND_MY_VOTE
+  | { type: 'PERSIST_ORGANIZATION' }
   | { type: 'INVITE_ACEPTED'; data: INVITE_ACEPTED_EVENT['data'] };
 
 type Services = {
@@ -37,6 +44,8 @@ type Services = {
   createOrg: { data: { organization: Organization } };
   sendInvitation: { data: unknown };
   sendInviteAcceptance: { data: unknown };
+  sendCommitToMembers: { data: unknown };
+  sendMyCommitVoteToMembers: { data: NEW_ORG_COMMIT_VOTE };
   sendOrg: {
     data: {
       type: 'sendOrg';
@@ -56,12 +65,13 @@ type Context = {
   invitingMember: JOIN_ORG_INVITE['data']['invitingMember'];
   ip: JOIN_ORG_INVITE['data']['ip'];
   newOrgPool: CommitPool;
+  commitPool: CommitPool;
   ingressOrgStatus: boolean;
 };
 
 export const newOrgMachine = createMachine(
   {
-    /** @xstate-layout N4IgpgJg5mDOIC5QDswHcDyAnKBZAhgMYAWAlqgMQDKAogCoD6AqrQEoDaADALqKgAOAe1ikALqUHI+IAB6IAnADYATADplAVmWdOAdgAsADkNGDAGhABPRAEZ9nRasMO9+pTZu7DAX28XUmDgEJORgqoI4GMh0xGBUohH4MBQQkmGwoviiYQHYeERkqOGR0bHxiTBcvEggQiLiktJyCJ42nKq68gDMnPpd8vrK8sr6FtYIXYZqPXYa8roO+roqvv7oecGFYRFQUTFxCVhJYQBm5BDkuzgpaarkAG6CANY560EFocW7pQcVp+eXPIIB6CQhZCTIKpVaR1MQQpqIZa6VQ9eRaTwaOyDLpjWweVTyQw2DS6XTaJGzVYgXLvEJFHZ7MqHY6qM7IC7IK5QChgLBYCKqfgAGyyJwiAFtVDT8nTtiV9uUjjBWQDOUCQWCGpCeNCarCtQiWp5VBoNIs9DZ5JxLfpRlZEF1lI55G1FroNIpuraNFTpZtPgyfoqWRAwEKwOI1ddUkUQS8pW8ZVsvozfkqwqHw5GucDkI9NRCoTwYcI4Y0as0NF1kYTlCZlMTDPNdDj7QhNPoUT0W5wm5x+op3b7E-76fKmX9VJmI4Drrz+VhBSLRGKsJK-R8x98FczldPs+q86DwZIi9UBKWDRXEFXDKpFBollW60MG3bxj0NKodI60VXOCS8jDoESYBuOaYssggh5AAYoIACu7IUAAwqwNAAIJ0DQDAYKwADiuoXvU8LXkaagPvIlHEg+NhEgMuIICSX4qM4RJEtRXRdMBGybnK24TumUrQTgcGIRAFAAFIYAAkgAcjh+GEbUl4kaAzQALScWoujEraijmooRgMfoKhOCS1rKA2miYkBfjUiOvEpkGu5hIQWBgOCUZQPgyCkAAXieyA3LGR7xhuspOTuk5uR5B44D5-mBbm+aBWeJbEeWamIIZ7QLMM8ycC6igPsoDFkneAEOKag5tNWNjcbSyaBlFgkxZ5XIJQFWo8nyArCqKEoJiBo58amwbKm1cXeb5XUQslx5amleoqZlsi2L2qjEpRlE1WSCw2AxTZdN+Sj6I+pr6DYIz1XZ4VNeB43pPg9yzlAdCCI9wVhHGrzDY5zUCSysDPa972PfNBanjqxbLRlUikTYXSmYMJlDHYigeH0xmUZtIyGB6mIqDligNaBW5jS5qjAy9Xlgy5PULkuA1rkNPERQDEHKtToMfS5EOpdD57KXDhqI4ox2FQ+XQaE2hLVooh02M6tGdAsBh1lopMjZFgNcyDXkwfgpBCvB7kUGhdCsAAmkp+qqWtLQOORtGOsVfROvMDGul+nBDNtgzFQs+ha45EmCOQ6HIBg02Jd1MbpJk2Ss41nxhxHUcx7NUNC3bq0aX0x2I-MIy9Docyml70udv2j4YyZegjFxt0ORFafIJH0edYFKHobJyE0AAMgPCl4QwUlybbK3w1lCCaXMJ1Kw4SOtPjDFVjY6gPnRPSKMYlkh634ftxnXdaqoaBG9mcFYNJeZiGAkkyfJuGj3JABq0lYZPIukepnhEk4fszgkYeisroBinF5AmndDoZQBhTSnQPsmNuHdM6BVUKwMAhAwCkHuJAW+L1sjvTbnkCg6FkL9wAAqMHfp-Gg38yzTwdn-Ukd5Oj6RroMKskwyrWg6H0SiRJlhol6Eg1OR9UGnwhKoKgYB2SXHQtg-gmRkDYK+ncUKv02bIIkSfGa6DZHyM5IosAyifLYP5otQW6VGGGhYQ4E0ZpCRkhlp6boXsZbIjOpaEwmISScSbmsP6h906d30WfAA6pfV6AARLI+BH5yRoDEkeDA5IwQwAwq8M91LGA3vMNohhByWS9ArNs6N2g9DgQHWsAFAn2WCTo0JaCz6KkuLJRM6ifrJzJmEFBejY7SLaZyDpIFLGFmsbDWxv9Ogbyro+JYdZ5iGAYk6TsRhOJXSbIZT8JNm6NPEc0qRkgZGHHaZ0+cfVlyrnXC3Jpx8wmDJOcMqAozDwpSsdwLJ9sNIeA9B0Uu4tLJkiMm2asUD8aYi8GXZQ4KxFFH6Y8rOyBVBRLhJyN+ghsiwAoHJPCaEqBUAYGhCSNBkJYRid8vOiA-79A3p6SyJkjCGEdMsL2fRHB2EKudEk4sWzwr6bopF6C0XZkxdiigskaARLSbJfFNBCUMDfhgL+MMiLTJyVdJ0m0VAOH0rvIpGhK7EicIYZYqMtBdEtLoAVqhEUtOkaKy44q4BkMoZQ1gGA37JNlfKwlVKmEaW6F+aqiNnBOi2vIBiAxjr4xZejOYg4ujB32dosCUAB6CHwKGcSMTB70Gwi-ANotd7HXXgMLeKhtCtnGHWDeOgzpFPsKSLwtkglpq3Jm7NkBVC4DAOKAARryWAdwIDhkldKhguAaC4AAEI0A4Gq4WGqHbkjvEoQcnoFjVj0GvOw95TRBz6A2wctqdhdpzb2-tQ6sAjuzRyV56A+2Dt5GQmJKTp1zoXcWhGlFOxXXmF6M0mgrVlS0JtJGDYFhE0xGenAF6e3PpvSO2AciH0ELEN3eOGjHhhTuemhDEAr0vtvVTNDlwMOJzmhqAWXyl250DYgTQV0CQ0RbMVYkj5wHlJ-E4SBaI3BFMosoODGas2XqQ8OsjRioCUe7pcxc-UVyDTugR8TiHr1SdQzJuTWpxnZx-TPbQxU+P9AbFaK1u8vZKzmVaTQ+NaL9mJKJwjxHkPn2iZyTBsAhDIFQ7i2SH8sIMHITQahyTDMO1ZRvapVrNCGURtx8YLZY1El9iy1hPR6mqc7epojknSPaYfXkW+YoumaJ6drc9eW3NafI15Urgh9PajoznKehoei9A6OiK1wwWyWjKR+MkuN6zDF3mXflqaU65e7flzThX6tckawzK5zNbkHJmxJ+bKHFsleQGKZrS11XZKi2Zpw7okbFX0kjdxbZtDtDNcVN8ZIkblRczVgrI6XlMH4BAfAEYICkOw90nLfFXOfdORES4P2-sA-eQtCZrWbEneaCUjeXgAmHsspZFZYKBhmTNL2M6vYVA+im70r44PtuQ6wND37-3RCA7nL1RT1yVP4c2xpkjX2zmchhwzpnUBDuTOOz8pj4svwAetB6BwLsks3iVptaqaJlhHSmO92btXb09z7oPYeL8x5P0i6jyFqgOWHv0m0IYg3bBcM2h4IYKWWXDBE76QQoZ4A1FB8jsXs9aJTAPWa8kcwd3y79yZy6llnyAeTWT9t03RrOT+D76ls9LrqGJDoblRglZKFWWobQaXfZtCYn0UTFNJxsmKzgFPjGECOC8G4SivRMQst6KVHjUCFhEljzpNwsKbXk6qw9Sm+5Xq18NISKBTLaKCPmI+XHtb-lmkbWaBL7Dy9J8ElBWCCF2QT4RrRRxJhaICMuhXNsjaINVrS5aSYm+Woskmq9Y5TCGOGiKQSD0RTk2WT0GSDvZLZNb8SYFlQCd0OBNtBpDtRPR-ZUHYUSffKZFHWwOlAkToZNQca0KYQA23ZEbvRLV2ckB-XWJ6GmLkOmZPZA33SiY6R0LEVGBsLLMqNwdQUkKybZQYZYEgzmPiZCdyQKGgPkA-GeNoCFLwAwB8d0JYHSXAx2R0DoeNa0Iwa0QkPZePCnDmR6KmfWLkQ2Y2U2MAEQh2MNCWS6IkEYBlLeL2Mub8P2P9J0LAwfDQ7We1V-Yw35FlTsLeMkPQEPNWVZDeTEewDlOsX2aFZw6AhPO1IVB1E5C+dFKAa+SjIw6g1PFhT-Hw4PboAI8peeT0X-YYM1fsX2W1Nw8JaRTBbBXBfBO+IhQQEhGvNIuvFhFsTab0OuToPwo1NsXlDoeYKWD0IuU9IfUOWI1-GRRbExMxVRVI0XdIzwNowcWQjwfsPaQ6F0AkfoLQdEH-K6Mo8Yiok5J1LyOJTIDwmlIpdoK0T0CpBsM0GtWwYBE0WFUAkyGzboA4o5I4lFF5N5Jo+Ylo5wZiWsTEdGSiC-IbZ0K0OYeNR0BtL4h5OI343nR9ECIQhcC4v3OwKBATBwZwK6c1R4xiHoM3RNDjFsYEnwUYkJJEiYtuSAPILE9SZYL8XxK6R0WuQYRfWwKsE0LlasJsFtLjREyRH41FTzKAF1T3QEuxRGVgpQfKXoKiR0Ykh3Y6c-WQ20bUl0UUgZZFVQW+KAdyWAWATBAAKywWyAgGZMJOuKsl1RjQgI8UHHUEZRkNZNNGpJcP+ngzyyxNnzvAAwwOJxAwOju3aE8RBQ9GTRgS8A1y225wDIrVxhj1DPXmsw3kewxn-mqn7HUKiM0L9M1wh1IDHTmOXRQPbA8CgWKjUP8U6B2IgW6BREfGbxzMuxTR9PZmLMTPc3vXOTQAKyxOMzYTpSn0mEZR6PGEMgqiViRjqj5TLxpPujExLOpyKwozqMCmTLRBRCGDmFOn0nxjkKOjNwGBz2uwfEGATK53cwSOzG8181QyxNdjvG0AGERnJCDhsN9i7HsFhT6BbCdGyw5zBw+2pweEwy1FkixUMVEBHMKnXSkPFibD9l3XKStW8I8FjKunFic1vLm252k2r1k320EFfI1hAMmExh2jAIgU9AJx0C8EJMPUIq1x5yhz53pzhwBMrN9ydG0AJEuiWGrCMBdGJJuyYr0AsPdBJHYoh2+3p2tIxIiBHIS2-AMGlk4hMn6B5Prz3NdG0C4WMCcQUupx2Ea1gtEHgtfMDjN1JAfF6BMlNGnNsBxnllL16C2k4nYuQkEHFHFDEEoX5GwVNMuFfIKTYKMCMBfEbzD0KW-DNR0i0FJxlkoj8oCqCtEBCtBDgBEE5FHXDCxPsEtGipMCmCmHiq9j3M8UHGMHYkAj2V8CAA */
+    /** @xstate-layout N4IgpgJg5mDOIC5QDswHcDyAnKBZAhgMYAWAlqgMQDKAogCoD6AqrQEoDaADALqKgAOAe1ikALqUHI+IAB6IAnPICMAOgAsADgDsAVm07OANgDMxgExaANCACeiM5x1qVWi-M7H5ew2uMBfP2tUTBwCEnIwFUEcDGQ6YjAqUWj8GAoISUjYUXxRSODsPCIyVCiYuISklJguXiQQIRFxSWk5BCUtJU4XeWNOX3k1M3kzNWs7BGMNMxU+pTUdeS0jNS1DMwCg9EKwksjoqFj4xOSsVMiAM3IIckOcdMyVcgA3QQBrfO3Q4oiyw4qTtVLtdboUEC9BIRchJkLVatJGmIYa1EGstLNOF4zB0dPMhsZxoglMSVPINEodFpXJw0fMdJsQAVvuFSgcjpVTucVFdkDdkHcoBQwFgsNEVPwADa5C7RAC2KiZRRZ+3KxyqZxg3JB-LBEKhzVhPHh9URBpR7Q6Kh0Bh8NKU7ntajGtkQ5kMpK6K10hl6TvpgUZXyVez+7MBGsiEDAErA4h19wypQhHwVQd2vzZAPVXKjMbjAvByFe+phcJ4COESJa9TaOmM6LJZg0QwpGiWWgJLoQZicsz6Hc4bY88kMugZivTrNVHKBKlzsdB92Foqw4qlohlWHlE5+U-+as5mvn+d1Rch0MkZbqAkrZpriDrGhUhicunM0xG80Jk0cKk4HmGa0+kpeRxzTXcVX3GcIwVQRCgAMUEABXXkKAAYVYGgAEE6BoBgMFYABxY0byaZF7wtGYX0UZQdBfJRyUGb9KR0Z8m0HBjiTo0wwJCYMM2ncMuWQOCcEQlCIAoAApDAAEkADl8KIkiGlvcjQDaABaUwZk6Jw1EMFYVg0b8DJmDRKU4JQzGxHtcVAgMd2VUMs0PSJCCwMBoXjKB8GQUgAC8L2QB4kzPFMnJDTMD1nDyvJPHA-MC4LC2LYKrwrMjqw0xB1mcYxPWmKYuhsnRvzxeR1GJEZ-2mCwlF4nYIJcmKYLi7yBSSoKDSFEUxUlaU5VTPjJ0gsNs01dqEt8-zuphVLzwNDKTTU7LZCJQcVCUQyPE4YYNEMe0pnK9ZWPta11kGDQrLURrmSiwSJqyfBnkXKA6EEJ7QsiZNPhG5rougrlYBet6PqehaS0vI1yxWrKpAopRjHWdRRku+ZDvmTsJjURQttGCz6PWW1DDu-i93GtyVBB16fPBtzepXNdBq3YamucwGhM1Gmwc+tzIfSmHr1U+HzSRkw-xHQ7+iRgrnQmbaey2rxcWtAziXrMnRpaoHudBnz4PwUgJSQzyKEwuhWAATRU011PWi0FhUA6R00VwyXcbGiXWYxnxV-brK0J1Scc8DnKkwRyCw5AMBm5KesTLIcjyNn7t+COo5juO5uh4W7bWrT6yfa61CRoOrPL+Ryo0CyrRL7Rtt6Tp-FD-7w8j5Bo9jrrgvQrD5LQmgABkh6UwiGBkhTbdWhGcoQbTFkl7ajGRjoGLKrs61UMwX0YvpDBrmyteajPO6znuDRUNAjfzRCsFkosxDAaS5MUgjx4UgA1WTcOn0WKM0h0ckzsPDXWRnRWyVguymEqixf8FgFiLB8Mfdumdu6zWCioVgYBCBgFIM8SAD9Xp5A+qfQoFAsJoUHgABUYF-H+NA-5Vlng7QBVInxaBHP+YwTgeymBMl2ZYqgg6eDJB0H0Bhbqt3ZiGU+Xds6YKoGAXktwsK4P4DkZAuDvpPHCn9GR6cO7yIvjCFQSiVH8jUWADRflcECyWkLTKzDzRsKMFaAwZJXDeEUF7doeh0QLHtM2VWHYeLSLTqUOR58MGXwAOo3zegAEVyPgF+CkaCJLHgwBS8EMBMLvHPTSNdVBLC6AdVwwxjAGXKgZbofQEE70bI4FuWw26yKMdE+Opj1S3HkkGHRv1U7k0iFE9BXTJBmNOL0oM9jSyOLhs4gBnDVA8IWE6VwbYtACImDvZwmhTDWTbD4YCIdWkGMiR0sZOdkCTOiNMvijN+rrk3NuMO7S0EKMvj0-kfS+KzNzvk+2WkuLumWGoFeNlXCaG-PWSqFlcRbP-DoMwsKUHvLPlczB8SkT8k-oIPIsAKAKUIphKgVAGCYSkjQNCuFEmAoLogQBnhVA+hsgZTQGhzBrBqcjLa4KvCILWPWFpgY2mGI+SYiZ2L8x4oJRQeSNBYlZLQhgXAuAf4ME-hgX+sNSKLMKdZHeW11hGEMgfA6G8FYFVYjXNYZlkUFSWGi8VGLPmmOlbcWVcAKHUOoawDAn8MnZPkiSmgZL6UsK0pslwu0DrcORWYb8vRVAMS8AVay4C2zOr3EPQQ+AoySUScPegeF34RrFgfX2W9Bi73WA4XxTZVD-gWAdcFVItkOTOREyCub82QBULgMAsoABGwpCVoX7oPEeWTJ7yXLRRJsyK-xUhMBZPaI4eHVybM+AqtoeEl2RtmnteaC0DqHaOrAsAngQBjPKxVDBcA0FwAAIRoBwXVIt9UOwcFs0khhRw+mWPWGkzF5jPmtGC3wzbRxHr+L209g6R1jpUPmvkUBfmIYvRQxJmTH0vrffOue9pBj4yWL6AwfClDfl0DMcW2JljE1xLBg48H+2YeQ7AZRaGiFiF7onXRrwIpvIElAVjEAz1IcvdTLjtwePJ3mnqQW3BCPfr9LMVYnQBycp7IYE6StzqqycJjTW4ThlwZPWx89HGZP8jk73ZcTyWavLFTmiz4n2NSc4xYqAdmDT-MNMpj9+dI32EHOiSpVILBNlLomrsiszoqwpEZ4kUiu1mZY25iTF6r3XxxVAbBsAhDIE40S+S39cIMEoTQWhGSVNtB4TSP8lkmw2SRUHGpe0-wHWZYBow21mM4DE1l6z3nCgPxlAMvRQztYZb7e5qznmbMCnG4Ifzy09UFIdly7oZIfDgtxp0BiunoHXXUJoZQXgg4ZoaqZmbg3MseavV5tDY3kATYc6uAaG4hqRRE0Nx70nRs4BW2t+ZG2gWukOuiDoQxSm+BMEYb8DhQW4wcPsqyl2tADdE5ltCghZSyjENQ0UuDYAiH5FfBJ-I71KvfgwFVaqf51cQC2boVk43kmGLVJHuJjUGQ7JoPaPDD23YBvdubKg8cE6JyTuA5OoCU7yzT5Vqr1WMC1TqvOM9zRDFHM+ayhqGJ2qgRMKk+UvCKAMGsdwpzRXnOPRLgH5i0O-Kl4T0QH0sISglI9ybgn9HdvM47hbV7nf3Ld2IT33vHug8C1r-+c8d5IxcGAgm+3piWtyrjK021PDYntJpm7aW7s4+D5J0PS3Xf4-d1Hn3IfHmfeeT94Trmy-ZbMZX9AEePeCC93X8vsfmeTFWS4M3lJg5rFHOVJFW1FjEh9AsGk-pi9i9L6ep6VB9YK++VAJg-AID4FjBAch-HBm-db+vtym-abb6mfyPfB+j+njSg4uPTjNu1kcHU9dGy5a+BhS+FaL0FLFUiMEMFjqLhzOLpfkCNfrcLclgLcA-ofqIMfkuH1I3k5tNqvkNhvlvggUgfvigWgVAIPkFtrhRLjP0H+GUu7KOBZN+KON0HoNoOCj4MoDwsvnboHrNjARGHARTqQDes-NQm+lQLJFQIwO-P3LJAAFo4SyQYBzrkEJ4OyrAopbQZrkigHwoAHOCYieAZ4sQWAirn4O58HnACG353L35EF5AQA0AYEUAyDZC5CRD4AXB5BYAAAUBgnAAAlBQGYUHhYTAFYQQbYQfvYY4SuEPnWCMDQb0CYKsIcr4uAkAZ4P+qAaME2NjkNrKvAUIberQPJLhlbJqtqowioV+rWP+pVOyl4LGkMPLJDqoKsEvp4iitiFwcEbwf2gURTmHvyLgDYF6n7u8AHultAf0fivAUMXgKMfimAGQfHjUblP0KxB2gZL0K1kjAAaxIsJ4G+HoBSBYLbr0dMeJgMdvktiMWMR9szN9qzBcWvjMfmB3t5ncUsSse-hDggCxJVGcZiBZB0FUowXriOE4MoCihrBYHkZltcSoIbMbJAODFxl8XkM4a4SnB4V4d4Z6AEUES3uYW8fAciTGBAGibyBiWAEPj4EapSFMH1pSNtJnpMIdOoMsEHN1kHGZAEI5IIFGPAPUGYb8QyvPAxNMOBtoD+ocVyd+IAoAZoEgq2jbsoBoNjpTECGKSFvPKXCoN0f+JiE4OSD6MdjsjMA4NoVdIsFZNiKltwVMVBFzMCEDlADqeaKCs2DRBsQxH0EMNPpVMsNoQsJ0KjiZivlAc6U9HONGAuD5B6RRB7OoD4Kmh7LoNCl2DplaBsWuqmZwuccSTrC6bBAhMhLyImURgxO4s2AxAMKXNaKZHoFtMjDZOSBjlMJqa5LFJ5B1IUJKiwsFuaAdKSHREsEYB+G4DUqsC2c2FSE4BSD4D0UWZzDGQcOJBWQsh-kSMyqSJwlUkwQxDZDUuiMGWXG6D+l2a1MDFvoUPTNqVuX8V0AVM7COJ0KONxEitOdDlMAsL+X1gZFebrJBGhL2QaDEZWQ7FxFtHtA4DdIoFsnsXFp0E+FUj-jXOCpiBAZGQ9NGVTDzAbEbCbJ5JBW0EjL0AaYsDvNaBZG4L4mvKheCj2P0NMF0CMLBqMm6mtEOQAn6c4LvNSLoE3CBlmaoLiOCn0IoKOD4iYBxZclxTcrlrfNEHJmAKRYykAu6AJbKcJSbkSIvD6FUsME2EBntHJRKjEqYtgrgvgoQo-CQoIGQjgOpRKVSL7HiHRPMJwkvmyZSKCksC+DwodJkdhY6drJxQOR8WhlYjYlompY+eKWwh2M+FSAbs+a4HpQgG2CUp4MisikdgVBsJAeisYpZVKlTgKMkjkC5UUoZKSEYMoLUoafRWAlaCilMM2IdIdL0OZa6pFTvr8oUDVddKxD6Bnilj6CrDCmsKSO4IsJykjHBQ6cERFWVTcgNUGDEdEDVSlpVAKhOXaXar4nWN0AsFLFDkyXoL1aVeMjcqfJAENQlbqZpGsDaoEl0UZkMNsvpVWvMB4B2u2q+NdZ0tcioB6rikscKeDolUjNQaAfEWwYZE6NPjORSOOQXpdqMMDZipfA-FAJ5GTtggAFY4L2E7UWA7a2QmqDD1jIrlR0ThZsoaavU0XwlzYuWppPjWRkZVIUZbxI6VTbQGT-opEjUdBs0IYh4c01qkb7mL6UblSWhBw1TWSBJm6dphU4EPYh7XoxguX56VR1EWodicJ5UwoUWrKKB9bizILFV-ba3l4oYQAu7oAeb60TkuDMoexTBspsk+BPhWQmAmDvn1i+AS2WaO3Payb2XBTS14w0gU01zAajixYKzgpPirq4j2iOAG7LkuYknzaO1KW3AFZFacYuXIy-gHzEaDg9h+l6a+wSLIpiIIKAV20X4R3t4vC8YGjyT4rmKiDu3KDPgHzsL2TATfXtAoXqZ7SSKsWYjh2F3t5R0+QrYV2LCbHEisE8IG7mmui-o4j87xH8JF6a1Rn-Y60HArZ92iAD0V3mBNoUh7QGQmmeBI6-ijAXbxH+L+2L2S7V4y6Qhy63AV1kisQ2RLCc5OgayK1aU+D-pDgeD7rLUrmXH-3S6iDE5ANk7wHF38guUSW+wQOIWjClxIUTAskp7virA2iDChUvEX2O3zFV4YO16Pb30WCkilyrDrCcqOCrDUacrOy+ALA+jz7mCmGoOvFL3IbkmomCB92IEXA2DsNPXmimB67mC+BIyfUHzlQOAlJHTmDDDzAoooP50hH9p4E34EMfmaEoohlgNsmGpsTrBdBOjxpVJ-3WOFHCEENeAcKDAAQdgBMtHdiYj4wmoHz9A0jQneNX74E77IHREYH+PbRcPdZVJHR02CL-pNYBO01OjIyFkWN9HiY+ODF3675EFP7OVqOUENxnZZEnEdAWCgZNqVrWhWSDiAZ-3XEuUQJtHsEGB9DNijD6Ns67T-hCrDC+B5326WNXGzGCF+P1NzxUW6TNziyL66Dv3ugUZSWjBCXKAlMLNlMqCInzE0kDNBysSDhxrP0azHU2R-iiJWRTAjOuB9PLMK5yOUmfTomLF5ADMjV-h7QdgUhMXIzficpc37KASVL-r+gBBAA */
     id: 'newOrgMachine',
     predictableActionArguments: true,
 
@@ -212,16 +222,18 @@ Neste momento ainda não faço parte da organização, dado que minha entrada ai
           },
 
           WaitingVotes: {
-            description: 'Aguardando os votos e a confirmação dos membros',
+            description: `Aguardando os votos e a confirmação dos membros;
+
+raises APPROVED_INGRESS or INGRESS_REJECTED`,
 
             on: {
               INGRESS_REJECTED: 'IngressRejected',
 
-              NEW_INGRESS_VOTE: {
+              APPROVED_INGRESS: 'StoringNewOrg',
+              NEW_ORG_COMMIT_VOTE: {
                 target: 'WaitingVotes',
                 actions: 'addVoteToThePool',
               },
-              APPROVED_INGRESS: 'StoringNewOrg',
             },
 
             entry: 'checkIngressVotes',
@@ -288,8 +300,9 @@ Neste momento ainda não faço parte da organização, dado que minha entrada ai
                 invoke: {
                   src: 'sendOrg',
                   onDone: {
-                    target: 'StoringUpdaetdOrg',
-                    actions: 'saveUpdatedOrg',
+                    target: 'SendingNewCommitToAllMembers',
+                    actions: 'addToPoolAndVote',
+                    description: 'raises NEW_ORG_COMMIT_VOTE event',
                   },
                   onError: 'orgInfoNotSent',
                 },
@@ -297,16 +310,17 @@ Neste momento ainda não faço parte da organização, dado que minha entrada ai
                 description: 'Envia as informações da organização',
               },
 
-              StoringUpdaetdOrg: {
+              orgInfoNotSent: {},
+
+              SendingNewCommitToAllMembers: {
                 invoke: {
-                  src: 'saveOrgToStorage',
+                  src: 'sendCommitToMembers',
                   onDone: 'idle',
-                  onError: 'StoringUpdatedError',
+                  onError: 'FailedToNorifyMembers',
                 },
               },
 
-              StoringUpdatedError: {},
-              orgInfoNotSent: {},
+              FailedToNorifyMembers: {},
             },
 
             initial: 'idle',
@@ -318,7 +332,85 @@ Neste momento ainda não faço parte da organização, dado que minha entrada ai
 
           CommitProcessing: {
             states: {
-              idle: {},
+              waiting: {
+                on: {
+                  NEW_ORG_COMMIT: {
+                    target: 'waiting',
+                    internal: true,
+                    actions: [
+                      'addOrgCommitToPool',
+                      'checkVotesInThePool',
+                      'voteNewCommit',
+                    ],
+                    description: 'voteNewCommit raises the SEND_MY_VOTE event',
+                  },
+
+                  NEW_ORG_COMMIT_VOTE: {
+                    target: 'waiting',
+                    internal: true,
+                    actions: [
+                      'addOrgVoteToThePool',
+                      'checkVotesInThePool',
+                      'raiseSave',
+                    ],
+                  },
+                },
+              },
+            },
+
+            initial: 'waiting',
+            entry: 'createPool',
+          },
+
+          StorageSaving: {
+            states: {
+              idle: {
+                on: {
+                  PERSIST_ORGANIZATION: 'StoringUpdaetdOrg',
+                },
+              },
+              StoringUpdatedError: {
+                after: {
+                  '500': 'idle',
+                },
+              },
+              StoringUpdaetdOrg: {
+                invoke: {
+                  src: 'saveOrgToStorage',
+                  onDone: 'idle',
+                  onError: 'StoringUpdatedError',
+                },
+              },
+            },
+
+            initial: 'idle',
+          },
+
+          Voting: {
+            states: {
+              idle: {
+                on: {
+                  SEND_MY_VOTE: 'SendingMyVote',
+                },
+              },
+
+              SendingMyVote: {
+                invoke: {
+                  src: 'sendMyCommitVoteToMembers',
+                  onDone: {
+                    target: 'idle',
+                    description: 'raises NEW_ORG_COMMIT_VOTE',
+                    actions: 'sendVoteToMyself',
+                  },
+                  onError: 'FailedToSendMyVote',
+                },
+              },
+
+              FailedToSendMyVote: {
+                after: {
+                  '1000': 'idle',
+                },
+              },
             },
 
             initial: 'idle',
@@ -356,15 +448,41 @@ As informações básicas são:
         orgInvitationCode: generateRandomInteger(100, 999),
       })),
       saveInvitingMemberToContext: assign((_, event) => event.data),
-      saveUpdatedOrg: assign((_, event) => ({
-        organization: event.data.data.commit.data.org,
-      })),
+      addToPoolAndVote: send((context, event) => {
+        const me = context.user.member.username;
+        console.log('action: addToPoolAndVote :: ', me);
+        // add new commit to the pool
+        const addedMemberCommit = event.data.data.commit.data.addedMemberCommit;
+        context.commitPool.addToPool(addedMemberCommit);
+        // Add my own vote
+        const vote: NEW_ORG_COMMIT_VOTE = {
+          type: 'NEW_ORG_COMMIT_VOTE',
+          data: {
+            from: context.user.member.username,
+            in: {
+              commitId: addedMemberCommit.data.commitId,
+              previousCommit: addedMemberCommit.data.previousCommit,
+            },
+            vote: 'accepted',
+          },
+        };
+        context.commitPool.addVote(vote.data);
+        console.log(
+          `action: addToPoolAndVote :: ${me} -- ${
+            (JSON.stringify(context.commitPool), null, 2)
+          }`,
+        );
+        return vote;
+      }),
       saveNewOrgToContext: assign((_, event) => {
+        console.log('action: saveNewOrgToContext');
         return {
           organization: event.data.org,
         };
       }),
       createNewOrgPool: assign((context, event) => {
+        const me = context.user.member.username;
+        console.log('action: createNewOrgPool ::', me);
         // console.log(
         //   'createNewOrgPool action: ',
         //   JSON.stringify(context.organization, null, 2),
@@ -373,8 +491,8 @@ As informações básicas são:
         const currentCommit = getLatestCommit(context.organization.commits).data
           .commitId;
         const newPool = CommitPool(
-          () => console.log('APPROVED_INGRESS'),
-          () => console.log('REJECTED_INGRESS'),
+          () => console.log('createNewOrgPool APPROVED_INGRESS'),
+          () => console.log('createNewOrgPool REJECTED_INGRESS'),
           voters,
           currentCommit,
         );
@@ -382,28 +500,39 @@ As informações básicas são:
 
         // Então eu computo automaticamente o voto de quem criou o commit, dado que este
         // obviamente sempre será uma aprovação
-        newPool.addVote({
-          from: event.data.addedMemberCommit.data.from,
-          in: {
-            commitId: event.data.addedMemberCommit.data.commitId,
-            previousCommit: event.data.addedMemberCommit.data.previousCommit,
-          },
-          vote: 'accepted',
-        });
+        // newPool.addVote({
+        //   from: event.data.addedMemberCommit.data.from,
+        //   in: {
+        //     commitId: event.data.addedMemberCommit.data.commitId,
+        //     previousCommit: event.data.addedMemberCommit.data.previousCommit,
+        //   },
+        //   vote: 'accepted',
+        // });
         return {
           newOrgPool: newPool,
         };
       }),
       addVoteToThePool: (context, event) => {
-        //
-        event.data;
+        const me = context.user.member.username;
+        console.log('action: addVoteToThePool :: ', me);
         context.newOrgPool.addVote(event.data);
+        console.log(
+          `action: addVoteToThePool :: ${me} -- ${
+            (JSON.stringify(context.newOrgPool), null, 2)
+          }`,
+        );
       },
       checkIngressVotes: send((context, event) => {
         const org = context.organization;
-        console.log('checkIngressVotes');
+        const me = context.user.member.username;
+        console.log(
+          `action: checkIngressVotes :: ${me} -- ${
+            (JSON.stringify(context.newOrgPool), null, 2)
+          }`,
+        );
+        console.log('action: checkIngressVotes ::', me);
         const commitId =
-          event.type === 'NEW_INGRESS_VOTE'
+          event.type === 'NEW_ORG_COMMIT_VOTE'
             ? event.data.in.commitId
             : event.data.addedMemberCommit.data.commitId;
 
@@ -429,6 +558,117 @@ As informações básicas são:
         org.members.push(res.right.commit.data.newMember);
         return { type: 'APPROVED_INGRESS' };
         // update commit history
+      }),
+      createPool: assign(context => {
+        console.log('action: createPool');
+        if (context?.commitPool?.addToPool) {
+          console.log('action: createPool - there is already one!');
+          return {};
+        }
+        const org = context.organization;
+        const voters = org.members.map(m => m.username);
+        const currentCommitId = getLatestCommit(org.commits).data.commitId;
+        const doNothing = () => {};
+        const commitPool = CommitPool(
+          doNothing,
+          doNothing,
+          voters,
+          currentCommitId,
+        );
+        return {
+          commitPool,
+        };
+      }),
+      addOrgCommitToPool: (context, event) => {
+        // context.commitPool.addToPool()
+        console.log('action: addOrgCommitToPool');
+        context.commitPool.addToPool(event.data);
+      },
+      addOrgVoteToThePool: (context, event) => {
+        const me = context.user.member.username;
+        console.log('action: addOrgVoteToThePool :: ', me);
+        context.commitPool.addVote(event.data);
+        console.log(
+          `action: addOrgVoteToThePool :: ${me} -- ${
+            (JSON.stringify(context.commitPool), null, 2)
+          }`,
+        );
+      },
+      checkVotesInThePool: (context, event) => {
+        const me = context.user.member.username;
+        console.log('action: checkVotesInThePool');
+        const commitId =
+          event.type === 'NEW_ORG_COMMIT_VOTE'
+            ? event.data.in.commitId
+            : event.data.data.commitId;
+
+        console.log('[checkVotesInThePool] commitId:', commitId);
+        const res = context.commitPool.checkVotes(commitId);
+        console.log(
+          `action: checkVotesInThePool :: ${me} -- ${
+            (JSON.stringify(context.commitPool), null, 2)
+          }`,
+        );
+        // start
+        const org = context.organization;
+
+        // Not yet approved
+        if (!res) {
+          console.log(
+            '[checkVotesInThePool] - no pool entry with this id or no changes',
+          );
+          return;
+        }
+
+        if (res._tag === 'Left') {
+          console.warn('[checkVotesInThePool] commit rejected');
+          return;
+        }
+
+        console.log('[checkVotesInThePool] commit to be inserted');
+        // raise('APPROVED_INGRESS');
+        org.commits = addCommiToHistory(org.commits, res.right.commit);
+
+        // se o commit for para add membros
+        if (res.right.commit.type === 'ADD_MEMBER_TO_ORG_COMMIT') {
+          org.members.push(res.right.commit.data.newMember);
+          // altera o voters da pool !!!
+          const newVoters = org.members.map(m => m.username);
+          context.commitPool.updateVoters(newVoters);
+        }
+        // ed
+      },
+      raiseSave: send(() => {
+        console.log('action: raiseSave');
+        return { type: 'PERSIST_ORGANIZATION' };
+      }),
+      voteNewCommit: send((context, event) => {
+        console.log('action: voteNewCommit');
+        const commitId = event.data.data.commitId;
+        const previousCommit = event.data.data.previousCommit;
+        const newMember = event.data.data.newMember;
+        const me = context.user.member.username;
+        const sendMyVote: SEND_MY_VOTE = {
+          type: 'SEND_MY_VOTE',
+          data: {
+            from: me,
+            vote: 'accepted',
+            in: {
+              commitId,
+              previousCommit,
+            },
+            extraMember: newMember,
+          },
+        };
+        return sendMyVote;
+      }),
+      sendVoteToMyself: send((context, event) => {
+        console.log('action: sendVoteToMyself');
+        const vote: NEW_ORG_COMMIT_VOTE = {
+          type: 'NEW_ORG_COMMIT_VOTE',
+          data: event.data.data,
+        };
+        return vote;
       }),
     },
   },

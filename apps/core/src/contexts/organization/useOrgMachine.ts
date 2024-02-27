@@ -14,12 +14,16 @@ import {
   INVITE_ACEPTED_EVENT,
   JOIN_ORG_INVITE,
   JOINED_ORG_INFO,
+  NEW_ORG_COMMIT,
+  NEW_ORG_COMMIT_VOTE,
 } from './orgEventTypes';
 import { useContextSelector } from 'use-context-selector';
 import { NetworkContext } from '../network/networkContext';
 import { ADD_MEMBER_TO_ORG_COMMIT } from '../../models/organization/organization';
 import { CommitPool } from '../../models/commitPool';
 import { getLatestCommit } from '../../models/commitHistory';
+import { Member } from '../../models/member';
+import { calcMinimumVotesToAccept } from '../../utils/math';
 
 type MachineState = Pick<
   StateFrom<typeof orgMachine>,
@@ -180,9 +184,191 @@ export const useOrgMachine = () => {
                       },
                     });
                   }
-                  console.log('sendOrg res: ', JSON.stringify(res, null, 2));
+                  // console.log('sendOrg res: ', JSON.stringify(res, null, 2));
                   return reject(res);
                 });
+              });
+            },
+            sendCommitToMembers: (context, event) => {
+              return new Promise(async (resolve, reject) => {
+                const newCommit = event.data.data.commit.data.addedMemberCommit;
+                const myUsername = context.user.member.username;
+                const members = context.organization.members.filter(
+                  m => m.username !== myUsername,
+                );
+                const sent: Member[] = [];
+                const sentFailed: Member[] = [];
+                const commitToSend: NEW_ORG_COMMIT = {
+                  type: 'NEW_ORG_COMMIT',
+                  data: newCommit,
+                };
+                const header = {
+                  /** Versão o programa/protocolo */
+                  version: '0.0.1',
+                  /** Id do grupo de pacotes. todas as partes precisam ter o mesmo id */
+                  commitId: 'orphan:kjh34kjh:NEW_ORG_COMMIT',
+                };
+                const body = JSON.stringify(commitToSend);
+                const message = `${JSON.stringify(header)}\r\n${body}`;
+
+                // console.log('sendCommitToMembers: ', message);
+
+                // envia uma primeira vez
+                for (let index = 0; index < members.length; index++) {
+                  const memberToSend = members[index];
+                  if (!memberToSend) {
+                    continue;
+                  }
+                  const res = await sendMessage({
+                    ip: memberToSend.ip,
+                    message: message,
+                    port: 4322,
+                  });
+                  if (res.data.sucess) {
+                    sent.push(memberToSend);
+                  } else {
+                    sentFailed.push(memberToSend);
+                  }
+                }
+
+                // tenta enviar novamente para os que falharam
+                for (let index = 0; index < sentFailed.length; index++) {
+                  const memberToSend = sentFailed[index];
+                  if (!memberToSend) {
+                    continue;
+                  }
+                  const res = await sendMessage({
+                    ip: memberToSend.ip,
+                    message: message,
+                    port: 4322,
+                  });
+                  if (res.data.sucess) {
+                    sent.push(memberToSend);
+                  }
+                }
+                // console.log(`COUNT total members: ${members.length}`);
+                // console.log(`COUNT sent: : ${sent.length}`);
+                // console.log('successs sent: ', JSON.stringify(sent, null, 2));
+                // console.log(
+                //   'failed sentFailed: ',
+                //   JSON.stringify(sent, null, 2),
+                // );
+
+                // se eu consegui enivar para a maioria:
+                const minimumVotesToAccept = calcMinimumVotesToAccept(
+                  members.length,
+                );
+                // console.log(`minimumVotesToAccept: ${minimumVotesToAccept}`);
+                if (sent.length >= minimumVotesToAccept) {
+                  // console.log('resolved');
+                  resolve({});
+                  return;
+                }
+                // console.log('rejected');
+                reject({});
+                return;
+              });
+            },
+            sendMyCommitVoteToMembers: (context, event) => {
+              return new Promise(async (resolve, reject) => {
+                const vote = event.data;
+                const myUsername = context.user.member.username;
+                const members = context.organization.members.filter(
+                  m => m.username !== myUsername,
+                );
+                const sent: Member[] = [];
+                const sentFailed: Member[] = [];
+                const commitToSend: NEW_ORG_COMMIT_VOTE = {
+                  type: 'NEW_ORG_COMMIT_VOTE',
+                  data: vote,
+                };
+                const header = {
+                  /** Versão o programa/protocolo */
+                  version: '0.0.1',
+                  /** Id do grupo de pacotes. todas as partes precisam ter o mesmo id */
+                  commitId: 'orphan:kjh34kjh:NEW_ORG_COMMIT_VOTE',
+                };
+                const body = JSON.stringify(commitToSend);
+                const message = `${JSON.stringify(header)}\r\n${body}`;
+
+                // console.log('sendCommitToMembers: ', message);
+
+                // envia uma primeira vez
+                for (let index = 0; index < members.length; index++) {
+                  const memberToSend = members[index];
+                  if (!memberToSend) {
+                    continue;
+                  }
+                  const res = await sendMessage({
+                    ip: memberToSend.ip,
+                    message: message,
+                    port: 4322,
+                  });
+                  if (res.data.sucess) {
+                    sent.push(memberToSend);
+                  } else {
+                    sentFailed.push(memberToSend);
+                  }
+                }
+
+                // tenta enviar novamente para os que falharam
+                for (let index = 0; index < sentFailed.length; index++) {
+                  const memberToSend = sentFailed[index];
+                  if (!memberToSend) {
+                    continue;
+                  }
+                  const res = await sendMessage({
+                    ip: memberToSend.ip,
+                    message: message,
+                    port: 4322,
+                  });
+                  if (res.data.sucess) {
+                    sent.push(memberToSend);
+                  }
+                }
+                // console.log(`COUNT total members: ${members.length}`);
+                // console.log(`COUNT sent: : ${sent.length}`);
+                // console.log('successs sent: ', JSON.stringify(sent, null, 2));
+                // console.log(
+                //   'failed sentFailed: ',
+                //   JSON.stringify(sent, null, 2),
+                // );
+
+                // se adicionando um novo membro no grupo
+                if (event.data.extraMember) {
+                  let res = await sendMessage({
+                    ip: event.data.extraMember.ip,
+                    message: message,
+                    port: 4322,
+                  });
+                  // se falha tenta novamente
+                  if (!res.data.sucess) {
+                    res = await sendMessage({
+                      ip: event.data.extraMember.ip,
+                      message: message,
+                      port: 4322,
+                    });
+                  }
+                  // se o novo membro adicionado não recebe a mensagem então é falha grave!!
+                  if (!res.data.sucess) {
+                    reject(undefined);
+                    return;
+                  }
+                }
+
+                // se eu consegui enivar para a maioria:
+                const minimumVotesToAccept = calcMinimumVotesToAccept(
+                  members.length,
+                );
+                // console.log(`minimumVotesToAccept: ${minimumVotesToAccept}`);
+                if (sent.length >= minimumVotesToAccept) {
+                  // console.log('resolved');
+                  resolve(commitToSend);
+                  return;
+                }
+                // console.log('rejected');
+                reject(undefined);
+                return;
               });
             },
           },
@@ -194,6 +380,7 @@ export const useOrgMachine = () => {
           invitingMember: {} as JOIN_ORG_INVITE['data']['invitingMember'],
           ip: '',
           newOrgPool: {} as CommitPool,
+          commitPool: {} as CommitPool,
           ingressOrgStatus: false,
         }),
     ),
@@ -202,7 +389,13 @@ export const useOrgMachine = () => {
   const transitions = actor.machine.transitions.map(t => t.eventType);
 
   useMessagesWith({
-    commitId: ['JOIN_ORG_INVITE', 'INVITE_ACEPTED', 'JOINED_ORG_INFO'],
+    commitId: [
+      'JOIN_ORG_INVITE',
+      'INVITE_ACEPTED',
+      'JOINED_ORG_INFO',
+      'NEW_ORG_COMMIT',
+      'NEW_ORG_COMMIT_VOTE',
+    ],
     callback: msg => actor.send(msg as any),
   });
 

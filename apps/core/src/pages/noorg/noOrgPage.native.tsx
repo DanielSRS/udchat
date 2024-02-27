@@ -88,6 +88,12 @@ export const NoOrgPage = () => {
     OrgContext,
     data => data.invitationCode,
   );
+  const commitPool = useContextSelector(OrgContext, data => data.commitPool);
+
+  const printpool = () => {
+    const ss = JSON.stringify(commitPool || {}, null, 2);
+    console.log('printpool: ', ss);
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -118,6 +124,7 @@ export const NoOrgPage = () => {
         <View style={{ justifyContent: 'space-between', flex: 1, padding: 20 }}>
           <Text>{'Dentro da org'}</Text>
           <View style={{ width: '100%', gap: 20 }}>
+            <Button title={'Print pool'} onPress={() => printpool()} />
             <Button title={'Delete user'} onPress={() => deleteUser()} />
             <Button
               title={'Delete org'}
